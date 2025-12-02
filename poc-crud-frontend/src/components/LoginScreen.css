@@ -1,0 +1,66 @@
+/* Full-screen background and centered card styling to match the provided design */
+.login-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #fff7f3 0%, #fff 20%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-bg-decor {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 10%, rgba(255,200,180,0.6) 0%, transparent 30%),
+              linear-gradient(135deg, rgba(250,230,220,0.6), rgba(255,255,255,0));
+  z-index: 0;
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 560px;
+  max-width: calc(100% - 48px);
+  background: #ea5b43; /* warm orange */
+  border-radius: 48px;
+  box-shadow: 0 24px 36px rgba(0,0,0,0.18);
+  padding: 48px 40px;
+  color: #fff;
+  text-align: center;
+}
+
+.login-card h5 {
+  font-size: 30px;
+  margin: 0 0 18px 0;
+  line-height: 1.05;
+}
+
+.login-subtext {
+  margin-bottom: 18px;
+  color: rgba(255,255,255,0.95);
+}
+
+.login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  margin: 18px 0 12px 0;
+}
+
+.login-buttons .MuiButton-root {
+  width: 260px;
+  border-radius: 999px;
+  padding: 12px 20px;
+}
+
+.login-footer {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+@media (max-width:600px) {
+  .login-card { width: 92%; padding: 28px; border-radius: 28px; }
+  .login-buttons .MuiButton-root { width: 220px; }
+}
