@@ -183,7 +183,7 @@ export default function DataTable({ onFilteredDataChange }) {
       // optimistic UI add
       const optimistic = { ...updatedRow, values: valuesArray, id: `local-${Date.now()}`, index: rows.length };
       setRows(prev => [...prev, optimistic]);
-      axios.post('http://localhost:3000/api/items', { values: valuesArray })
+      axios.post('/api/items', { values: valuesArray })
         .then(() => fetchRows())
         .catch(err => {
           console.error('Add failed', err);
@@ -199,7 +199,7 @@ export default function DataTable({ onFilteredDataChange }) {
         return copy;
       });
 
-      axios.patch(`http://localhost:3000/api/items/${editServerIdx}`, { values: valuesArray })
+      axios.patch(`/api/items/${editServerIdx}`, { values: valuesArray })
         .then(() => fetchRows())
         .catch(err => {
           console.error('Edit failed', err);
@@ -212,7 +212,7 @@ export default function DataTable({ onFilteredDataChange }) {
   async function fetchRows() {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/api/items');
+      const res = await axios.get('/api/items');
       let data = res?.data;
       if (data && data.success && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
@@ -276,7 +276,7 @@ export default function DataTable({ onFilteredDataChange }) {
   const handleDelete = async (row) => {
     try {
       const targetIndex = row.index ?? row.id ?? rows.indexOf(row);
-      await axios.delete(`http://localhost:3000/api/items/${targetIndex}`);
+      await axios.delete(`/api/items/${targetIndex}`);
       await fetchRows();
     } catch (err) {
       console.error('Delete failed', err?.response?.data || err.message || err);

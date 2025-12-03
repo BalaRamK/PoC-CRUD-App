@@ -36,7 +36,7 @@ export default function EditRowDialog({ open, initialValues, onClose, rowIndex, 
       fields[7], fields[8], fields[9], fields[10], fields[11], fields[12]
     ];
     try {
-      await axios.patch(`http://localhost:3000/api/items/${rowIndex}`, { values: payload });
+      await axios.patch(`/api/items/${rowIndex}`, { values: payload });
       onSaved();
       onClose();
     } catch (err) {

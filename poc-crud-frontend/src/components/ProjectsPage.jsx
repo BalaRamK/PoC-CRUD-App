@@ -70,7 +70,7 @@ export default function JiraProjectsPage() {
       try {
         setLoadingProjects(true);
         setError(null);
-        const response = await axios.get('http://localhost:3000/api/jira/projects');
+        const response = await axios.get('/api/jira/projects');
         if (response.data.success) {
           setProjects(response.data.data);
           const qpProject = searchParams.get('project');
@@ -104,7 +104,7 @@ export default function JiraProjectsPage() {
         setError(null);
         console.log('[Frontend] Fetching issues for project:', selectedProjectKey);
         // Use the project-specific endpoint
-        const response = await axios.get(`http://localhost:3000/api/jira/project/${selectedProjectKey}/issues`);
+        const response = await axios.get(`/api/jira/project/${selectedProjectKey}/issues`);
         if (response.data.success) {
           // Process and organize issues hierarchically
           const fetchedIssues = response.data.data;

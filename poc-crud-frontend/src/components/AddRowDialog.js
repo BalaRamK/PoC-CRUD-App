@@ -32,7 +32,7 @@ export default function AddRowDialog({ open, onClose, onAdded }) {
     ];
     console.log("Add payload:", payload, "length:", payload.length);
     try {
-      await axios.post("http://localhost:3000/api/items", { values: payload });
+      await axios.post("/api/items", { values: payload });
       setFields(Array(columns.length).fill(""));
       if (onAdded) onAdded();
       onClose();

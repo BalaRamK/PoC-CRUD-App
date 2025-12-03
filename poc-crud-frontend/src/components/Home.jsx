@@ -51,7 +51,7 @@ export default function Home() {
   async function fetchRows() {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:3000/api/items');
+      const res = await axios.get('/api/items');
       let data = res?.data;
       if (data && data.success && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
@@ -90,7 +90,7 @@ export default function Home() {
   // Fetch Jira projects
   async function fetchJiraProjects() {
     try {
-      const response = await axios.get('http://localhost:3000/api/jira/projects');
+      const response = await axios.get('/api/jira/projects');
       if (response.data.success) {
         setJiraProjects(response.data.data);
         if (response.data.data.length > 0) {
@@ -114,7 +114,7 @@ export default function Home() {
     async function fetchJiraIssues() {
       try {
         setLoadingJira(true);
-        const response = await axios.get(`http://localhost:3000/api/jira/project/${selectedJiraProject}/issues`);
+        const response = await axios.get(`/api/jira/project/${selectedJiraProject}/issues`);
         if (response.data.success) {
           setJiraIssues(response.data.data);
         }

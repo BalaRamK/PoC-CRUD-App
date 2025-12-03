@@ -56,7 +56,7 @@ export default function Schedule() {
   useEffect(() => {
     async function fetchJiraProjects() {
       try {
-        const response = await axios.get('http://localhost:3000/api/jira/projects');
+        const response = await axios.get('/api/jira/projects');
         if (response.data.success) {
           setJiraProjects(response.data.data);
           if (response.data.data.length > 0) {
@@ -116,7 +116,7 @@ export default function Schedule() {
       };
 
       // Call backend API to save scheduled report
-      const response = await axios.post('http://localhost:3000/api/reports/scheduled', payload);
+      const response = await axios.post('/api/reports/scheduled', payload);
       
       if (response.data.success) {
         console.log('Report Configuration Saved:', response.data.data);
@@ -142,10 +142,10 @@ export default function Schedule() {
       // Fetch data based on configuration
       let data = [];
       if (config.dataSource === 'poc') {
-        const response = await axios.get('http://localhost:3000/api/items');
+        const response = await axios.get('/api/items');
         data = response.data?.data || [];
       } else if (config.dataSource === 'jira') {
-        const response = await axios.get(`http://localhost:3000/api/jira/project/${config.jiraProject}/issues`);
+        const response = await axios.get(`/api/jira/project/${config.jiraProject}/issues`);
         data = response.data?.data || [];
       }
 
