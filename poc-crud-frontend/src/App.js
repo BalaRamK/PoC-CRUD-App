@@ -8,6 +8,7 @@ import Reports from "./components/Reports";
 import ProjectsPage from "./components/ProjectsPage"; // Import ProjectsPage
 import DataTable from "./components/DataTable";       // Import DataTable
 import Schedule from "./components/Schedule";         // Import Schedule
+import Documentation from "./components/Documentation"; // Import Documentation
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
 
       {/* Other routes that use the dashboard layout */}
       <Route path="/schedule" element={<DeliveryDashboard><Schedule /></DeliveryDashboard>} />
-      <Route path="/documents" element={<DeliveryDashboard><div style={{ padding: '20px' }}>Documents Page Content</div></DeliveryDashboard>} />
+      <Route path="/documents" element={<DeliveryDashboard><Documentation /></DeliveryDashboard>} />
       <Route path="/settings" element={<DeliveryDashboard><div style={{ padding: '20px' }}>Settings Page Content</div></DeliveryDashboard>} />
 
       {/* Original test route (also wrapped) */}

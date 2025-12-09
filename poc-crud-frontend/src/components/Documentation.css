@@ -1,0 +1,60 @@
+.documentation-root {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Logo Section Styling */
+.logo-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0 30px 0;
+}
+
+/* Logo Placeholder - Remove this when actual logo is added */
+.logo-placeholder {
+  width: 400px;
+  height: 150px;
+  border: 3px dashed #cbd5e0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+}
+
+/* Company Logo - Uncomment when logo is ready */
+.company-logo {
+  width: 400px;
+  height: 150px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Documentation Cards */
+.doc-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .logo-placeholder,
+  .company-logo {
+    width: 300px;
+    height: 112px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-placeholder,
+  .company-logo {
+    width: 250px;
+    height: 94px;
+  }
+  
+  .logo-placeholder {
+    padding: 15px;
+  }
+}
