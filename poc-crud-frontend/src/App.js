@@ -1,14 +1,14 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import DeliveryDashboard from "./components/DeliveryDashboard";
-import LoginScreen from "./components/LoginScreen";
-import AuthCallback from './components/AuthCallback';
-import Home from './components/Home';
-import Reports from "./components/Reports";
-import ProjectsPage from "./components/ProjectsPage"; // Import ProjectsPage
-import DataTable from "./components/DataTable";       // Import DataTable
-import Schedule from "./components/Schedule";         // Import Schedule
-import Documentation from "./components/Documentation"; // Import Documentation
+import DashboardLayout from "./layouts/DashboardLayout";
+import LoginScreen from "./pages/auth/LoginScreen";
+import AuthCallback from './pages/auth/AuthCallback';
+import Home from './pages/dashboard/Home';
+import Reports from "./pages/reports/Reports";
+import ProjectsPage from "./pages/jira/ProjectsPage";
+import DataTable from "./pages/pocDelivery/DataTable";
+import Schedule from "./pages/dashboard/Schedule";
+import Documentation from "./pages/docs/Documentation";
 
 export default function App() {
   return (
@@ -18,20 +18,16 @@ export default function App() {
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
 
-      {/* Protected/dashboard routes wrapped with DeliveryDashboard layout */}
-      {/* All these routes will now have the sidebar and topbar from DeliveryDashboard */}
-      <Route path="/home" element={<DeliveryDashboard><Home /></DeliveryDashboard>} />
-      <Route path="/poc-delivery-list" element={<DeliveryDashboard><DataTable /></DeliveryDashboard>} />
-      <Route path="/projects" element={<DeliveryDashboard><ProjectsPage /></DeliveryDashboard>} /> {/* Jira Projects Dashboard */}
-      <Route path="/reports" element={<DeliveryDashboard><Reports /></DeliveryDashboard>} /> {/* Report Dashboard */}
-
-      {/* Other routes that use the dashboard layout */}
-      <Route path="/schedule" element={<DeliveryDashboard><Schedule /></DeliveryDashboard>} />
-      <Route path="/documents" element={<DeliveryDashboard><Documentation /></DeliveryDashboard>} />
-      <Route path="/settings" element={<DeliveryDashboard><div style={{ padding: '20px' }}>Settings Page Content</div></DeliveryDashboard>} />
-
-      {/* Original test route (also wrapped) */}
-      <Route path="/test" element={<DeliveryDashboard><div style={{ background: 'lime', padding: '48px' }}>TEST ROUTE (LIME)</div></DeliveryDashboard>} />
+      {/* Protected/dashboard routes wrapped with DashboardLayout */}
+      {/* All these routes will now have the top navigation and main content area */}
+      <Route path="/home" element={<DashboardLayout><Home /></DashboardLayout>} />
+      <Route path="/poc-delivery-list" element={<DashboardLayout><DataTable /></DashboardLayout>} />
+      <Route path="/projects" element={<DashboardLayout><ProjectsPage /></DashboardLayout>} />
+      <Route path="/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+      <Route path="/schedule" element={<DashboardLayout><Schedule /></DashboardLayout>} />
+      <Route path="/documents" element={<DashboardLayout><Documentation /></DashboardLayout>} />
+      <Route path="/settings" element={<DashboardLayout><div style={{ padding: '20px' }}>Settings Page Content</div></DashboardLayout>} />
+      <Route path="/test" element={<DashboardLayout><div style={{ background: 'lime', padding: '48px' }}>TEST ROUTE (LIME)</div></DashboardLayout>} />
     </Routes>
   );
 }
