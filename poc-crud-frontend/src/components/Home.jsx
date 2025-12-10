@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip
+  Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab
 } from '@mui/material';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -47,6 +47,9 @@ export default function Home() {
   const [selectedJiraProject, setSelectedJiraProject] = useState('');
   const [jiraIssues, setJiraIssues] = useState([]);
   const [loadingJira, setLoadingJira] = useState(false);
+
+  // Tab state
+  const [tabValue, setTabValue] = useState(0);
 
   async function fetchRows() {
     setLoading(true);
@@ -205,7 +208,7 @@ export default function Home() {
 
   return (
     <Box>
-      {/* Header with Project Selector */}
+      {/* Header with Title and Jira Project Selector */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-dark)', mb: 0.5 }}>Dashboard Overview</Typography>
@@ -229,7 +232,7 @@ export default function Home() {
         </FormControl>
       </Box>
 
-      {/* Highlights Tiles */}
+      {/* Highlights Tiles (KPI Overview) */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <DashboardTile
@@ -259,113 +262,197 @@ export default function Home() {
         </Grid>
       </Grid>
 
-      {/* Jira KPI Tiles */}
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Project Metrics
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<WorkIcon />} label="Total Issues" value={jiraTotalIssues} color="#7c3aed" trend={{ delta: trendTotalIssues }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<CheckCircleOutlineIcon />} label="Done" value={jiraDone} color="#22C55E" trend={{ delta: trendDone }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=Done`)} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={jiraInProgress} color="#2563EB" trend={{ delta: trendInProgress }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=In%20Progress`)} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<BugReportIcon />} label="Bugs" value={jiraBugs} color="#EF4444" trend={{ delta: trendBugs }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&type=Bug`)} />
-        </Grid>
-      </Grid>
+      {/* Tabs Section */}
+      <Paper sx={{ borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={(e, newValue) => setTabValue(newValue)}
+          sx={{ 
+            borderBottom: '2px solid #e5e7eb',
+            '& .MuiTab-root': {
+              fontWeight: 600,
+              fontSize: '1rem',
+              textTransform: 'none',
+              minWidth: 'auto',
+              px: 3,
+              py: 1.5,
+              color: 'text.secondary',
+              '&.Mui-selected': {
+                color: 'var(--primary-orange)',
+              }
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'var(--primary-orange)',
+              height: 3,
+            }
+          }}
+        >
+          <Tab label="PoC Delivery" />
+          <Tab label="Jira Overview" />
+        </Tabs>
 
-      {/* Jira Issue Type Breakdown */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>Issue Type Breakdown</Typography>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#faf5ff', border: '2px solid #7c3aed' }}>
-              <Chip label="Epics" size="small" sx={{ bgcolor: '#7c3aed', color: 'white', fontWeight: 600, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#7c3aed' }}>{jiraEpics}</Typography>
-            </Paper>
+        {/* TAB 1: PoC Delivery */}
+        <Box sx={{ display: tabValue === 0 ? 'block' : 'none', p: 3 }}>
+          {/* PoC KPI Tiles */}
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> PoC Delivery Metrics
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<DnsIcon />} label="Total PoCs" value={total} color="#E6512E" trend={{ delta: trendTotalPocs }} onClick={() => navigate('/poc-delivery-list')} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={completed} color="#22C55E" trend={{ delta: trendCompletedPocs }} onClick={() => navigate('/poc-delivery-list?status=Completed')} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<CancelOutlinedIcon />} label="Delayed" value={delayed} color="#F59E0B" trend={{ delta: trendDelayedPocs }} onClick={() => navigate('/poc-delivery-list?status=Delayed')} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={inProgress} color="#2563EB" trend={{ delta: trendInProgressPocs }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')} />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#eff6ff', border: '2px solid #3b82f6' }}>
-              <Chip label="Tasks/Stories" size="small" sx={{ bgcolor: '#3b82f6', color: 'white', fontWeight: 600, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#3b82f6' }}>{jiraTasks}</Typography>
-            </Paper>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#f8fafc', border: '2px solid #64748b' }}>
-              <Chip label="Subtasks" size="small" sx={{ bgcolor: '#64748b', color: 'white', fontWeight: 600, mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#64748b' }}>{jiraSubtasks}</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Paper>
 
-      {/* PoC KPI Tiles */}
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> PoC Delivery Metrics
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<DnsIcon />} label="Total PoCs" value={total} color="#E6512E" trend={{ delta: trendTotalPocs }} onClick={() => navigate('/poc-delivery-list')} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={completed} color="#22C55E" trend={{ delta: trendCompletedPocs }} onClick={() => navigate('/poc-delivery-list?status=Completed')} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<CancelOutlinedIcon />} label="Delayed" value={delayed} color="#F59E0B" trend={{ delta: trendDelayedPocs }} onClick={() => navigate('/poc-delivery-list?status=Delayed')} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={inProgress} color="#2563EB" trend={{ delta: trendInProgressPocs }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')} />
-        </Grid>
-      </Grid>
+          {/* Overall PoC Progress */}
+          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: '0 10px 32px rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, #ffffff 0%, #fff7f4 100%)', position: 'relative', overflow: 'hidden' }}>
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>Overall PoC Completion</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700, color: 'var(--primary-orange)' }}>{averageCompletion.toFixed(0)}%</Typography>
+              </Box>
+              <LinearProgress 
+                variant="determinate" 
+                value={averageCompletion} 
+                sx={{ 
+                  height: 12, 
+                  borderRadius: 6, 
+                  bgcolor: 'var(--secondary-gray)', 
+                  '& .MuiLinearProgress-bar': { 
+                    bgcolor: 'var(--primary-orange)',
+                    borderRadius: 6
+                  } 
+                }} 
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Button 
+                  size="small" 
+                  onClick={() => navigate('/poc-delivery-list')} 
+                  sx={{ 
+                    color: 'var(--primary-orange)', 
+                    fontWeight: 600,
+                    '&:hover': { bgcolor: 'rgba(255, 111, 0, 0.08)' }
+                  }}
+                >
+                  View All PoCs →
+                </Button>
+                <Button 
+                  size="small" 
+                  onClick={() => navigate('/projects')} 
+                  sx={{ 
+                    color: '#7c3aed', 
+                    fontWeight: 600,
+                    '&:hover': { bgcolor: 'rgba(124, 58, 237, 0.08)' }
+                  }}
+                >
+                  View All Issues →
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
 
-      {/* Overall PoC Progress */}
-      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: '0 10px 32px rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, #ffffff 0%, #fff7f4 100%)', position: 'relative', overflow: 'hidden' }}>
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>Overall PoC Completion</Typography>
-            <Typography variant="h3" sx={{ fontWeight: 700, color: 'var(--primary-orange)' }}>{averageCompletion.toFixed(0)}%</Typography>
-          </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={averageCompletion} 
-            sx={{ 
-              height: 12, 
-              borderRadius: 6, 
-              bgcolor: 'var(--secondary-gray)', 
-              '& .MuiLinearProgress-bar': { 
-                bgcolor: 'var(--primary-orange)',
-                borderRadius: 6
-              } 
-            }} 
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button 
-              size="small" 
-              onClick={() => navigate('/poc-delivery-list')} 
-              sx={{ 
-                color: 'var(--primary-orange)', 
-                fontWeight: 600,
-                '&:hover': { bgcolor: 'rgba(255, 111, 0, 0.08)' }
-              }}
-            >
-              View All PoCs →
-            </Button>
-            <Button 
-              size="small" 
-              onClick={() => navigate('/projects')} 
-              sx={{ 
-                color: '#7c3aed', 
-                fontWeight: 600,
-                '&:hover': { bgcolor: 'rgba(124, 58, 237, 0.08)' }
-              }}
-            >
-              View All Issues →
-            </Button>
-          </Box>
+        {/* TAB 2: Jira Overview */}
+        <Box sx={{ display: tabValue === 1 ? 'block' : 'none', p: 3 }}>
+          {/* Jira KPI Tiles */}
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Project Metrics
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<WorkIcon />} label="Total Issues" value={jiraTotalIssues} color="#7c3aed" trend={{ delta: trendTotalIssues }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<CheckCircleOutlineIcon />} label="Done" value={jiraDone} color="#22C55E" trend={{ delta: trendDone }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=Done`)} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={jiraInProgress} color="#2563EB" trend={{ delta: trendInProgress }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=In%20Progress`)} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<BugReportIcon />} label="Bugs" value={jiraBugs} color="#EF4444" trend={{ delta: trendBugs }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&type=Bug`)} />
+            </Grid>
+          </Grid>
+
+          {/* Jira Issue Type Breakdown */}
+          <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>Issue Type Breakdown</Typography>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#faf5ff', border: '2px solid #7c3aed' }}>
+                  <Chip label="Epics" size="small" sx={{ bgcolor: '#7c3aed', color: 'white', fontWeight: 600, mb: 1 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#7c3aed' }}>{jiraEpics}</Typography>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#eff6ff', border: '2px solid #3b82f6' }}>
+                  <Chip label="Tasks/Stories" size="small" sx={{ bgcolor: '#3b82f6', color: 'white', fontWeight: 600, mb: 1 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#3b82f6' }}>{jiraTasks}</Typography>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#f8fafc', border: '2px solid #64748b' }}>
+                  <Chip label="Subtasks" size="small" sx={{ bgcolor: '#64748b', color: 'white', fontWeight: 600, mb: 1 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#64748b' }}>{jiraSubtasks}</Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Paper>
+
+          {/* Jira Issues Table */}
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>Issues in {selectedJiraProject || 'Selected Project'}</Typography>
+            {loadingJira ? (
+              <Typography>Loading issues...</Typography>
+            ) : jiraIssues.length > 0 ? (
+              <TableContainer sx={{ maxHeight: 500, overflow: 'auto' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: '#f3f4f6' }}>
+                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Key</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Summary</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Assignee</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {jiraIssues.map(issue => (
+                      <TableRow key={issue.key} hover>
+                        <TableCell sx={{ fontWeight: 600, color: '#7c3aed' }}>{issue.key}</TableCell>
+                        <TableCell>{issue.summary}</TableCell>
+                        <TableCell>
+                          <Chip label={issue.type} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={issue.status} 
+                            size="small"
+                            sx={{
+                              bgcolor: String(issue.status).toLowerCase() === 'done' ? '#d1fae5' : 
+                                      String(issue.status).toLowerCase() === 'in progress' ? '#dbeafe' : '#f3f4f6',
+                              color: String(issue.status).toLowerCase() === 'done' ? '#065f46' :
+                                     String(issue.status).toLowerCase() === 'in progress' ? '#0c4a6e' : '#374151'
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>{issue.assignee || 'Unassigned'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography color="text.secondary">No issues found. Select a Jira project above.</Typography>
+            )}
+          </Paper>
         </Box>
       </Paper>
     </Box>
