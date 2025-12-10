@@ -208,59 +208,11 @@ export default function Home() {
 
   return (
     <Box>
-      {/* Header with Title and Jira Project Selector */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-dark)', mb: 0.5 }}>Dashboard Overview</Typography>
-          <Typography variant="body2" color="text.secondary">Track Jira projects and PoC delivery metrics</Typography>
-        </Box>
-        <FormControl size="small" sx={{ minWidth: 250 }}>
-          <InputLabel id="jira-project-select">Select Jira Project</InputLabel>
-          <Select
-            labelId="jira-project-select"
-            value={selectedJiraProject}
-            label="Select Jira Project"
-            onChange={(e) => setSelectedJiraProject(e.target.value)}
-            sx={{ bgcolor: 'white', borderRadius: 2 }}
-          >
-            {jiraProjects.map(project => (
-              <MenuItem key={project.key} value={project.key}>
-                {project.name} ({project.key})
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      {/* Header with Title */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-dark)', mb: 0.5 }}>Dashboard Overview</Typography>
+        <Typography variant="body2" color="text.secondary">Track Jira projects and PoC delivery metrics</Typography>
       </Box>
-
-      {/* Highlights Tiles (KPI Overview) */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DashboardTile
-            variant="primary"
-            title={`Jira Overview — ${selectedJiraProject || 'Project'}`}
-            subtitle={`${jiraDone} done of ${jiraTotalIssues} issues/tasks`}
-            progress={jiraProgress}
-            tasks={jiraTotalIssues}
-            daysRemain={getMinDaysRemainFromIssues()}
-            avatars={jiraAvatars}
-            trend={{ delta: trendDone, label: 'vs last week' }}
-            onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DashboardTile
-            variant="light"
-            title="PoC Delivery"
-            subtitle={`${completed} completed of ${total} PoCs`}
-            progress={pocProgress}
-            tasks={total}
-            daysRemain={getMinDaysRemainFromPocs()}
-            avatars={pocAvatars}
-            trend={{ delta: trendCompletedPocs, label: 'vs last week' }}
-            onClick={() => navigate('/poc-delivery-list')}
-          />
-        </Grid>
-      </Grid>
 
       {/* Tabs Section */}
       <Paper sx={{ borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
@@ -362,6 +314,39 @@ export default function Home() {
 
         {/* TAB 2: Jira Overview */}
         <Box sx={{ display: tabValue === 1 ? 'block' : 'none', p: 3 }}>
+          {/* Jira Project Selector */}
+          <FormControl size="small" sx={{ minWidth: 250, mb: 3 }}>
+            <InputLabel id="jira-project-select">Select Jira Project</InputLabel>
+            <Select
+              labelId="jira-project-select"
+              value={selectedJiraProject}
+              label="Select Jira Project"
+              onChange={(e) => setSelectedJiraProject(e.target.value)}
+              sx={{ bgcolor: 'white', borderRadius: 2 }}
+            >
+              {jiraProjects.map(project => (
+                <MenuItem key={project.key} value={project.key}>
+                  {project.name} ({project.key})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Jira Overview KPI Tile */}
+          <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #faf5ff 0%, #fff 100%)' }}>
+            <DashboardTile
+              variant="primary"
+              title={`Jira Overview — ${selectedJiraProject || 'Project'}`}
+              subtitle={`${jiraDone} done of ${jiraTotalIssues} issues/tasks`}
+              progress={jiraProgress}
+              tasks={jiraTotalIssues}
+              daysRemain={getMinDaysRemainFromIssues()}
+              avatars={jiraAvatars}
+              trend={{ delta: trendDone, label: 'vs last week' }}
+              onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)}
+            />
+          </Paper>
+
           {/* Jira KPI Tiles */}
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
             <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Project Metrics
