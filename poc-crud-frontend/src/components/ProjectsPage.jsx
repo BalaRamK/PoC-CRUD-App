@@ -43,11 +43,15 @@ export default function JiraProjectsPage() {
         const response = await axios.get('/api/jira/projects');
         if (response.data.success) {
           const projectsList = response.data.data;
-          setProjects(projectsList);
+          // Filter projects that have "Delivery" in their name
+          const filteredProjects = projectsList.filter(p => 
+            p.name && p.name.toLowerCase().includes('delivery')
+          );
+          setProjects(filteredProjects);
 
-          // Fetch issues for each project to calculate metrics
+          // Fetch issues for each filtered project to calculate metrics
           const enrichedProjects = await Promise.all(
-            projectsList.map(async (project) => {
+            filteredProjects.map(async (project) => {
               try {
                 const issuesResponse = await axios.get(`/api/jira/project/${project.key}/issues`);
                 if (issuesResponse.data.success) {

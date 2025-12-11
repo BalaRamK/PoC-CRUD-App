@@ -7,10 +7,6 @@ import {
   Box,
   Button,
   IconButton,
-  Avatar,
-  InputBase,
-  Menu,
-  MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,45 +19,28 @@ import {
 } from '@mui/material';
 
 // Icons
-import SearchIcon from '@mui/icons-material/Search';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import WorkIcon from '@mui/icons-material/Work';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 
 const navItems = [
-  { text: 'Home', icon: <DashboardIcon />, path: '/home' },
-  { text: 'Schedule', icon: <CalendarTodayIcon />, path: '/schedule' },
-  { text: 'Jira Projects', icon: <WorkIcon />, path: '/projects' },
-  { text: 'PoC Delivery', icon: <ViewListIcon />, path: '/poc-delivery-list' },
-  { text: 'Reports', icon: <BarChartIcon />, path: '/reports' },
-  { text: 'Documents', icon: <DescriptionOutlinedIcon />, path: '/documents' },
+  { text: 'Home', path: '/home' },
+  { text: 'Schedule', path: '/schedule' },
+  { text: 'Jira Projects', path: '/projects' },
+  { text: 'PoC Delivery', path: '/poc-delivery-list' },
+  { text: 'Documents', path: '/documents' },
 ];
 
 export default function TopNavigation() {
   const auth = useAuth();
-  const user = auth?.user;
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  const handleProfileMenuOpen = (e) => setProfileMenuAnchor(e.currentTarget);
-  const handleProfileMenuClose = () => setProfileMenuAnchor(null);
   const handleLogout = () => {
-    handleProfileMenuClose();
+    setMobileMenuOpen(false);
     setLogoutOpen(true);
   };
 
@@ -76,7 +55,6 @@ export default function TopNavigation() {
   };
 
   const cancelLogout = () => setLogoutOpen(false);
-  const userProfilePic = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' fill='%23e0e0e0'/%3E%3C/svg%3E";
 
   return (
     <>
@@ -84,118 +62,92 @@ export default function TopNavigation() {
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          bgcolor: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'saturate(180%) blur(10px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+          bgcolor: '#ffffff',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
           color: 'var(--text-dark)',
+          borderBottom: '1px solid #f0f0f0',
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 72, px: { xs: 2, md: 4 } }}>
-          {/* Logo & Brand */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 700, color: 'var(--primary-orange)', display: { xs: 'none', sm: 'block' } }}
-            >
-              PoC Tracker
-            </Typography>
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>
+          {/* Logo Only */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box 
+              component="img" 
+              src="/images/qnu-logo.png" 
+              alt="QNu Labs" 
+              sx={{ height: 36, width: 'auto', cursor: 'pointer' }}
+            />
           </Box>
 
           {/* Desktop Navigation Menu */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 0.5, flex: 1, justifyContent: 'center', mx: 2 }}>
-              {navItems.map(({ text, icon, path }) => (
+            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flex: 1 }}>
+              {navItems.map(({ text, path }) => (
                 <Button
                   key={text}
                   component={NavLink}
                   to={path}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    px: 2,
-                    py: 1,
-                    borderRadius: '8px',
+                    color: '#666666',
+                    textTransform: 'none',
                     fontSize: '0.95rem',
                     fontWeight: 500,
-                    color: 'var(--text-light)',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s ease',
+                    borderRadius: '6px',
+                    px: 2,
+                    py: 1,
                     '&.active': {
-                      backgroundColor: 'var(--active-bg)',
-                      color: 'var(--active-text)',
-                      '& svg': { color: 'var(--active-text)' },
+                      backgroundColor: '#ff9500',
+                      color: '#ffffff',
+                      fontWeight: 600,
                     },
                     '&:hover': {
-                      backgroundColor: '#f0f0f0',
-                      color: 'var(--text-dark)',
-                    },
-                    '& svg': {
-                      fontSize: '1.2rem',
-                      transition: 'color 0.3s ease',
+                      color: '#000000',
+                      backgroundColor: 'transparent',
                     },
                   }}
                 >
-                  {icon}
-                  {!isTablet && text}
+                  {text}
                 </Button>
               ))}
             </Box>
           )}
 
-          {/* Search Bar - Desktop */}
-          {!isMobile && (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: 'var(--secondary-gray)',
-                borderRadius: '12px',
-                p: '8px 12px',
-                border: '1px solid var(--border-color)',
-                minWidth: 300,
-                maxWidth: 400,
-              }}
-            >
-              <SearchIcon sx={{ color: 'var(--text-light)', mr: 1, fontSize: '1.2rem' }} />
-              <InputBase
-                placeholder="Search..."
-                inputProps={{ 'aria-label': 'search' }}
-                sx={{ flex: 1, color: 'var(--text-dark)', '& input::placeholder': { opacity: 0.7 } }}
-              />
-            </Box>
-          )}
-
-          {/* Right Actions */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, ml: { xs: 1, md: 2 } }}>
+          {/* Right Side - Logout Button */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {!isMobile && (
-              <>
-                <IconButton color="inherit" size="small">
-                  <AddCircleOutlineIcon />
-                </IconButton>
-                <IconButton color="inherit" size="small">
-                  <NotificationsNoneIcon />
-                </IconButton>
-              </>
+              <Button
+                onClick={handleLogout}
+                sx={{
+                  color: '#ef4444',
+                  textTransform: 'none',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  backgroundColor: 'transparent',
+                  border: '1px solid #ef4444',
+                  borderRadius: '4px',
+                  px: 2,
+                  py: 0.75,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: '#fef2f2',
+                    borderColor: '#ef4444',
+                  },
+                }}
+              >
+                Log out
+              </Button>
             )}
-
-            {/* Profile Menu */}
-            <IconButton
-              onClick={handleProfileMenuOpen}
-              sx={{ p: 0.5 }}
-            >
-              <Avatar
-                src={userProfilePic}
-                alt={user?.name || 'User'}
-                sx={{ width: 36, height: 36, cursor: 'pointer' }}
-              />
-            </IconButton>
 
             {/* Mobile Menu Toggle */}
             {isMobile && (
               <IconButton
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                color="inherit"
+                sx={{
+                  color: '#666666',
+                  '&:hover': { color: '#000000', backgroundColor: '#f5f5f5' },
+                  borderRadius: '6px',
+                }}
               >
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
               </IconButton>
@@ -204,38 +156,6 @@ export default function TopNavigation() {
         </Toolbar>
       </AppBar>
 
-      {/* Profile Dropdown Menu */}
-      <Menu
-        anchorEl={profileMenuAnchor}
-        open={Boolean(profileMenuAnchor)}
-        onClose={handleProfileMenuClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Box sx={{ p: 2, minWidth: 250 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Avatar src={userProfilePic} alt={user?.name || 'User'} sx={{ width: 48, height: 48 }} />
-            <Box>
-              <Typography sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>
-                {user?.name || 'Guest User'}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'var(--text-light)' }}>
-                Designer
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-        <Divider />
-        <MenuItem component={NavLink} to="/settings" sx={{ display: 'flex', gap: 2 }}>
-          <SettingsOutlinedIcon sx={{ fontSize: '1.2rem' }} />
-          Settings
-        </MenuItem>
-        <MenuItem onClick={handleLogout} sx={{ display: 'flex', gap: 2 }}>
-          <ExitToAppOutlinedIcon sx={{ fontSize: '1.2rem' }} />
-          Log Out
-        </MenuItem>
-      </Menu>
-
       {/* Mobile Menu Drawer */}
       <Drawer
         anchor="top"
@@ -243,13 +163,14 @@ export default function TopNavigation() {
         onClose={() => setMobileMenuOpen(false)}
         sx={{
           '& .MuiDrawer-paper': {
-            marginTop: '72px',
+            marginTop: '64px',
             borderRadius: 0,
+            borderTop: '1px solid #f0f0f0',
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {navItems.map(({ text, icon, path }) => (
+        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {navItems.map(({ text, path }) => (
             <Button
               key={text}
               component={NavLink}
@@ -260,54 +181,28 @@ export default function TopNavigation() {
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
-                gap: 2,
                 px: 2,
                 py: 1.5,
-                borderRadius: '8px',
-                color: 'var(--text-dark)',
+                borderRadius: '6px',
+                color: '#666666',
                 textTransform: 'none',
-                fontSize: '1rem',
+                fontSize: '0.95rem',
                 fontWeight: 500,
+                transition: 'all 0.2s ease',
                 '&.active': {
-                  backgroundColor: 'var(--active-bg)',
-                  color: 'var(--active-text)',
-                  '& svg': { color: 'var(--active-text)' },
+                  color: '#000000',
+                  fontWeight: 600,
                 },
                 '&:hover': {
-                  backgroundColor: '#f0f0f0',
-                },
-                '& svg': {
-                  fontSize: '1.3rem',
+                  backgroundColor: '#f9f9f9',
+                  color: '#000000',
                 },
               }}
             >
-              {icon}
               {text}
             </Button>
           ))}
           <Divider sx={{ my: 1 }} />
-          <Button
-            component={NavLink}
-            to="/settings"
-            onClick={() => setMobileMenuOpen(false)}
-            fullWidth
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              gap: 2,
-              px: 2,
-              py: 1.5,
-              borderRadius: '8px',
-              color: 'var(--text-dark)',
-              textTransform: 'none',
-              fontSize: '1rem',
-              '&:hover': { backgroundColor: '#f0f0f0' },
-            }}
-          >
-            <SettingsOutlinedIcon />
-            Settings
-          </Button>
           <Button
             fullWidth
             onClick={handleLogout}
@@ -315,18 +210,18 @@ export default function TopNavigation() {
               display: 'flex',
               justifyContent: 'flex-start',
               alignItems: 'center',
-              gap: 2,
               px: 2,
               py: 1.5,
-              borderRadius: '8px',
+              borderRadius: '6px',
               color: '#ef4444',
               textTransform: 'none',
-              fontSize: '1rem',
-              '&:hover': { backgroundColor: '#ffe5e5' },
+              fontSize: '0.95rem',
+              fontWeight: 500,
+              transition: 'all 0.2s ease',
+              '&:hover': { backgroundColor: '#fef2f2' },
             }}
           >
-            <ExitToAppOutlinedIcon />
-            Log Out
+            Log out
           </Button>
         </Box>
       </Drawer>
