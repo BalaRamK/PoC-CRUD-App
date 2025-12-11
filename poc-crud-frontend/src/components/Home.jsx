@@ -65,7 +65,7 @@ export default function Home() {
         else if (Array.isArray(item)) values = item;
 
         // Ensure keys match your Excel columns
-        const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "phase", "status", "percent", "criteria", "milestones", "comments"];
+        const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "estimatedEndDate", "estimatedDeliveryDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"];
         const mapped = keys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
 
         // Convert Excel serial dates for startDate/endDate if needed, as in DataTable.js
@@ -77,6 +77,17 @@ export default function Home() {
         };
         if (typeof mapped.startDate === 'number') mapped.startDate = excelSerialToISO(mapped.startDate);
         if (typeof mapped.endDate === 'number') mapped.endDate = excelSerialToISO(mapped.endDate);
+        if (typeof mapped.estimatedEndDate === 'number') mapped.estimatedEndDate = excelSerialToISO(mapped.estimatedEndDate);
+        if (typeof mapped.estimatedDeliveryDate === 'number') mapped.estimatedDeliveryDate = excelSerialToISO(mapped.estimatedDeliveryDate);
+
+        // derive estimated delivery date if empty and project is past end date
+        if (!mapped.estimatedDeliveryDate) {
+          const today = dayjs();
+          const endDateObj = mapped.endDate ? dayjs(mapped.endDate) : null;
+          if (endDateObj && endDateObj.isValid() && endDateObj.isBefore(today, 'day')) {
+            mapped.estimatedDeliveryDate = mapped.estimatedEndDate || mapped.endDate;
+          }
+        }
 
         return { id: item.id ?? idx, index: item.index ?? idx, values, ...mapped };
       });
@@ -310,6 +321,52 @@ export default function Home() {
               </Box>
             </Box>
           </Paper>
+
+          {/* Delayed & In Progress PoC Details */}
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            {delayed > 0 && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CancelOutlinedIcon /> Delayed Projects ({delayed})
+                  </Typography>
+                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    {rows.filter(r => String(r.status).toLowerCase() === 'delayed').map((item, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
+                          <Chip label="Delayed" size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">Lead: {item.deliveryLead || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(item.endDate)}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+              </Grid>
+            )}
+            {inProgress > 0 && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <HourglassEmptyIcon /> In Progress Projects ({inProgress})
+                  </Typography>
+                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    {rows.filter(r => ['execution','in progress','on track'].includes(String(r.status).toLowerCase())).map((item, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
+                          <Chip label={String(item.status).charAt(0).toUpperCase() + String(item.status).slice(1)} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">Lead: {item.deliveryLead || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Progress: {item.percent || 0}%</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+              </Grid>
+            )}
+          </Grid>
         </Box>
 
         {/* TAB 2: Jira Overview */}
@@ -332,6 +389,55 @@ export default function Home() {
             </Select>
           </FormControl>
 
+          {/* Overall Jira Projects Metrics */}
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> Overall Jira Projects Metrics
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile icon={<WorkIcon />} label="Total Projects" value={jiraProjects.length} color="#7c3aed" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile 
+                icon={<CheckCircleOutlineIcon />} 
+                label="Completed" 
+                value={jiraProjects.filter(p => {
+                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
+                  return projIssues.length > 0 && projIssues.every(i => String(i.status).toLowerCase() === 'done');
+                }).length} 
+                color="#22C55E" 
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile 
+                icon={<HourglassEmptyIcon />} 
+                label="In Progress" 
+                value={jiraProjects.filter(p => {
+                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
+                  return projIssues.length > 0 && projIssues.some(i => String(i.status).toLowerCase() === 'in progress');
+                }).length} 
+                color="#2563EB" 
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <StatTile 
+                icon={<CancelOutlinedIcon />} 
+                label="Delayed" 
+                value={jiraProjects.filter(p => {
+                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
+                  return projIssues.length > 0 && projIssues.some(i => {
+                    const dueDate = dayjs(i.dueDate);
+                    return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
+                  });
+                }).length} 
+                color="#F59E0B" 
+              />
+            </Grid>
+          </Grid>
+
+          {/* Jira Project Selector */}
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'var(--text-dark)' }}>Project Details</Typography>
+
           {/* Jira Overview KPI Tile */}
           <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #faf5ff 0%, #fff 100%)' }}>
             <DashboardTile
@@ -349,7 +455,7 @@ export default function Home() {
 
           {/* Jira KPI Tiles */}
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Project Metrics
+            <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Issues Metrics
           </Typography>
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -364,6 +470,70 @@ export default function Home() {
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile icon={<BugReportIcon />} label="Bugs" value={jiraBugs} color="#EF4444" trend={{ delta: trendBugs }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&type=Bug`)} />
             </Grid>
+          </Grid>
+
+          {/* In Progress & Delayed Issues Details */}
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            {jiraInProgress > 0 && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <HourglassEmptyIcon /> In Progress Issues ({jiraInProgress})
+                  </Typography>
+                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    {jiraIssues.filter(i => String(i.status).toLowerCase() === 'in progress').slice(0, 5).map((issue, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{issue.summary}</Typography>
+                          <Chip label={issue.key} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600, ml: 1 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">Assignee: {issue.assignee || 'Unassigned'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(issue.dueDate)}</Typography>
+                      </Box>
+                    ))}
+                    {jiraInProgress > 5 && (
+                      <Typography variant="caption" sx={{ color: '#2563EB', fontWeight: 600 }}>+{jiraInProgress - 5} more issues...</Typography>
+                    )}
+                  </Box>
+                </Paper>
+              </Grid>
+            )}
+            {jiraIssues.some(i => {
+              const dueDate = dayjs(i.dueDate);
+              return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
+            }) && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CancelOutlinedIcon /> Delayed Issues
+                  </Typography>
+                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    {jiraIssues.filter(i => {
+                      const dueDate = dayjs(i.dueDate);
+                      return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
+                    }).slice(0, 5).map((issue, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{issue.summary}</Typography>
+                          <Chip label={issue.key} size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600, ml: 1 }} />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">Assignee: {issue.assignee || 'Unassigned'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(issue.dueDate)}</Typography>
+                      </Box>
+                    ))}
+                    {jiraIssues.filter(i => {
+                      const dueDate = dayjs(i.dueDate);
+                      return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
+                    }).length > 5 && (
+                      <Typography variant="caption" sx={{ color: '#F59E0B', fontWeight: 600 }}>+{jiraIssues.filter(i => {
+                        const dueDate = dayjs(i.dueDate);
+                        return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
+                      }).length - 5} more issues...</Typography>
+                    )}
+                  </Box>
+                </Paper>
+              </Grid>
+            )}
           </Grid>
 
           {/* Jira Issue Type Breakdown */}

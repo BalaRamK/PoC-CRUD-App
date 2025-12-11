@@ -10,8 +10,8 @@ import axios from "axios";
 
 const columns = [
   "PoC ID", "Customer Name", "PoC Title", "Sales Owner", "Delivery Lead",
-  "Start Date", "End Date", "Current Phase", "Status", "% Completion",
-  "Success Criteria", "Key Milestones", "Comments"
+  "Start Date", "End Date", "Estimated End Date", "Estimated Delivery Date", "Current Phase", "Status", "% Completion",
+  "Next Milestone", "Current Blockers", "Comments"
 ];
 
 export default function EditRowDialog({ open, initialValues, onClose, rowIndex, onSaved }) {
@@ -33,7 +33,9 @@ export default function EditRowDialog({ open, initialValues, onClose, rowIndex, 
       fields[0], fields[1], fields[2], fields[3], fields[4],
       fields[5] && dayjs(fields[5]).isValid() ? dayjs(fields[5]).format("YYYY-MM-DD") : "",
       fields[6] && dayjs(fields[6]).isValid() ? dayjs(fields[6]).format("YYYY-MM-DD") : "",
-      fields[7], fields[8], fields[9], fields[10], fields[11], fields[12]
+      fields[7] && dayjs(fields[7]).isValid() ? dayjs(fields[7]).format("YYYY-MM-DD") : "",
+      fields[8] && dayjs(fields[8]).isValid() ? dayjs(fields[8]).format("YYYY-MM-DD") : "",
+      fields[9], fields[10], fields[11], fields[12], fields[13], fields[14]
     ];
     try {
       await axios.patch(`/api/items/${rowIndex}`, { values: payload });
@@ -52,7 +54,7 @@ export default function EditRowDialog({ open, initialValues, onClose, rowIndex, 
           <Grid container spacing={2}>
             {columns.map((col, idx) => (
               <Grid item xs={12} sm={6} md={4} key={col}>
-                {idx === 5 || idx === 6 ? (
+                {[5,6,7,8].includes(idx) ? (
                   <DatePicker
                     label={col}
                     value={fields[idx] ? dayjs(fields[idx]) : null}
@@ -73,6 +75,9 @@ export default function EditRowDialog({ open, initialValues, onClose, rowIndex, 
                     fullWidth
                     margin="dense"
                     variant="outlined"
+                    multiline={col === 'Comments'}
+                    minRows={col === 'Comments' ? 3 : 1}
+                    placeholder={col === 'Comments' ? 'Add date, notes, and wrap text as needed' : undefined}
                   />
                 )}
               </Grid>
