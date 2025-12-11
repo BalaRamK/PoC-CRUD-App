@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Chip, Button
+  LinearProgress, Chip, IconButton, Tooltip
 } from '@mui/material';
+import { Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import ProjectDetailView from './ProjectDetailView';
 
 // Helper for date formatting
 const formatDate = (dateString) => {
@@ -30,6 +32,7 @@ export default function JiraProjectsPage() {
   const [projectsData, setProjectsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // Fetch all Jira projects on component mount
   useEffect(() => {
@@ -128,6 +131,17 @@ export default function JiraProjectsPage() {
     };
   };
 
+  // If a project is selected, show detail view
+  if (selectedProject) {
+    return (
+      <ProjectDetailView 
+        projectKey={selectedProject.key}
+        projectName={selectedProject.name}
+        onBack={() => setSelectedProject(null)}
+      />
+    );
+  }
+
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>
@@ -168,19 +182,22 @@ export default function JiraProjectsPage() {
               <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
                 Status
               </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                   <LinearProgress sx={{ width: '100%', mb: 2 }} />
                   <Typography color="text.secondary">Loading projects...</Typography>
                 </TableCell>
               </TableRow>
             ) : projectsData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">No projects found</Typography>
                 </TableCell>
               </TableRow>
@@ -278,6 +295,17 @@ export default function JiraProjectsPage() {
                         }}
                       />
                     </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="View Project Details">
+                        <IconButton 
+                          size="small" 
+                          onClick={() => setSelectedProject({ key: project.key, name: project.name })}
+                          sx={{ color: '#7c3aed' }}
+                        >
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 );
               })
@@ -339,96 +367,7 @@ export default function JiraProjectsPage() {
     </Box>
   );
 }
-      }
-      try {
-        setLoadingIssues(true);
-        setError(null);
-        console.log('[Frontend] Fetching issues for project:', selectedProjectKey);
-        // Use the project-specific endpoint
-        const response = await axios.get(`/api/jira/project/${selectedProjectKey}/issues`);
-        if (response.data.success) {
-          // Process and organize issues hierarchically
-          const fetchedIssues = response.data.data;
-          console.log('[Frontend] Fetched', fetchedIssues.length, 'issues from API');
-          console.log('[Frontend] First issue full:', fetchedIssues[0]);
-          console.log('[Frontend] First 5 issue keys and types:', fetchedIssues.slice(0, 5).map(i => `${i.key}: type="${i.type}"`));
-          const organizedIssues = organizeIssuesHierarchically(fetchedIssues);
-          console.log('[Frontend] Organized into', organizedIssues.length, 'root-level items');
-          setIssues(organizedIssues);
-          
-          // Auto-expand all epics by default
-          const epicsToExpand = new Set();
-          organizedIssues.forEach(issue => {
-            if (issue.type === 'Epic' && issue.children && issue.children.length > 0) {
-              epicsToExpand.add(issue.key);
-            }
-          });
-          setExpandedIssues(epicsToExpand);
-        } else {
-          setError(response.data.message || `Failed to fetch issues for project ${selectedProjectKey}.`);
-        }
-      } catch (err) {
-        console.error(`Error fetching issues for project ${selectedProjectKey}:`, err?.response?.data || err.message);
-        setError(err?.response?.data?.message || err.message || `Failed to fetch issues for project ${selectedProjectKey}.`);
-      } finally {
-        setLoadingIssues(false);
-      }
-    }
-    fetchIssues();
-  }, [selectedProjectKey]);
 
-  // Apply filters whenever issues or filter values change
-  useEffect(() => {
-    let filtered = [...issues];
-    
-    // Filter by issue type
-    if (filterIssueType !== 'All') {
-      filtered = filterHierarchically(filtered, (issue) => issue.type === filterIssueType);
-    }
-    
-    // Filter by status
-    if (filterStatus !== 'All') {
-      filtered = filterHierarchically(filtered, (issue) => issue.status === filterStatus);
-    }
-    
-    setFilteredIssues(filtered);
-  }, [issues, filterIssueType, filterStatus]);
-
-  // Helper to filter hierarchical data while preserving structure
-  const filterHierarchically = (issuesList, predicate) => {
-    const filtered = [];
-    
-    issuesList.forEach(issue => {
-      const childrenMatch = issue.children ? filterHierarchically(issue.children, predicate) : [];
-      const issueMatches = predicate(issue);
-      
-      if (issueMatches || childrenMatch.length > 0) {
-        filtered.push({
-          ...issue,
-          children: childrenMatch
-        });
-      }
-    });
-    
-    return filtered;
-  };
-
-  // Flatten for summaries
-  const flatIssues = useMemo(() => {
-    const out = [];
-    const walk = (arr) => arr.forEach(i => { out.push(i); if (i.children && i.children.length) walk(i.children); });
-    walk(issues);
-    return out;
-  }, [issues]);
-
-  const summary = useMemo(() => ({
-    total: flatIssues.length,
-    epics: flatIssues.filter(i => i.type === 'Epic').length,
-    tasks: flatIssues.filter(i => i.type === 'Task' || i.type === 'Story').length,
-    subtasks: flatIssues.filter(i => i.type === 'Subtask' || i.type === 'Sub-task').length,
-    bugs: flatIssues.filter(i => i.type === 'Bug').length,
-    done: flatIssues.filter(i => String(i.status).toLowerCase() === 'done').length,
-  }), [flatIssues]);
 
   // Function to organize issues into Epic -> Task/Story -> Subtask hierarchy
   const organizeIssuesHierarchically = (issues) => {
@@ -700,4 +639,3 @@ export default function JiraProjectsPage() {
       </Paper>
     </Box>
   );
-}
