@@ -217,12 +217,20 @@ export default function DataTable({ onFilteredDataChange }) {
       if (data && data.success && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
 
+      console.log('Raw data from backend:', data.slice(0, 2)); // Log first 2 rows
+      
       const normalized = data.map((item, idx) => {
         let values = [];
         if (Array.isArray(item.values)) {
           values = Array.isArray(item.values[0]) ? item.values[0] : item.values;
         } else if (Array.isArray(item)) {
           values = item;
+        }
+
+        console.log(`Row ${idx} - values length: ${values.length}, expected: ${allKeys.length}`);
+        if (idx === 0) {
+          console.log('First row values:', values);
+          console.log('Expected keys:', allKeys);
         }
 
         // convert Excel serial dates to ISO for startDate/endDate if needed
