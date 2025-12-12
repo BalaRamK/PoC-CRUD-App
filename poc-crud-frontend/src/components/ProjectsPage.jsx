@@ -104,8 +104,16 @@ export default function JiraProjectsPage() {
         const starts = validDates.map(d => d.start).filter(Boolean);
         const ends = validDates.map(d => d.end).filter(Boolean);
         
-        if (starts.length > 0) startDate = dayjs.min(...starts);
-        if (ends.length > 0) endDate = dayjs.max(...ends);
+        if (starts.length > 0) {
+          startDate = starts.reduce((earliest, current) => 
+            current.isBefore(earliest) ? current : earliest
+          );
+        }
+        if (ends.length > 0) {
+          endDate = ends.reduce((latest, current) => 
+            current.isAfter(latest) ? current : latest
+          );
+        }
       }
     }
 
