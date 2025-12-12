@@ -229,15 +229,15 @@ export default function Home() {
             }
           }}
         >
-          <Tab label="PoC Delivery" />
-          <Tab label="Jira Overview" />
+          <Tab label="PoC Status" />
+          <Tab label="Project Delivery Status" />
         </Tabs>
 
-        {/* TAB 1: PoC Delivery */}
+        {/* TAB 1: PoC Status */}
         <Box sx={{ display: tabValue === 0 ? 'block' : 'none', p: 3 }}>
           {/* PoC KPI Tiles */}
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> PoC Delivery Metrics
+            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> PoC Status Overview
           </Typography>
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -350,7 +350,7 @@ export default function Home() {
           </Grid>
         </Box>
 
-        {/* TAB 2: Jira Overview */}
+        {/* TAB 2: Project Delivery Status */}
         <Box sx={{ display: tabValue === 1 ? 'block' : 'none', p: 3 }}>
 
           {/* Overall Jira Projects Metrics (Delivery Projects Only) */}

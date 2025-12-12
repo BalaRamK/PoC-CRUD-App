@@ -24,10 +24,10 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const navItems = [
   { text: 'Home', path: '/home' },
-  { text: 'Schedule', path: '/schedule' },
-  { text: 'Jira Projects', path: '/projects' },
+  { text: 'Project Delivery', path: '/projects' },
   { text: 'PoC Delivery', path: '/poc-delivery-list' },
   { text: 'Documents', path: '/documents' },
+  { text: 'Schedule', path: '/schedule' },
 ];
 
 export default function TopNavigation() {
