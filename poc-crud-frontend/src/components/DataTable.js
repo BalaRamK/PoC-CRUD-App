@@ -21,18 +21,18 @@ import './ModernDialog.css'; // Import the new CSS file
 
 const allColumns = [
   "PoC ID", "Customer Name", "PoC Title", "Sales Owner", "Delivery Lead",
-  "Start Date", "End Date", "Estimated End Date", "Estimated Delivery Date", "Current Phase", "Status", "% Completion",
+  "Start Date", "End Date", "Estimated End Date", "Current Phase", "Status", "% Completion",
   "Next Milestone", "Current Blockers", "Comments"
 ];
 
 const allKeys = [
   "pocId", "customer", "title", "salesOwner", "deliveryLead",
-  "startDate", "endDate", "estimatedEndDate", "estimatedDeliveryDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"
+  "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"
 ];
 
 const initialVisibleColumns = [
   "pocId", "customer", "salesOwner", "deliveryLead",
-  "startDate", "endDate", "estimatedEndDate", "estimatedDeliveryDate", "phase", "status", "percent"
+  "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent"
 ];
 
 const statusOptions = ['Completed', 'Delayed', 'On Track', 'Cancelled', 'Draft'];
@@ -242,22 +242,13 @@ export default function DataTable({ onFilteredDataChange }) {
         };
         values = values.map((v, i) => {
           const key = allKeys[i];
-          if ((key === 'startDate' || key === 'endDate' || key === 'estimatedEndDate' || key === 'estimatedDeliveryDate') && typeof v === 'number') {
+          if ((key === 'startDate' || key === 'endDate' || key === 'estimatedEndDate') && typeof v === 'number') {
             return excelSerialToISO(v);
           }
           return v;
         });
 
         const mapped = allKeys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
-
-        // derive estimated delivery date if missing and project is past end date
-        if (!mapped.estimatedDeliveryDate) {
-          const today = dayjs();
-          const endDateObj = mapped.endDate ? dayjs(mapped.endDate) : null;
-          if (endDateObj && endDateObj.isValid() && endDateObj.isBefore(today, 'day')) {
-            mapped.estimatedDeliveryDate = mapped.estimatedEndDate || mapped.endDate;
-          }
-        }
 
         return {
           id: item.id ?? idx,
@@ -621,7 +612,7 @@ export default function DataTable({ onFilteredDataChange }) {
                       }}>
                         {k === 'status' ? (
                           <Chip size="small" {...getStatusChipProps(row[k])} sx={{ borderRadius: '4px', height: '24px', fontSize: '0.75rem' }} />
-                        ) : (['startDate','endDate','estimatedEndDate','estimatedDeliveryDate'].includes(k) && row[k]) ? (
+                        ) : (['startDate','endDate','estimatedEndDate'].includes(k) && row[k]) ? (
                           dayjs(row[k]).isValid() ? dayjs(row[k]).format('DD MMM YYYY') : row[k]
                         ) : k === 'percent' && row[k] ? (
                           `${row[k]}%`

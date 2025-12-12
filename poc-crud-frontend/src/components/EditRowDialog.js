@@ -10,7 +10,7 @@ import axios from "axios";
 
 const columns = [
   "PoC ID", "Customer Name", "PoC Title", "Sales Owner", "Delivery Lead",
-  "Start Date", "End Date", "Estimated End Date", "Estimated Delivery Date", "Current Phase", "Status", "% Completion",
+  "Start Date", "End Date", "Estimated End Date", "Current Phase", "Status", "% Completion",
   "Next Milestone", "Current Blockers", "Comments"
 ];
 
@@ -34,8 +34,7 @@ export default function EditRowDialog({ open, initialValues, onClose, rowIndex, 
       fields[5] && dayjs(fields[5]).isValid() ? dayjs(fields[5]).format("YYYY-MM-DD") : "",
       fields[6] && dayjs(fields[6]).isValid() ? dayjs(fields[6]).format("YYYY-MM-DD") : "",
       fields[7] && dayjs(fields[7]).isValid() ? dayjs(fields[7]).format("YYYY-MM-DD") : "",
-      fields[8] && dayjs(fields[8]).isValid() ? dayjs(fields[8]).format("YYYY-MM-DD") : "",
-      fields[9], fields[10], fields[11], fields[12], fields[13], fields[14]
+      fields[8], fields[9], fields[10], fields[11], fields[12], fields[13]
     ];
     try {
       await axios.patch(`/api/items/${rowIndex}`, { values: payload });

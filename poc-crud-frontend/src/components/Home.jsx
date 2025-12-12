@@ -64,7 +64,7 @@ export default function Home() {
         else if (Array.isArray(item)) values = item;
 
         // Ensure keys match your Excel columns
-        const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "estimatedEndDate", "estimatedDeliveryDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"];
+        const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"];
         const mapped = keys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
 
         // Convert Excel serial dates for startDate/endDate if needed, as in DataTable.js
@@ -77,16 +77,6 @@ export default function Home() {
         if (typeof mapped.startDate === 'number') mapped.startDate = excelSerialToISO(mapped.startDate);
         if (typeof mapped.endDate === 'number') mapped.endDate = excelSerialToISO(mapped.endDate);
         if (typeof mapped.estimatedEndDate === 'number') mapped.estimatedEndDate = excelSerialToISO(mapped.estimatedEndDate);
-        if (typeof mapped.estimatedDeliveryDate === 'number') mapped.estimatedDeliveryDate = excelSerialToISO(mapped.estimatedDeliveryDate);
-
-        // derive estimated delivery date if empty and project is past end date
-        if (!mapped.estimatedDeliveryDate) {
-          const today = dayjs();
-          const endDateObj = mapped.endDate ? dayjs(mapped.endDate) : null;
-          if (endDateObj && endDateObj.isValid() && endDateObj.isBefore(today, 'day')) {
-            mapped.estimatedDeliveryDate = mapped.estimatedEndDate || mapped.endDate;
-          }
-        }
 
         return { id: item.id ?? idx, index: item.index ?? idx, values, ...mapped };
       });
