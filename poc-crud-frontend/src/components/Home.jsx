@@ -44,8 +44,7 @@ export default function Home() {
   
   // Jira state
   const [jiraProjects, setJiraProjects] = useState([]);
-  const [selectedJiraProject, setSelectedJiraProject] = useState('');
-  const [jiraIssues, setJiraIssues] = useState([]);
+  const [allProjectsData, setAllProjectsData] = useState([]);
   const [loadingJira, setLoadingJira] = useState(false);
 
   // Tab state
@@ -101,18 +100,53 @@ export default function Home() {
     }
   }
 
-  // Fetch Jira projects
+  // Fetch Jira projects with "Delivery" in name and their issues
   async function fetchJiraProjects() {
     try {
+      setLoadingJira(true);
       const response = await axios.get('/api/jira/projects');
       if (response.data.success) {
-        setJiraProjects(response.data.data);
-        if (response.data.data.length > 0) {
-          setSelectedJiraProject(response.data.data[0].key);
-        }
+        // Filter projects with "Delivery" in name
+        const deliveryProjects = response.data.data.filter(p => 
+          p.name && p.name.toLowerCase().includes('delivery')
+        );
+        setJiraProjects(deliveryProjects);
+
+        // Fetch issues for each delivery project
+        const projectsWithData = await Promise.all(
+          deliveryProjects.map(async (project) => {
+            try {
+              const issuesResponse = await axios.get(`/api/jira/project/${project.key}/issues`);
+              if (issuesResponse.data.success) {
+                const issues = issuesResponse.data.data || [];
+                return {
+                  ...project,
+                  issues,
+                  totalIssues: issues.length,
+                  completedIssues: issues.filter(i => String(i.status).toLowerCase() === 'done').length,
+                  inProgressIssues: issues.filter(i => String(i.status).toLowerCase() === 'in progress').length,
+                  startDate: issues.length > 0 ? issues.reduce((min, i) => {
+                    const d = dayjs(i.created);
+                    return !min || (d.isValid() && d.isBefore(min)) ? d : min;
+                  }, null) : null,
+                  endDate: issues.length > 0 ? issues.reduce((max, i) => {
+                    const d = dayjs(i.dueDate);
+                    return !max || (d.isValid() && d.isAfter(max)) ? d : max;
+                  }, null) : null
+                };
+              }
+            } catch (err) {
+              console.error(`Error fetching issues for ${project.key}:`, err);
+            }
+            return { ...project, issues: [], totalIssues: 0, completedIssues: 0, inProgressIssues: 0 };
+          })
+        );
+        setAllProjectsData(projectsWithData);
       }
     } catch (error) {
       console.error('Error fetching Jira projects:', error);
+    } finally {
+      setLoadingJira(false);
     }
   }
 
@@ -121,67 +155,32 @@ export default function Home() {
     fetchJiraProjects(); 
   }, []);
 
-  // Fetch Jira issues when project changes
-  useEffect(() => {
-    if (!selectedJiraProject) return;
-    
-    async function fetchJiraIssues() {
-      try {
-        setLoadingJira(true);
-        const response = await axios.get(`/api/jira/project/${selectedJiraProject}/issues`);
-        if (response.data.success) {
-          setJiraIssues(response.data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching Jira issues:', error);
-      } finally {
-        setLoadingJira(false);
-      }
-    }
-    
-    fetchJiraIssues();
-  }, [selectedJiraProject]);
-
   // PoC KPI Calculations
   const total = rows.length;
   const completed = rows.filter(r => String(r.status).toLowerCase() === 'completed').length;
   const delayed = rows.filter(r => String(r.status).toLowerCase() === 'delayed').length;
   const inProgress = rows.filter(r => String(r.status).toLowerCase() === 'execution' || String(r.status).toLowerCase() === 'in progress' || String(r.status).toLowerCase() === 'on track').length;
 
-  // Jira KPI Calculations
-  const jiraTotalIssues = jiraIssues.length;
-  const jiraEpics = jiraIssues.filter(i => i.type === 'Epic').length;
-  const jiraTasks = jiraIssues.filter(i => i.type === 'Task' || i.type === 'Story').length;
-  const jiraSubtasks = jiraIssues.filter(i => i.type === 'Subtask' || i.type === 'Sub-task').length;
-  const jiraDone = jiraIssues.filter(i => String(i.status).toLowerCase() === 'done').length;
-  const jiraInProgress = jiraIssues.filter(i => String(i.status).toLowerCase() === 'in progress').length;
-  const jiraToDo = jiraIssues.filter(i => String(i.status).toLowerCase() === 'to do').length;
-  const jiraBugs = jiraIssues.filter(i => i.type === 'Bug').length;
+  // Get delayed and in progress PoC data
+  const delayedRows = rows.filter(r => String(r.status).toLowerCase() === 'delayed');
+  const inProgressRows = rows.filter(r => ['execution','in progress','on track'].includes(String(r.status).toLowerCase()));
 
-  // Tile helpers
-  const getMinDaysRemainFromIssues = () => {
-    const diffs = jiraIssues
-      .map(i => (i.dueDate ? dayjs(i.dueDate) : null))
-      .filter(d => d && d.isValid())
-      .map(d => Math.max(0, d.diff(dayjs(), 'day')));
-    return diffs.length ? Math.min(...diffs) : null;
-  };
+  // Jira Project Calculations (from allProjectsData)
+  const allIssues = allProjectsData.flatMap(p => p.issues || []);
+  const jiraTotalProjects = allProjectsData.length;
+  const jiraCompletedProjects = allProjectsData.filter(p => p.totalIssues > 0 && p.completedIssues === p.totalIssues).length;
+  const jiraInProgressProjects = allProjectsData.filter(p => p.inProgressIssues > 0).length;
+  const jiraDelayedProjects = allProjectsData.filter(p => {
+    const endDate = p.endDate;
+    return endDate && endDate.isValid() && endDate.isBefore(dayjs(), 'day') && p.completedIssues < p.totalIssues;
+  }).length;
 
-  const getMinDaysRemainFromPocs = () => {
-    const diffs = rows
-      .map(r => (r.endDate ? dayjs(r.endDate) : null))
-      .filter(d => d && d.isValid())
-      .map(d => Math.max(0, d.diff(dayjs(), 'day')));
-    return diffs.length ? Math.min(...diffs) : null;
-  };
-
-  const jiraProgress = jiraTotalIssues > 0 ? Math.round((jiraDone / jiraTotalIssues) * 100) : 0;
-  const jiraAvatars = Array.from(new Set(
-    jiraIssues.map(i => i.assignee).filter(Boolean)
-  )).slice(0, 3);
-  const pocAvatars = Array.from(new Set(
-    rows.map(r => r.deliveryLead).filter(Boolean)
-  )).slice(0, 3);
+  // Get delayed and in progress project data
+  const delayedProjectsData = allProjectsData.filter(p => {
+    const endDate = p.endDate;
+    return endDate && endDate.isValid() && endDate.isBefore(dayjs(), 'day') && p.completedIssues < p.totalIssues;
+  });
+  const inProgressProjectsData = allProjectsData.filter(p => p.inProgressIssues > 0);
 
   // Trend helpers (vs last week)
   const inWindow = (d, start, end) => d && d.isValid() && (d.isAfter(start) || d.isSame(start, 'day')) && (d.isBefore(end) || d.isSame(end, 'day'));
@@ -192,20 +191,10 @@ export default function Home() {
 
   const delta = (a, b) => a - b;
 
-  const issuesCreatedIn = (start, end) => jiraIssues.filter(i => inWindow(dayjs(i.created), start, end)).length;
-  const issuesDoneIn = (start, end) => jiraIssues.filter(i => String(i.status).toLowerCase() === 'done' && inWindow(dayjs(i.updated), start, end)).length;
-  const issuesInProgressIn = (start, end) => jiraIssues.filter(i => String(i.status).toLowerCase() === 'in progress' && inWindow(dayjs(i.updated), start, end)).length;
-  const bugsCreatedIn = (start, end) => jiraIssues.filter(i => i.type === 'Bug' && inWindow(dayjs(i.created), start, end)).length;
-
   const pocsStartedIn = (start, end) => rows.filter(r => inWindow(dayjs(r.startDate), start, end)).length;
   const pocsCompletedIn = (start, end) => rows.filter(r => String(r.status).toLowerCase() === 'completed' && inWindow(dayjs(r.endDate), start, end)).length;
   const pocsDelayedIn = (start, end) => rows.filter(r => String(r.status).toLowerCase() === 'delayed' && inWindow(dayjs(r.endDate), start, end)).length;
   const pocsInProgressIn = (start, end) => rows.filter(r => ['execution','in progress','on track'].includes(String(r.status).toLowerCase()) && inWindow(dayjs(r.startDate), start, end)).length;
-
-  const trendTotalIssues = delta(issuesCreatedIn(weekStart, today), issuesCreatedIn(prevWeekStart, prevWeekEnd));
-  const trendDone = delta(issuesDoneIn(weekStart, today), issuesDoneIn(prevWeekStart, prevWeekEnd));
-  const trendInProgress = delta(issuesInProgressIn(weekStart, today), issuesInProgressIn(prevWeekStart, prevWeekEnd));
-  const trendBugs = delta(bugsCreatedIn(weekStart, today), bugsCreatedIn(prevWeekStart, prevWeekEnd));
 
   const trendTotalPocs = delta(pocsStartedIn(weekStart, today), pocsStartedIn(prevWeekStart, prevWeekEnd));
   const trendCompletedPocs = delta(pocsCompletedIn(weekStart, today), pocsCompletedIn(prevWeekStart, prevWeekEnd));
@@ -331,13 +320,14 @@ export default function Home() {
                     <CancelOutlinedIcon /> Delayed Projects ({delayed})
                   </Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {rows.filter(r => String(r.status).toLowerCase() === 'delayed').map((item, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
+                    {delayedRows.map((item, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a', cursor: 'pointer' }} onClick={() => navigate('/poc-delivery-list?status=Delayed')}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
                           <Chip label="Delayed" size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600 }} />
                         </Box>
-                        <Typography variant="caption" color="text.secondary">Lead: {item.deliveryLead || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Customer: {item.customer || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Lead: {item.deliveryLead || 'N/A'}</Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(item.endDate)}</Typography>
                       </Box>
                     ))}
@@ -352,13 +342,14 @@ export default function Home() {
                     <HourglassEmptyIcon /> In Progress Projects ({inProgress})
                   </Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {rows.filter(r => ['execution','in progress','on track'].includes(String(r.status).toLowerCase())).map((item, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
+                    {inProgressRows.map((item, idx) => (
+                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe', cursor: 'pointer' }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
                           <Chip label={String(item.status).charAt(0).toUpperCase() + String(item.status).slice(1)} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600 }} />
                         </Box>
-                        <Typography variant="caption" color="text.secondary">Lead: {item.deliveryLead || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Customer: {item.customer || 'N/A'}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Lead: {item.deliveryLead || 'N/A'}</Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Progress: {item.percent || 0}%</Typography>
                       </Box>
                     ))}
@@ -371,164 +362,128 @@ export default function Home() {
 
         {/* TAB 2: Jira Overview */}
         <Box sx={{ display: tabValue === 1 ? 'block' : 'none', p: 3 }}>
-          {/* Jira Project Selector */}
-          <FormControl size="small" sx={{ minWidth: 250, mb: 3 }}>
-            <InputLabel id="jira-project-select">Select Jira Project</InputLabel>
-            <Select
-              labelId="jira-project-select"
-              value={selectedJiraProject}
-              label="Select Jira Project"
-              onChange={(e) => setSelectedJiraProject(e.target.value)}
-              sx={{ bgcolor: 'white', borderRadius: 2 }}
-            >
-              {jiraProjects.map(project => (
-                <MenuItem key={project.key} value={project.key}>
-                  {project.name} ({project.key})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
 
-          {/* Overall Jira Projects Metrics */}
+          {/* Overall Jira Projects Metrics (Delivery Projects Only) */}
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> Overall Jira Projects Metrics
+            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> Delivery Projects Overview
           </Typography>
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<WorkIcon />} label="Total Projects" value={jiraProjects.length} color="#7c3aed" />
+              <StatTile 
+                icon={<WorkIcon />} 
+                label="Total Projects" 
+                value={jiraTotalProjects} 
+                color="#7c3aed" 
+                onClick={() => navigate('/projects')}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile 
                 icon={<CheckCircleOutlineIcon />} 
                 label="Completed" 
-                value={jiraProjects.filter(p => {
-                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
-                  return projIssues.length > 0 && projIssues.every(i => String(i.status).toLowerCase() === 'done');
-                }).length} 
+                value={jiraCompletedProjects} 
                 color="#22C55E" 
+                onClick={() => navigate('/projects')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile 
                 icon={<HourglassEmptyIcon />} 
                 label="In Progress" 
-                value={jiraProjects.filter(p => {
-                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
-                  return projIssues.length > 0 && projIssues.some(i => String(i.status).toLowerCase() === 'in progress');
-                }).length} 
+                value={jiraInProgressProjects} 
                 color="#2563EB" 
+                onClick={() => navigate('/projects')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile 
                 icon={<CancelOutlinedIcon />} 
                 label="Delayed" 
-                value={jiraProjects.filter(p => {
-                  const projIssues = jiraIssues.filter(i => i.projectKey === p.key);
-                  return projIssues.length > 0 && projIssues.some(i => {
-                    const dueDate = dayjs(i.dueDate);
-                    return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
-                  });
-                }).length} 
+                value={jiraDelayedProjects} 
                 color="#F59E0B" 
+                onClick={() => navigate('/projects')}
               />
             </Grid>
           </Grid>
 
-          {/* Jira Project Selector */}
+          {/* Project Details Cards */}
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'var(--text-dark)' }}>Project Details</Typography>
-
-          {/* Jira Overview KPI Tile */}
-          <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #faf5ff 0%, #fff 100%)' }}>
-            <DashboardTile
-              variant="primary"
-              title={`Jira Overview — ${selectedJiraProject || 'Project'}`}
-              subtitle={`${jiraDone} done of ${jiraTotalIssues} issues/tasks`}
-              progress={jiraProgress}
-              tasks={jiraTotalIssues}
-              daysRemain={getMinDaysRemainFromIssues()}
-              avatars={jiraAvatars}
-              trend={{ delta: trendDone, label: 'vs last week' }}
-              onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)}
-            />
-          </Paper>
-
-          {/* Jira KPI Tiles */}
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <WorkIcon sx={{ color: '#7c3aed' }} /> Jira Issues Metrics
-          </Typography>
+          
           <Grid container spacing={2} sx={{ mb: 4 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<WorkIcon />} label="Total Issues" value={jiraTotalIssues} color="#7c3aed" trend={{ delta: trendTotalIssues }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}`)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<CheckCircleOutlineIcon />} label="Done" value={jiraDone} color="#22C55E" trend={{ delta: trendDone }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=Done`)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={jiraInProgress} color="#2563EB" trend={{ delta: trendInProgress }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&status=In%20Progress`)} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<BugReportIcon />} label="Bugs" value={jiraBugs} color="#EF4444" trend={{ delta: trendBugs }} onClick={() => navigate(`/projects?project=${encodeURIComponent(selectedJiraProject || '')}&type=Bug`)} />
-            </Grid>
-          </Grid>
-
-          {/* In Progress & Delayed Issues Details */}
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            {jiraInProgress > 0 && (
+            {/* In Progress Projects */}
+            {inProgressProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <HourglassEmptyIcon /> In Progress Issues ({jiraInProgress})
+                    <HourglassEmptyIcon /> In Progress Projects ({inProgressProjectsData.length})
                   </Typography>
-                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {jiraIssues.filter(i => String(i.status).toLowerCase() === 'in progress').slice(0, 5).map((issue, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{issue.summary}</Typography>
-                          <Chip label={issue.key} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600, ml: 1 }} />
+                  <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                    {inProgressProjectsData.slice(0, 5).map((project, idx) => (
+                      <Box key={idx} sx={{ p: 2.5, mb: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{project.name}</Typography>
+                          <Chip label={project.key} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600, ml: 1 }} />
                         </Box>
-                        <Typography variant="caption" color="text.secondary">Assignee: {issue.assignee || 'Unassigned'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(issue.dueDate)}</Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>Start Date:</strong> {project.startDate ? project.startDate.format('MMM DD, YYYY') : 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>End Date:</strong> {project.endDate ? project.endDate.format('MMM DD, YYYY') : 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>Progress:</strong> {project.completedIssues} / {project.totalIssues} issues completed
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>Status:</strong> {project.inProgressIssues} issue(s) in progress
+                          </Typography>
+                        </Box>
                       </Box>
                     ))}
-                    {jiraInProgress > 5 && (
-                      <Typography variant="caption" sx={{ color: '#2563EB', fontWeight: 600 }}>+{jiraInProgress - 5} more issues...</Typography>
+                    {inProgressProjectsData.length > 5 && (
+                      <Typography variant="caption" sx={{ color: '#2563EB', fontWeight: 600 }}>
+                        +{inProgressProjectsData.length - 5} more projects...
+                      </Typography>
                     )}
                   </Box>
                 </Paper>
               </Grid>
             )}
-            {jiraIssues.some(i => {
-              const dueDate = dayjs(i.dueDate);
-              return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
-            }) && (
+
+            {/* Delayed Projects */}
+            {delayedProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CancelOutlinedIcon /> Delayed Issues
+                    <CancelOutlinedIcon /> Delayed Projects ({delayedProjectsData.length})
                   </Typography>
-                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {jiraIssues.filter(i => {
-                      const dueDate = dayjs(i.dueDate);
-                      return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
-                    }).slice(0, 5).map((issue, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{issue.summary}</Typography>
-                          <Chip label={issue.key} size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600, ml: 1 }} />
+                  <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                    {delayedProjectsData.slice(0, 5).map((project, idx) => (
+                      <Box key={idx} sx={{ p: 2.5, mb: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{project.name}</Typography>
+                          <Chip label={project.key} size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600, ml: 1 }} />
                         </Box>
-                        <Typography variant="caption" color="text.secondary">Assignee: {issue.assignee || 'Unassigned'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(issue.dueDate)}</Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>Start Date:</strong> {project.startDate ? project.startDate.format('MMM DD, YYYY') : 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>End Date:</strong> {project.endDate ? project.endDate.format('MMM DD, YYYY') : 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            <strong>Progress:</strong> {project.completedIssues} / {project.totalIssues} issues completed
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#F59E0B', fontWeight: 600 }}>
+                            <strong>Status:</strong> Overdue by {dayjs().diff(project.endDate, 'days')} day(s)
+                          </Typography>
+                        </Box>
                       </Box>
                     ))}
-                    {jiraIssues.filter(i => {
-                      const dueDate = dayjs(i.dueDate);
-                      return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
-                    }).length > 5 && (
-                      <Typography variant="caption" sx={{ color: '#F59E0B', fontWeight: 600 }}>+{jiraIssues.filter(i => {
-                        const dueDate = dayjs(i.dueDate);
-                        return dueDate.isValid() && dueDate.isBefore(dayjs(), 'day') && String(i.status).toLowerCase() !== 'done';
-                      }).length - 5} more issues...</Typography>
+                    {delayedProjectsData.length > 5 && (
+                      <Typography variant="caption" sx={{ color: '#F59E0B', fontWeight: 600 }}>
+                        +{delayedProjectsData.length - 5} more projects...
+                      </Typography>
                     )}
                   </Box>
                 </Paper>
@@ -536,78 +491,13 @@ export default function Home() {
             )}
           </Grid>
 
-          {/* Jira Issue Type Breakdown */}
-          <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>Issue Type Breakdown</Typography>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#faf5ff', border: '2px solid #7c3aed' }}>
-                  <Chip label="Epics" size="small" sx={{ bgcolor: '#7c3aed', color: 'white', fontWeight: 600, mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#7c3aed' }}>{jiraEpics}</Typography>
-                </Paper>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#eff6ff', border: '2px solid #3b82f6' }}>
-                  <Chip label="Tasks/Stories" size="small" sx={{ bgcolor: '#3b82f6', color: 'white', fontWeight: 600, mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#3b82f6' }}>{jiraTasks}</Typography>
-                </Paper>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Paper sx={{ p: 2.5, borderRadius: 2, textAlign: 'center', bgcolor: '#f8fafc', border: '2px solid #64748b' }}>
-                  <Chip label="Subtasks" size="small" sx={{ bgcolor: '#64748b', color: 'white', fontWeight: 600, mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#64748b' }}>{jiraSubtasks}</Typography>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Paper>
 
-          {/* Jira Issues Table */}
-          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>Issues in {selectedJiraProject || 'Selected Project'}</Typography>
-            {loadingJira ? (
-              <Typography>Loading issues...</Typography>
-            ) : jiraIssues.length > 0 ? (
-              <TableContainer sx={{ maxHeight: 500, overflow: 'auto' }}>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: '#f3f4f6' }}>
-                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Key</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Summary</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Type</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>Assignee</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {jiraIssues.map(issue => (
-                      <TableRow key={issue.key} hover>
-                        <TableCell sx={{ fontWeight: 600, color: '#7c3aed' }}>{issue.key}</TableCell>
-                        <TableCell>{issue.summary}</TableCell>
-                        <TableCell>
-                          <Chip label={issue.type} size="small" variant="outlined" />
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={issue.status} 
-                            size="small"
-                            sx={{
-                              bgcolor: String(issue.status).toLowerCase() === 'done' ? '#d1fae5' : 
-                                      String(issue.status).toLowerCase() === 'in progress' ? '#dbeafe' : '#f3f4f6',
-                              color: String(issue.status).toLowerCase() === 'done' ? '#065f46' :
-                                     String(issue.status).toLowerCase() === 'in progress' ? '#0c4a6e' : '#374151'
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>{issue.assignee || 'Unassigned'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography color="text.secondary">No issues found. Select a Jira project above.</Typography>
-            )}
-          </Paper>
+
+
+
+
+
+
         </Box>
       </Paper>
     </Box>

@@ -276,6 +276,27 @@ export default function DataTable({ onFilteredDataChange }) {
     setSearchParams({ page: String(page), rpp: String(rowsPerPage) }, { replace: true });
   }, [page, rowsPerPage, setSearchParams]);
 
+  // Sync filter states with URL params
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    const deliveryLeadParam = searchParams.get('deliveryLead');
+    const salesOwnerParam = searchParams.get('salesOwner');
+    const qParam = searchParams.get('q');
+    
+    if (statusParam !== null && statusParam !== filterStatus) {
+      setFilterStatus(statusParam);
+    }
+    if (deliveryLeadParam !== null && deliveryLeadParam !== filterDeliveryLead) {
+      setFilterDeliveryLead(deliveryLeadParam);
+    }
+    if (salesOwnerParam !== null && salesOwnerParam !== filterSalesOwner) {
+      setFilterSalesOwner(salesOwnerParam);
+    }
+    if (qParam !== null && qParam !== searchText) {
+      setSearchText(qParam);
+    }
+  }, [searchParams]);
+
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     const newRpp = parseInt(event.target.value, 10);
