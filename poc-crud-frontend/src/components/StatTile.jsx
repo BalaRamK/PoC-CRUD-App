@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 
-export default function StatTile({ icon, label, value, color = '#3b82f6', trend = null, onClick }) {
+export default function StatTile({ icon, label, value, color = 'var(--primary-orange)', trend = null, onClick }) {
   return (
     <Paper
       sx={{
@@ -40,7 +40,7 @@ export default function StatTile({ icon, label, value, color = '#3b82f6', trend 
           {value}
         </Typography>
         {trend && (
-          <Typography variant="caption" sx={{ mt: 0.25, display: 'inline-block', color: trend.delta >= 0 ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
+          <Typography variant="caption" sx={{ mt: 0.25, display: 'inline-block', color: trend.delta >= 0 ? '#16a34a' : 'var(--primary-orange)', fontWeight: 600 }}>
             {trend.delta >= 0 ? `+${trend.delta}` : `${trend.delta}`} {trend.label || 'vs last week'}
           </Typography>
         )}

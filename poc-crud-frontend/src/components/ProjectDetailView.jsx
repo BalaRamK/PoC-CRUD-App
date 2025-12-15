@@ -198,8 +198,8 @@ export default function ProjectDetailView({ projectKey, projectName, onBack }) {
           <TableRow 
             hover 
             sx={{ 
-              bgcolor: isEpic ? '#faf5ff' : 'inherit',
-              '&:hover': { bgcolor: isEpic ? '#f3e8ff' : 'rgba(0, 0, 0, 0.04)' }
+              bgcolor: isEpic ? 'var(--active-bg)' : 'inherit',
+              '&:hover': { bgcolor: isEpic ? 'var(--active-bg)' : 'rgba(0, 0, 0, 0.04)' }
             }}
           >
             <TableCell sx={{ paddingLeft: `${level * 24 + 8}px`, minWidth: '200px' }}>
@@ -223,7 +223,7 @@ export default function ProjectDetailView({ projectKey, projectName, onBack }) {
                     fontSize: '0.65rem', 
                     height: '18px',
                     fontWeight: 600,
-                    bgcolor: isEpic ? '#7c3aed' : isSubtask ? '#64748b' : '#3b82f6',
+                    bgcolor: isEpic ? 'var(--primary-orange)' : isSubtask ? 'var(--text-light)' : 'var(--primary-orange)',
                     color: 'white'
                   }} 
                 />
@@ -231,7 +231,7 @@ export default function ProjectDetailView({ projectKey, projectName, onBack }) {
                   variant="body2" 
                   sx={{ 
                     fontWeight: isEpic ? 600 : 400,
-                    color: isEpic ? '#7c3aed' : 'inherit'
+                    color: isEpic ? 'var(--primary-orange)' : 'inherit'
                   }}
                 >
                   {issue.key}
@@ -288,7 +288,7 @@ export default function ProjectDetailView({ projectKey, projectName, onBack }) {
         <Button 
           startIcon={<ArrowBack />} 
           onClick={onBack}
-          sx={{ mr: 2, color: '#7c3aed' }}
+          sx={{ mr: 2, color: 'var(--primary-orange)' }}
         >
           Back to Projects
         </Button>
@@ -298,7 +298,7 @@ export default function ProjectDetailView({ projectKey, projectName, onBack }) {
       </Box>
 
       {error && (
-        <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffebee', borderRadius: 2 }}>
+        <Paper sx={{ p: 2, mb: 3, bgcolor: 'var(--active-bg)', borderRadius: 2 }}>
           <Typography color="error">{error}</Typography>
         </Paper>
       )}

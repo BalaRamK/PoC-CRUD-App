@@ -60,6 +60,15 @@
   gap: 12px;
 }
 
+.dialog-main-content .MuiButton-containedPrimary {
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--light-orange-1) 100%);
+  color: #fff;
+}
+
+.dialog-main-content .MuiButton-containedPrimary:hover {
+  background: linear-gradient(135deg, var(--light-orange-1) 0%, var(--light-orange-2) 100%);
+}
+
 .dialog-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

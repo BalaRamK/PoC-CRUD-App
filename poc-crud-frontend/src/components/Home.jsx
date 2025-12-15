@@ -28,10 +28,10 @@ const formatDate = (dateString) => {
 const getStatusColor = (status) => {
   switch (String(status).toLowerCase()) {
     case 'completed': return '#4CAF50'; // Green
-    case 'delayed': return '#FF9800';   // Orange
-    case 'on track': return '#2196F3';  // Blue
-    case 'execution': return '#2196F3'; // Blue
-    case 'in progress': return '#2196F3'; // Blue
+    case 'delayed': return 'var(--primary-orange)';   // Orange
+    case 'on track': return 'var(--light-orange-1)';
+    case 'execution': return 'var(--light-orange-1)';
+    case 'in progress': return 'var(--light-orange-1)';
     case 'cancelled': return '#F44336'; // Red
     default: return '#607D8B'; // Grayish-blue
   }
@@ -205,12 +205,12 @@ export default function Home() {
       </Box>
 
       {/* Tabs Section */}
-      <Paper sx={{ borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #f8f9ff 100%)' }}>
+      <Paper sx={{ borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #FFF3F0 100%)' }}>
         <Tabs 
           value={tabValue} 
           onChange={(e, newValue) => setTabValue(newValue)}
           sx={{ 
-            borderBottom: '2px solid #e5e7eb',
+            borderBottom: '2px solid var(--border-color)',
             '& .MuiTab-root': {
               fontWeight: 600,
               fontSize: '1rem',
@@ -241,21 +241,21 @@ export default function Home() {
           </Typography>
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<DnsIcon />} label="Total PoCs" value={total} color="#E6512E" trend={{ delta: trendTotalPocs }} onClick={() => navigate('/poc-delivery-list')} />
+              <StatTile icon={<DnsIcon />} label="Total PoCs" value={total} color="var(--primary-orange)" trend={{ delta: trendTotalPocs }} onClick={() => navigate('/poc-delivery-list')} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={completed} color="#22C55E" trend={{ delta: trendCompletedPocs }} onClick={() => navigate('/poc-delivery-list?status=Completed')} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<CancelOutlinedIcon />} label="Delayed" value={delayed} color="#F59E0B" trend={{ delta: trendDelayedPocs }} onClick={() => navigate('/poc-delivery-list?status=Delayed')} />
+              <StatTile icon={<CancelOutlinedIcon />} label="Delayed" value={delayed} color="var(--primary-orange)" trend={{ delta: trendDelayedPocs }} onClick={() => navigate('/poc-delivery-list?status=Delayed')} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={inProgress} color="#2563EB" trend={{ delta: trendInProgressPocs }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')} />
+              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={inProgress} color="var(--light-orange-1)" trend={{ delta: trendInProgressPocs }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')} />
             </Grid>
           </Grid>
 
           {/* Overall PoC Progress */}
-          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: '0 10px 32px rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, #ffffff 0%, #fff7f4 100%)', position: 'relative', overflow: 'hidden' }}>
+          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: '0 10px 32px rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, #ffffff 0%, var(--active-bg) 100%)', position: 'relative', overflow: 'hidden' }}>
             <Box sx={{ position: 'relative', zIndex: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>Overall PoC Completion</Typography>
@@ -281,7 +281,7 @@ export default function Home() {
                   sx={{ 
                     color: 'var(--primary-orange)', 
                     fontWeight: 600,
-                    '&:hover': { bgcolor: 'rgba(255, 111, 0, 0.08)' }
+                    '&:hover': { bgcolor: 'rgba(240, 102, 73, 0.08)' }
                   }}
                 >
                   View All PoCs →
@@ -290,9 +290,9 @@ export default function Home() {
                   size="small" 
                   onClick={() => navigate('/projects')} 
                   sx={{ 
-                    color: '#7c3aed', 
+                    color: 'var(--primary-orange)', 
                     fontWeight: 600,
-                    '&:hover': { bgcolor: 'rgba(124, 58, 237, 0.08)' }
+                    '&:hover': { bgcolor: 'var(--active-bg)' }
                   }}
                 >
                   View All Issues →
@@ -305,7 +305,7 @@ export default function Home() {
           <Grid container spacing={2} sx={{ mt: 2 }}>
             {delayed > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)' }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--active-bg) 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CancelOutlinedIcon /> Delayed Projects ({delayed})
                   </Typography>
@@ -327,7 +327,7 @@ export default function Home() {
             )}
             {inProgress > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--secondary-gray) 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <HourglassEmptyIcon /> In Progress Projects ({inProgress})
                   </Typography>
@@ -403,7 +403,7 @@ export default function Home() {
             {/* In Progress Projects */}
             {inProgressProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--secondary-gray) 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <HourglassEmptyIcon /> In Progress Projects ({inProgressProjectsData.length})
                   </Typography>
@@ -443,7 +443,7 @@ export default function Home() {
             {/* Delayed Projects */}
             {delayedProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fffbeb 0%, #fff 100%)' }}>
+                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--active-bg) 0%, #fff 100%)' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CancelOutlinedIcon /> Delayed Projects ({delayedProjectsData.length})
                   </Typography>

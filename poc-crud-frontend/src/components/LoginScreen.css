@@ -102,27 +102,27 @@
 }
 
 .login-buttons .MuiButton-contained {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--light-orange-1) 100%);
   color: #fff;
   border: none;
 }
 
 .login-buttons .MuiButton-contained:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a4193 100%);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, var(--light-orange-1) 0%, var(--light-orange-2) 100%);
+  box-shadow: 0 6px 20px rgba(240, 102, 73, 0.4);
   transform: translateY(-2px);
 }
 
 .login-buttons .MuiButton-outlined {
   background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: var(--primary-orange);
+  border: 2px solid var(--primary-orange);
 }
 
 .login-buttons .MuiButton-outlined:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: #5568d3;
-  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+  background: rgba(240, 102, 73, 0.1);
+  border-color: var(--light-orange-1);
+  box-shadow: 0 4px 14px rgba(240, 102, 73, 0.2);
 }
 
 .login-footer {

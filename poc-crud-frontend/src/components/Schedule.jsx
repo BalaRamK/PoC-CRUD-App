@@ -214,14 +214,14 @@ export default function Schedule() {
                   </CardContent>
                 </Card>
                 
-                <Card sx={{ border: dataSource === 'jira' ? '2px solid #7c3aed' : '1px solid var(--border-color)' }}>
+                <Card sx={{ border: dataSource === 'jira' ? '2px solid var(--primary-orange)' : '1px solid var(--border-color)' }}>
                   <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <FormControlLabel value="jira" control={<Radio />} label="" sx={{ m: 0 }} />
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Jira Project Data</Typography>
                       <Typography variant="body2" color="text.secondary">Export issues from Jira projects</Typography>
                     </Box>
-                    <WorkIcon sx={{ color: '#7c3aed', fontSize: 40 }} />
+                    <WorkIcon sx={{ color: 'var(--primary-orange)', fontSize: 40 }} />
                   </CardContent>
                 </Card>
               </RadioGroup>
@@ -600,7 +600,7 @@ export default function Schedule() {
                 startIcon={scheduleEnabled ? <ScheduleIcon /> : deliveryMethod === 'email' ? <EmailIcon /> : <DownloadIcon />}
                 sx={{ 
                   bgcolor: 'var(--primary-orange)', 
-                  '&:hover': { bgcolor: '#d94520' }
+                  '&:hover': { bgcolor: var(--active-bg) }
                 }}
               >
                 {loading ? 'Processing...' : scheduleEnabled ? 'Schedule Report' : deliveryMethod === 'email' ? 'Send Report' : 'Export Now'}
@@ -611,7 +611,7 @@ export default function Schedule() {
                 onClick={handleNext}
                 sx={{ 
                   bgcolor: 'var(--primary-orange)', 
-                  '&:hover': { bgcolor: '#d94520' }
+                  '&:hover': { bgcolor: var(--active-bg) }
                 }}
               >
                 Next

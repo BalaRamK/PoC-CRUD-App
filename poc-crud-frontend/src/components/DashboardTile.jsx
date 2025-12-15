@@ -25,15 +25,15 @@ export default function DashboardTile({
         overflow: 'hidden',
         bgcolor: isPrimary ? undefined : 'var(--card-bg)',
         color: isPrimary ? '#fff' : 'var(--text-dark)',
-        boxShadow: isPrimary ? '0 16px 40px rgba(230, 81, 46, 0.35)' : '0 8px 24px rgba(0,0,0,0.06)',
+        boxShadow: isPrimary ? '0 16px 40px rgba(240, 102, 73, 0.35)' : '0 8px 24px rgba(0,0,0,0.06)',
         border: isPrimary ? 'none' : '1px solid var(--border-color)',
         background: isPrimary
-          ? 'linear-gradient(160deg, #E6512E 0%, #FF8A65 100%)'
+          ? 'linear-gradient(160deg, var(--primary-orange) 0%, var(--light-orange-1) 100%)'
           : 'linear-gradient(180deg, #FFFFFF 0%, #FBFBFD 100%)',
         minHeight: 180,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'transform 120ms ease, box-shadow 120ms ease',
-        '&:hover': onClick ? { transform: 'translateY(-2px)', boxShadow: isPrimary ? '0 20px 48px rgba(230,81,46,0.45)' : '0 12px 28px rgba(0,0,0,0.09)' } : undefined,
+        '&:hover': onClick ? { transform: 'translateY(-2px)', boxShadow: isPrimary ? '0 20px 48px rgba(240, 102, 73, 0.45)' : '0 12px 28px rgba(0,0,0,0.09)' } : undefined,
       }}
       onClick={onClick}
     >
@@ -55,7 +55,7 @@ export default function DashboardTile({
         )}
         {trend && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: isPrimary ? '#fff' : (trend.delta >= 0 ? '#16a34a' : '#dc2626') }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: isPrimary ? '#fff' : (trend.delta >= 0 ? '#16a34a' : 'var(--primary-orange)') }}>
               {trend.delta >= 0 ? `+${trend.delta}` : `${trend.delta}`}
             </Typography>
             <Typography variant="caption" sx={{ opacity: isPrimary ? 0.85 : 0.7 }}>{trend.label || 'vs last week'}</Typography>
@@ -102,7 +102,7 @@ export default function DashboardTile({
                 height: 28,
                 ml: idx === 0 ? 0 : -1,
                 border: '2px solid',
-                borderColor: isPrimary ? '#E6512E' : '#fff',
+                borderColor: isPrimary ? 'var(--primary-orange)' : '#fff',
                 bgcolor: isPrimary ? 'rgba(255,255,255,0.85)' : 'var(--secondary-gray)',
                 color: 'var(--text-dark)',
                 fontSize: '0.75rem',

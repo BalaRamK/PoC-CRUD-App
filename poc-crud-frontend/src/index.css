@@ -1,33 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary-orange: #E6512E; /* darker orange for better contrast */
-  --primary-orange-light: #FF7A5C;
-  --secondary-gray: #F3F5F8;
-  --text-dark: #1F2937;   /* gray-800 */
-  --text-light: #6B7280;  /* gray-500 */
-  --sidebar-bg: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --border-color: #E5E7EB; /* gray-200 for stronger separation */
-  --active-bg: #FFE4DC;   /* clearer active highlight */
-  --active-text: #E6512E;
-  --shadow-light: 0px 6px 24px rgba(0, 0, 0, 0.06);
-  --focus-ring: 0 0 0 3px rgba(230, 81, 46, 0.25);
-}
+  /* Core palette */
+  --primary-orange: #F06649; /* requested primary */
+  --light-orange-1: #F58B6D; /* lighter shade */
+  --light-orange-2: #FAD0BF; /* lightest shade */
 
-/* Basic resets and variable definitions for consistent design */
-:root {
-  --primary-orange: #FF6B4A;
-  --primary-orange-light: #FF8F77;
+  /* Neutrals */
   --secondary-gray: #F3F5F8;
-  --text-dark: #333333;
-  --text-light: #666666;
+  --text-dark: #1F2937;
+  --text-light: #6B7280;
   --sidebar-bg: #FFFFFF;
   --card-bg: #FFFFFF;
-  --border-color: #EEEEEE;
-  --active-bg: #FFF3F0;
-  --active-text: #FF6B4A;
-  --shadow-light: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  --border-color: #E5E7EB;
+
+  /* Accents */
+  --active-bg: #FFE4DC;
+  --active-text: var(--primary-orange);
+
+  /* Effects */
+  --shadow-light: 0px 6px 24px rgba(0, 0, 0, 0.06);
+  --focus-ring: 0 0 0 3px rgba(240, 102, 73, 0.25);
 }
 
 * {

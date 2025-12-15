@@ -28,7 +28,7 @@ export function BarChart({ data }) {
       {
         label: 'Value',
         data: data.map(d => d.value),
-        backgroundColor: 'rgba(255, 107, 74, 0.6)',
+        backgroundColor: 'rgba(240, 102, 73, 0.6)',
       },
     ],
   };
@@ -42,7 +42,7 @@ export function PieChart({ data }) {
       {
         data: data.map(d => d.value),
         backgroundColor: [
-            'rgba(255, 107, 74, 0.6)',
+          'rgba(240, 102, 73, 0.6)',
             'rgba(54, 162, 235, 0.6)',
             'rgba(255, 206, 86, 0.6)',
             'rgba(75, 192, 192, 0.6)',

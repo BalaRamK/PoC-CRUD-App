@@ -65,7 +65,7 @@ export default function TopNavigation() {
           bgcolor: '#ffffff',
           boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
           color: 'var(--text-dark)',
-          borderBottom: '1px solid #f0f0f0',
+          borderBottom: '1px solid var(--border-color)',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>
@@ -88,7 +88,7 @@ export default function TopNavigation() {
                   component={NavLink}
                   to={path}
                   sx={{
-                    color: '#666666',
+                    color: 'var(--text-light)',
                     textTransform: 'none',
                     fontSize: '0.95rem',
                     fontWeight: 500,
@@ -97,12 +97,12 @@ export default function TopNavigation() {
                     px: 2,
                     py: 1,
                     '&.active': {
-                      backgroundColor: '#ff9500',
+                      backgroundColor: 'var(--primary-orange)',
                       color: '#ffffff',
                       fontWeight: 600,
                     },
                     '&:hover': {
-                      color: '#000000',
+                      color: 'var(--text-dark)',
                       backgroundColor: 'transparent',
                     },
                   }}
@@ -119,19 +119,19 @@ export default function TopNavigation() {
               <Button
                 onClick={handleLogout}
                 sx={{
-                  color: '#ef4444',
+                  color: 'var(--primary-orange)',
                   textTransform: 'none',
                   fontSize: '0.95rem',
                   fontWeight: 500,
                   backgroundColor: 'transparent',
-                  border: '1px solid #ef4444',
+                  border: '1px solid var(--primary-orange)',
                   borderRadius: '4px',
                   px: 2,
                   py: 0.75,
                   transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: '#fef2f2',
-                    borderColor: '#ef4444',
+                    backgroundColor: 'var(--active-bg)',
+                    borderColor: 'var(--primary-orange)',
                   },
                 }}
               >
@@ -145,7 +145,7 @@ export default function TopNavigation() {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 sx={{
                   color: '#666666',
-                  '&:hover': { color: '#000000', backgroundColor: '#f5f5f5' },
+                  '&:hover': { color: 'var(--text-dark)', backgroundColor: 'var(--secondary-gray)' },
                   borderRadius: '6px',
                 }}
               >
@@ -165,7 +165,7 @@ export default function TopNavigation() {
           '& .MuiDrawer-paper': {
             marginTop: '64px',
             borderRadius: 0,
-            borderTop: '1px solid #f0f0f0',
+            borderTop: '1px solid var(--border-color)',
           },
         }}
       >
@@ -184,18 +184,18 @@ export default function TopNavigation() {
                 px: 2,
                 py: 1.5,
                 borderRadius: '6px',
-                color: '#666666',
+                color: 'var(--text-light)',
                 textTransform: 'none',
                 fontSize: '0.95rem',
                 fontWeight: 500,
                 transition: 'all 0.2s ease',
                 '&.active': {
-                  color: '#000000',
+                  color: 'var(--text-dark)',
                   fontWeight: 600,
                 },
                 '&:hover': {
-                  backgroundColor: '#f9f9f9',
-                  color: '#000000',
+                  backgroundColor: 'var(--secondary-gray)',
+                  color: 'var(--text-dark)',
                 },
               }}
             >
