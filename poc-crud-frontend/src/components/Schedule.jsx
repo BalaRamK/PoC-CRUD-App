@@ -600,7 +600,7 @@ export default function Schedule() {
                 startIcon={scheduleEnabled ? <ScheduleIcon /> : deliveryMethod === 'email' ? <EmailIcon /> : <DownloadIcon />}
                 sx={{ 
                   bgcolor: 'var(--primary-orange)', 
-                  '&:hover': { bgcolor: var(--active-bg) }
+                  '&:hover': { bgcolor: 'var(--active-bg)' }
                 }}
               >
                 {loading ? 'Processing...' : scheduleEnabled ? 'Schedule Report' : deliveryMethod === 'email' ? 'Send Report' : 'Export Now'}
@@ -611,7 +611,7 @@ export default function Schedule() {
                 onClick={handleNext}
                 sx={{ 
                   bgcolor: 'var(--primary-orange)', 
-                  '&:hover': { bgcolor: var(--active-bg) }
+                  '&:hover': { bgcolor: 'var(--active-bg)' }
                 }}
               >
                 Next
