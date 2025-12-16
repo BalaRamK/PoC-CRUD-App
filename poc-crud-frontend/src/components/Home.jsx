@@ -193,7 +193,9 @@ export default function Home() {
     return rows.filter(r => {
       const itemStartDate = dayjs(r.startDate);
       if (!itemStartDate.isValid()) return false;
-      return itemStartDate.isSameOrAfter(startDate, 'day') && itemStartDate.isSameOrBefore(endDate, 'day');
+      // Use standard comparison: check if item date is after/same as start AND before/same as end
+      return (itemStartDate.isAfter(startDate, 'day') || itemStartDate.isSame(startDate, 'day')) && 
+             (itemStartDate.isBefore(endDate, 'day') || itemStartDate.isSame(endDate, 'day'));
     });
   };
 
@@ -357,18 +359,19 @@ export default function Home() {
                 borderRadius: 2,
                 overflow: 'hidden',
                 gap: '2px',
-                bgcolor: 'transparent'
+                bgcolor: 'rgba(255,255,255,0.2)',
+                p: 0.5
               }}>
                 {filteredRows.map((item, idx) => {
                   const status = String(item.status).toLowerCase();
-                  let color = '#FCD34D'; // yellow for delayed
+                  let color = '#DC2626'; // red for delayed
                   
                   if (status === 'completed') {
-                    color = '#22C55E'; // green
+                    color = '#FFFFFF'; // white for completed
                   } else if (isDelayed(item)) {
-                    color = '#FCD34D'; // yellow for delayed
+                    color = '#DC2626'; // red for delayed
                   } else if (['execution', 'in progress', 'on track'].includes(status)) {
-                    color = '#3B82F6'; // blue for in progress
+                    color = '#FDE047'; // bright yellow for in progress
                   }
                   
                   return (
@@ -377,7 +380,9 @@ export default function Home() {
                       sx={{ 
                         flex: 1,
                         bgcolor: color,
-                        minWidth: '4px'
+                        minWidth: '4px',
+                        borderRadius: 1,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                       }} 
                     />
                   );
@@ -386,16 +391,16 @@ export default function Home() {
               {/* Legend */}
               <Box sx={{ display: 'flex', gap: 3, mt: 2, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#22C55E' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>Complete</Typography>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FFFFFF', border: '1px solid rgba(255,255,255,0.5)' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>Complete</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#3B82F6' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>In-Progress</Typography>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FDE047', border: '1px solid rgba(255,255,255,0.3)' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>In-Progress</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FCD34D' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>Delayed</Typography>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#DC2626', border: '1px solid rgba(255,255,255,0.3)' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>Delayed</Typography>
                 </Box>
               </Box>
             </Box>
