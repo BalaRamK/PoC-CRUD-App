@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab
+  Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -53,6 +54,9 @@ export default function Home() {
   // Tab state
   const [tabValue, setTabValue] = useState(0);
   const [timePeriod, setTimePeriod] = useState('3 months');
+  const [customDateDialogOpen, setCustomDateDialogOpen] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
 
   async function fetchRows() {
     setLoading(true);
@@ -149,15 +153,67 @@ export default function Home() {
     fetchJiraProjects(); 
   }, []);
 
-  // PoC KPI Calculations
-  const total = rows.length;
-  const completed = rows.filter(r => String(r.status).toLowerCase() === 'completed').length;
-  const delayed = rows.filter(r => String(r.status).toLowerCase() === 'delayed').length;
-  const inProgress = rows.filter(r => String(r.status).toLowerCase() === 'execution' || String(r.status).toLowerCase() === 'in progress' || String(r.status).toLowerCase() === 'on track').length;
+  // Helper to calculate if a PoC is actually delayed based on dates
+  const isDelayed = (item) => {
+    const status = String(item.status).toLowerCase();
+    if (status === 'completed') return false;
+    const endDate = dayjs(item.endDate);
+    const today = dayjs();
+    return endDate.isValid() && endDate.isBefore(today, 'day');
+  };
+
+  // Helper to filter rows by time period
+  const getFilteredRows = () => {
+    const today = dayjs();
+    let startDate, endDate;
+
+    switch (timePeriod) {
+      case '3 months':
+        startDate = today.subtract(3, 'month');
+        endDate = today;
+        break;
+      case '6 months':
+        startDate = today.subtract(6, 'month');
+        endDate = today;
+        break;
+      case 'full timeline':
+        return rows; // No filtering
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          startDate = dayjs(customStartDate);
+          endDate = dayjs(customEndDate);
+        } else {
+          return rows; // If custom dates not set, show all
+        }
+        break;
+      default:
+        return rows;
+    }
+
+    return rows.filter(r => {
+      const itemStartDate = dayjs(r.startDate);
+      if (!itemStartDate.isValid()) return false;
+      return itemStartDate.isSameOrAfter(startDate, 'day') && itemStartDate.isSameOrBefore(endDate, 'day');
+    });
+  };
+
+  const filteredRows = getFilteredRows();
+
+  // PoC KPI Calculations - using filtered rows and auto-calculated delayed status
+  const total = filteredRows.length;
+  const completed = filteredRows.filter(r => String(r.status).toLowerCase() === 'completed').length;
+  const delayed = filteredRows.filter(r => isDelayed(r)).length;
+  const inProgress = filteredRows.filter(r => {
+    const status = String(r.status).toLowerCase();
+    return !isDelayed(r) && status !== 'completed' && ['execution','in progress','on track'].includes(status);
+  }).length;
 
   // Get delayed and in progress PoC data
-  const delayedRows = rows.filter(r => String(r.status).toLowerCase() === 'delayed');
-  const inProgressRows = rows.filter(r => ['execution','in progress','on track'].includes(String(r.status).toLowerCase()));
+  const delayedRows = filteredRows.filter(r => isDelayed(r));
+  const inProgressRows = filteredRows.filter(r => {
+    const status = String(r.status).toLowerCase();
+    return !isDelayed(r) && status !== 'completed' && ['execution','in progress','on track'].includes(status);
+  });
 
   // Jira Project Calculations (from allProjectsData)
   const allIssues = allProjectsData.flatMap(p => p.issues || []);
@@ -268,7 +324,13 @@ export default function Home() {
               <FormControl size="small" sx={{ minWidth: 140 }}>
                 <Select
                   value={timePeriod}
-                  onChange={(e) => setTimePeriod(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setTimePeriod(value);
+                    if (value === 'custom') {
+                      setCustomDateDialogOpen(true);
+                    }
+                  }}
                   sx={{
                     bgcolor: '#fff',
                     color: '#1F2937',
@@ -297,11 +359,17 @@ export default function Home() {
                 gap: '2px',
                 bgcolor: 'transparent'
               }}>
-                {rows.map((item, idx) => {
+                {filteredRows.map((item, idx) => {
                   const status = String(item.status).toLowerCase();
-                  let color = '#FCD34D'; // default yellow for delayed
-                  if (status === 'completed') color = '#22C55E';
-                  else if (['execution', 'in progress', 'on track'].includes(status)) color = '#3B82F6';
+                  let color = '#FCD34D'; // yellow for delayed
+                  
+                  if (status === 'completed') {
+                    color = '#22C55E'; // green
+                  } else if (isDelayed(item)) {
+                    color = '#FCD34D'; // yellow for delayed
+                  } else if (['execution', 'in progress', 'on track'].includes(status)) {
+                    color = '#3B82F6'; // blue for in progress
+                  }
                   
                   return (
                     <Box 
@@ -460,7 +528,13 @@ export default function Home() {
                   <FormControl size="small" sx={{ minWidth: 100 }}>
                     <Select
                       value={timePeriod}
-                      onChange={(e) => setTimePeriod(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setTimePeriod(value);
+                        if (value === 'custom') {
+                          setCustomDateDialogOpen(true);
+                        }
+                      }}
                       sx={{
                         bgcolor: '#fff',
                         color: '#1F2937',
@@ -480,7 +554,14 @@ export default function Home() {
                 </Box>
                 
                 {/* Simple Timeline View */}
-                <Box sx={{ position: 'relative', mt: 3 }}>
+                <Box sx={{ position: 'relative', mt: 3, maxHeight: 250, overflow: 'auto', pr: 1,
+                  '&::-webkit-scrollbar': { width: '6px' },
+                  '&::-webkit-scrollbar-thumb': { 
+                    bgcolor: 'rgba(0,0,0,0.2)',
+                    borderRadius: '3px',
+                    '&:hover': { bgcolor: 'rgba(0,0,0,0.3)' }
+                  }
+                }}>
                   {/* Month Labels */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1 }}>
                     {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'].map(month => (
@@ -490,13 +571,16 @@ export default function Home() {
                     ))}
                   </Box>
 
-                  {/* Timeline Bars */}
+                  {/* Timeline Bars - Show all filtered items */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {rows.slice(0, 3).map((item, idx) => {
+                    {filteredRows.map((item, idx) => {
                       const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
                       const endMonth = item.endDate ? dayjs(item.endDate).month() : 5;
                       const leftPercent = (startMonth / 12) * 100;
                       const widthPercent = Math.max(((endMonth - startMonth + 1) / 12) * 100, 8);
+                      
+                      const colors = ['#FF6B4A', '#D32F2F', '#FF8F77', '#F06649', '#FF7A5C', '#E85A3F', '#FF9980'];
+                      const color = colors[idx % colors.length];
                       
                       return (
                         <Box key={idx} sx={{ position: 'relative', height: 32, display: 'flex', alignItems: 'center' }}>
@@ -505,7 +589,7 @@ export default function Home() {
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
                             height: 28,
-                            bgcolor: idx === 0 ? '#FF6B4A' : idx === 1 ? '#D32F2F' : '#FF8F77',
+                            bgcolor: color,
                             borderRadius: 2,
                             display: 'flex',
                             alignItems: 'center',
@@ -513,7 +597,7 @@ export default function Home() {
                             px: 1,
                             boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                           }}>
-                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {item.customer || item.title || `Project ${idx + 1}`}
                             </Typography>
                           </Box>
@@ -923,6 +1007,74 @@ export default function Home() {
 
         </Box>
       </Paper>
+
+      {/* Custom Date Range Dialog */}
+      <Dialog 
+        open={customDateDialogOpen} 
+        onClose={() => setCustomDateDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+          Select Custom Date Range
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': { borderColor: 'var(--primary-orange)' },
+                  '&.Mui-focused fieldset': { borderColor: 'var(--primary-orange)' }
+                }
+              }}
+            />
+            <TextField
+              label="End Date"
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ min: customStartDate }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': { borderColor: 'var(--primary-orange)' },
+                  '&.Mui-focused fieldset': { borderColor: 'var(--primary-orange)' }
+                }
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button 
+            onClick={() => {
+              setCustomDateDialogOpen(false);
+              setTimePeriod('full timeline');
+            }}
+            sx={{ color: 'var(--text-light)' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => setCustomDateDialogOpen(false)}
+            variant="contained"
+            disabled={!customStartDate || !customEndDate}
+            sx={{
+              bgcolor: 'var(--primary-orange)',
+              '&:hover': { bgcolor: 'var(--light-orange-1)' },
+              '&:disabled': { bgcolor: '#E5E7EB', color: '#9CA3AF' }
+            }}
+          >
+            Apply
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
