@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip
 } from '@mui/material';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -201,6 +201,26 @@ export default function Home() {
 
   const filteredRows = getFilteredRows();
 
+  // Helper to get month range for timeline display
+  const getTimelineMonths = () => {
+    if (filteredRows.length === 0) return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'];
+    
+    let minMonth = 11, maxMonth = 0;
+    filteredRows.forEach(item => {
+      const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
+      const endMonth = item.endDate ? dayjs(item.endDate).month() : 0;
+      minMonth = Math.min(minMonth, startMonth);
+      maxMonth = Math.max(maxMonth, endMonth);
+    });
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const range = maxMonth - minMonth + 1;
+    if (range <= 0) return months.slice(0, 6);
+    return months.slice(minMonth, minMonth + Math.min(range, 12));
+  };
+
+  const timelineMonths = getTimelineMonths();
+
   // PoC KPI Calculations - using filtered rows and auto-calculated delayed status
   const total = filteredRows.length;
   const completed = filteredRows.filter(r => String(r.status).toLowerCase() === 'completed').length;
@@ -374,17 +394,26 @@ export default function Home() {
                     color = '#FDE047'; // bright yellow for in progress
                   }
                   
+                  const tooltipText = `${item.customer || item.title || 'N/A'}\nStatus: ${status}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}`;
+                  
                   return (
-                    <Box 
-                      key={idx}
-                      sx={{ 
-                        flex: 1,
-                        bgcolor: color,
-                        minWidth: '4px',
-                        borderRadius: 1,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                      }} 
-                    />
+                    <Tooltip key={idx} title={tooltipText} arrow>
+                      <Box 
+                        sx={{ 
+                          flex: 1,
+                          bgcolor: color,
+                          minWidth: '4px',
+                          borderRadius: 1,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                            transform: 'scaleY(1.2)'
+                          }
+                        }} 
+                      />
+                    </Tooltip>
                   );
                 })}
               </Box>
@@ -567,10 +596,10 @@ export default function Home() {
                     '&:hover': { bgcolor: 'rgba(0,0,0,0.3)' }
                   }
                 }}>
-                  {/* Month Labels */}
+                  {/* Month Labels - Dynamic based on filtered data */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1 }}>
-                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'].map(month => (
-                      <Typography key={month} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem', fontWeight: 500 }}>
+                    {timelineMonths.map((month, idx) => (
+                      <Typography key={idx} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem', fontWeight: 500 }}>
                         {month}
                       </Typography>
                     ))}
@@ -587,26 +616,35 @@ export default function Home() {
                       const colors = ['#FF6B4A', '#D32F2F', '#FF8F77', '#F06649', '#FF7A5C', '#E85A3F', '#FF9980'];
                       const color = colors[idx % colors.length];
                       
+                      const tooltipText = `${item.customer || item.title || 'N/A'}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}\nStatus: ${item.status || 'N/A'}`;
+                      
                       return (
-                        <Box key={idx} sx={{ position: 'relative', height: 32, display: 'flex', alignItems: 'center' }}>
-                          <Box sx={{
-                            position: 'absolute',
-                            left: `${leftPercent}%`,
-                            width: `${widthPercent}%`,
-                            height: 28,
-                            bgcolor: color,
-                            borderRadius: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            px: 1,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                          }}>
-                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {item.customer || item.title || `Project ${idx + 1}`}
-                            </Typography>
+                        <Tooltip key={idx} title={tooltipText} arrow>
+                          <Box sx={{ position: 'relative', height: 32, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                            <Box sx={{
+                              position: 'absolute',
+                              left: `${leftPercent}%`,
+                              width: `${widthPercent}%`,
+                              height: 28,
+                              bgcolor: color,
+                              borderRadius: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              px: 1,
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+                                transform: 'scaleY(1.15)'
+                              }
+                            }}>
+                              <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.customer || item.title || `Project ${idx + 1}`}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
+                        </Tooltip>
                       );
                     })}
                   </Box>
