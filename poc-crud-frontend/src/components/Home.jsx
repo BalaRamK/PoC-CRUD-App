@@ -263,122 +263,115 @@ export default function Home() {
             {/* Header with Dropdown */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>Status Summary</Typography>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
                 <Select
                   value={timePeriod}
                   onChange={(e) => setTimePeriod(e.target.value)}
                   sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    color: '#fff',
+                    bgcolor: '#fff',
+                    color: '#1F2937',
                     borderRadius: 2,
+                    fontWeight: 500,
+                    fontSize: '0.875rem',
                     '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                    '& .MuiSvgIcon-root': { color: '#fff' }
+                    '& .MuiSvgIcon-root': { color: '#1F2937' }
                   }}
                 >
                   <MenuItem value="3 months">3 months</MenuItem>
                   <MenuItem value="6 months">6 months</MenuItem>
-                  <MenuItem value="1 year">1 year</MenuItem>
+                  <MenuItem value="full timeline">Full Timeline</MenuItem>
+                  <MenuItem value="custom">Custom</MenuItem>
                 </Select>
               </FormControl>
             </Box>
 
-            {/* Visual Status Bar */}
+            {/* Visual Status Bar - Segmented */}
             <Box sx={{ mb: 3 }}>
               <Box sx={{ 
                 display: 'flex', 
                 height: 40, 
                 borderRadius: 2,
                 overflow: 'hidden',
-                bgcolor: 'rgba(255,255,255,0.2)'
+                gap: '2px',
+                bgcolor: 'transparent'
               }}>
-                {/* Completed - Green */}
-                {completed > 0 && (
-                  <Box sx={{ 
-                    width: `${(completed / total) * 100}%`, 
-                    bgcolor: '#22C55E',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }} />
-                )}
-                {/* In Progress - Blue */}
-                {inProgress > 0 && (
-                  <Box sx={{ 
-                    width: `${(inProgress / total) * 100}%`, 
-                    bgcolor: '#3B82F6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }} />
-                )}
-                {/* Delayed - Yellow */}
-                {delayed > 0 && (
-                  <Box sx={{ 
-                    width: `${(delayed / total) * 100}%`, 
-                    bgcolor: '#FCD34D',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }} />
-                )}
+                {rows.map((item, idx) => {
+                  const status = String(item.status).toLowerCase();
+                  let color = '#FCD34D'; // default yellow for delayed
+                  if (status === 'completed') color = '#22C55E';
+                  else if (['execution', 'in progress', 'on track'].includes(status)) color = '#3B82F6';
+                  
+                  return (
+                    <Box 
+                      key={idx}
+                      sx={{ 
+                        flex: 1,
+                        bgcolor: color,
+                        minWidth: '4px'
+                      }} 
+                    />
+                  );
+                })}
               </Box>
               {/* Legend */}
-              <Box sx={{ display: 'flex', gap: 3, mt: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 3, mt: 2, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#22C55E' }} />
-                  <Typography variant="caption">Complete</Typography>
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>Complete</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#3B82F6' }} />
-                  <Typography variant="caption">In-Progress</Typography>
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>In-Progress</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FCD34D' }} />
-                  <Typography variant="caption">Delayed</Typography>
+                  <Typography variant="caption" sx={{ fontSize: '0.8rem' }}>Delayed</Typography>
                 </Box>
               </Box>
             </Box>
 
-            {/* Stats Grid */}
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Total PoCs</Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{total}</Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Completed</Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{completed}</Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>In Progress</Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{inProgress}</Typography>
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 6, md: 3 }}>
-                <Box>
-                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Delayed</Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{delayed}</Typography>
-                </Box>
-              </Grid>
-            </Grid>
+            {/* Stats Grid with Dividers */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
+              <Box sx={{ flex: 1, py: 1 }}>
+                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Total PoCs</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{total}</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1 }}>
+                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Completed</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{completed}</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1 }}>
+                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>In Progress</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{inProgress}</Typography>
+              </Box>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1 }}>
+                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Delayed</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{delayed}</Typography>
+              </Box>
+            </Box>
 
             {/* Arrow Button */}
             <IconButton
               onClick={() => navigate('/poc-delivery-list')}
               sx={{
                 position: 'absolute',
-                bottom: 16,
-                right: 16,
-                bgcolor: 'rgba(255,255,255,0.25)',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' }
+                bottom: 20,
+                right: 20,
+                bgcolor: '#fff',
+                width: 40,
+                height: 40,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                '&:hover': { 
+                  bgcolor: '#fff',
+                  transform: 'translateX(4px)',
+                  transition: 'transform 0.2s ease'
+                }
               }}
             >
-              <ArrowForwardIcon sx={{ color: '#fff' }} />
+              <ArrowForwardIcon sx={{ color: '#FF6B4A' }} />
             </IconButton>
           </Paper>
 
