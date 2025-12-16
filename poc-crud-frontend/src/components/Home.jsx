@@ -6,6 +6,7 @@ import {
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthProvider';
 import DashboardTile from './DashboardTile';
 import StatTile from './StatTile';
 
@@ -39,6 +40,7 @@ const getStatusColor = (status) => {
 };
 
 export default function Home() {
+  const { user } = useAuth();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -199,11 +201,11 @@ export default function Home() {
 
 
   return (
-    <Box>
+    <Box sx={{ px: 4, py: 3 }}>
       {/* Header with Title */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-dark)', mb: 0.5 }}>Dashboard Overview</Typography>
-        <Typography variant="body2" color="text.secondary">Track Jira projects and PoC delivery metrics</Typography>
+      <Box sx={{ mb: 4, py: 2 }}>
+        <Typography sx={{ fontWeight: 500, color: 'var(--primary-orange)', mb: 1, fontSize: '0.95rem', letterSpacing: '0.3px' }}>Ready to Conquer?</Typography>
+        <Typography variant="h3" sx={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '2rem', lineHeight: 1.2 }}>Welcome Back, {user?.name || 'Guest'}!</Typography>
       </Box>
 
       {/* Tabs Section */}
@@ -375,47 +377,47 @@ export default function Home() {
             </IconButton>
           </Paper>
 
-          {/* Two Column Layout */}
-          <Grid container spacing={3}>
+          {/* Two Column Layout - Important Blockers & PoC Timeline */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* Important Blockers Section */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper sx={{ 
                 p: 3, 
                 borderRadius: 3, 
                 background: 'linear-gradient(135deg, #FFB5A0 0%, #FFC9B8 100%)',
-                minHeight: 400,
+                minHeight: 300,
                 position: 'relative',
-                boxShadow: '0 4px 16px rgba(255, 181, 160, 0.3)'
+                boxShadow: '0 4px 16px rgba(255, 181, 160, 0.3)',
+                border: '3px solid #1E88E5'
               }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1F2937' }}>Important Blockers</Typography>
-                <Box sx={{ maxHeight: 300, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1F2937' }}>Important Blockers</Typography>
+                <Box sx={{ maxHeight: 230, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).slice(0, 3).map((item, idx) => (
                     <Box key={idx} sx={{ 
                       p: 2.5, 
-                      bgcolor: 'rgba(255,255,255,0.7)', 
+                      bgcolor: 'rgba(255,255,255,0.8)', 
                       borderRadius: 2,
                       backdropFilter: 'blur(10px)'
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
                         Project Name: {item.title || item.customer || 'N/A'}
                       </Typography>
-                      <Typography variant="body2" sx={{ mb: 2, color: '#4B5563' }}>
-                        <strong>Blockers:</strong> {item.currentBlockers}
+                      <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
+                        Blockers: {item.currentBlockers}
                       </Typography>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
-                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
-                            <strong>⏰ Start Date</strong>
+                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block', fontSize: '0.7rem' }}>
+                            <strong>Start Date</strong>
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600 }}>
-                            {formatDate(item.startDate) || 'N/A'}
-                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600, fontSize: '0.75rem' }}>
+                            {formatDate(item.startDate) || 'N/A'}\n                          </Typography>
                         </Box>
                         <Box sx={{ textAlign: 'right' }}>
-                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
-                            <strong>⏱️ End Date</strong>
+                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block', fontSize: '0.7rem' }}>
+                            <strong>End Date</strong>
                           </Typography>
-                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600 }}>
+                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600, fontSize: '0.75rem' }}>
                             {formatDate(item.endDate) || 'N/A'}
                           </Typography>
                         </Box>
@@ -423,7 +425,7 @@ export default function Home() {
                     </Box>
                   ))}
                   {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).length === 0 && (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Box sx={{ textAlign: 'center', py: 2 }}>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>No blockers reported</Typography>
                     </Box>
                   )}
@@ -434,8 +436,8 @@ export default function Home() {
                     position: 'absolute',
                     bottom: 16,
                     right: 16,
-                    bgcolor: 'rgba(255,255,255,0.5)',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' }
+                    bgcolor: 'rgba(255,255,255,0.6)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.8)' }
                   }}
                 >
                   <ArrowForwardIcon sx={{ color: '#1F2937' }} />
@@ -449,18 +451,40 @@ export default function Home() {
                 p: 3, 
                 borderRadius: 3, 
                 background: 'linear-gradient(135deg, #FFE5E0 0%, #FFF0ED 100%)',
-                minHeight: 400,
+                minHeight: 300,
                 position: 'relative',
                 boxShadow: '0 4px 16px rgba(255, 229, 224, 0.3)'
               }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1F2937' }}>PoC Timeline</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>PoC Timeline</Typography>
+                  <FormControl size="small" sx={{ minWidth: 100 }}>
+                    <Select
+                      value={timePeriod}
+                      onChange={(e) => setTimePeriod(e.target.value)}
+                      sx={{
+                        bgcolor: '#fff',
+                        color: '#1F2937',
+                        borderRadius: 1.5,
+                        fontWeight: 400,
+                        fontSize: '0.8rem',
+                        '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                        '& .MuiSvgIcon-root': { color: '#1F2937' }
+                      }}
+                    >
+                      <MenuItem value="3 months">3 months</MenuItem>
+                      <MenuItem value="6 months">6 months</MenuItem>
+                      <MenuItem value="full timeline">Full Timeline</MenuItem>
+                      <MenuItem value="custom">Custom</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
                 
                 {/* Simple Timeline View */}
-                <Box sx={{ position: 'relative', mt: 4 }}>
+                <Box sx={{ position: 'relative', mt: 3 }}>
                   {/* Month Labels */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1 }}>
                     {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'].map(month => (
-                      <Typography key={month} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem' }}>
+                      <Typography key={month} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem', fontWeight: 500 }}>
                         {month}
                       </Typography>
                     ))}
@@ -469,27 +493,27 @@ export default function Home() {
                   {/* Timeline Bars */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {rows.slice(0, 3).map((item, idx) => {
-                      // Calculate bar position based on dates (simplified)
                       const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
                       const endMonth = item.endDate ? dayjs(item.endDate).month() : 5;
                       const leftPercent = (startMonth / 12) * 100;
-                      const widthPercent = ((endMonth - startMonth + 1) / 12) * 100;
+                      const widthPercent = Math.max(((endMonth - startMonth + 1) / 12) * 100, 8);
                       
                       return (
-                        <Box key={idx} sx={{ position: 'relative', height: 32 }}>
+                        <Box key={idx} sx={{ position: 'relative', height: 32, display: 'flex', alignItems: 'center' }}>
                           <Box sx={{
                             position: 'absolute',
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
-                            height: 32,
+                            height: 28,
                             bgcolor: idx === 0 ? '#FF6B4A' : idx === 1 ? '#D32F2F' : '#FF8F77',
                             borderRadius: 2,
                             display: 'flex',
                             alignItems: 'center',
-                            px: 1.5,
+                            justifyContent: 'center',
+                            px: 1,
                             boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                           }}>
-                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.75rem' }}>
+                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                               {item.customer || item.title || `Project ${idx + 1}`}
                             </Typography>
                           </Box>
@@ -505,12 +529,255 @@ export default function Home() {
                     position: 'absolute',
                     bottom: 16,
                     right: 16,
-                    bgcolor: 'rgba(255,255,255,0.5)',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' }
+                    bgcolor: 'rgba(255,255,255,0.6)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.8)' }
                   }}
                 >
                   <ArrowForwardIcon sx={{ color: '#1F2937' }} />
                 </IconButton>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          {/* Three Column Layout - Reminders, Delayed, In Progress */}
+          <Grid container spacing={3} sx={{ mt: 2 }}>
+            {/* Reminders Section - Blue Border Card */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Paper sx={{ 
+                p: 0,
+                borderRadius: 3,
+                minHeight: 350,
+                position: 'relative',
+                overflow: 'hidden',
+                border: '3px solid #1E88E5',
+                boxShadow: '0 4px 12px rgba(30, 136, 229, 0.2)'
+              }}>
+                {/* Header */}
+                <Box sx={{ 
+                  bgcolor: '#4A90E2',
+                  p: 2.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff' }}>Reminders</Typography>
+                  <Typography sx={{ color: '#fff', fontSize: '1.2rem' }}>⏰</Typography>
+                </Box>
+
+                {/* Content */}
+                <Box sx={{ 
+                  p: 2.5, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2,
+                  maxHeight: 280,
+                  overflow: 'auto',
+                  '&::-webkit-scrollbar': {
+                    width: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    bgcolor: 'transparent',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: 'rgba(0,0,0,0.2)',
+                    borderRadius: '3px',
+                    '&:hover': {
+                      bgcolor: 'rgba(0,0,0,0.3)',
+                    }
+                  }
+                }}>
+                  {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).map((item, idx) => (
+                    <Box key={idx} sx={{ 
+                      p: 2,
+                      bgcolor: '#fff',
+                      borderRadius: 2,
+                      border: '1px solid #E0E0E0'
+                    }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#1F2937' }}>
+                        Project Name: {item.title || item.customer || 'N/A'}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1 }}>
+                        Blockers: {item.currentBlockers}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
+                        Due Date: {formatDate(item.endDate) || 'N/A'}
+                      </Typography>
+                    </Box>
+                  ))}
+                  {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>No reminders</Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* Delayed PoCs Section - Light Pink Card */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Paper sx={{ 
+                p: 3,
+                borderRadius: 3,
+                minHeight: 350,
+                background: 'linear-gradient(180deg, #FFD8CC 0%, #FFCDB8 100%)',
+                position: 'relative',
+                boxShadow: '0 4px 12px rgba(255, 181, 160, 0.3)'
+              }}>
+                {/* Header */}
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
+                  Delayed PoCs
+                  <Typography sx={{ fontSize: '1.1rem' }}>⏱️</Typography>
+                </Typography>
+
+                {/* Content */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2,
+                  maxHeight: 280,
+                  overflow: 'auto',
+                  '&::-webkit-scrollbar': {
+                    width: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    bgcolor: 'transparent',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: 'rgba(0,0,0,0.2)',
+                    borderRadius: '3px',
+                    '&:hover': {
+                      bgcolor: 'rgba(0,0,0,0.3)',
+                    }
+                  }
+                }}>
+                  {delayedRows.map((item, idx) => (
+                    <Box key={idx} sx={{ 
+                      p: 2.5,
+                      bgcolor: 'rgba(255,255,255,0.8)',
+                      borderRadius: 2,
+                      backdropFilter: 'blur(10px)'
+                    }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
+                        Project Name: {item.title || item.customer || 'N/A'}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
+                        Blockers: {item.currentBlockers || 'Next Milestone'}
+                      </Typography>
+                      {/* Progress Bar */}
+                      <Box sx={{ mb: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.75rem' }}>Progress</Typography>
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#D32F2F' }}>{item.percent || 0}%</Typography>
+                        </Box>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={Number(item.percent) || 0} 
+                          sx={{ 
+                            height: 6, 
+                            borderRadius: 3,
+                            bgcolor: 'rgba(0,0,0,0.1)',
+                            '& .MuiLinearProgress-bar': { 
+                              bgcolor: '#D32F2F',
+                              borderRadius: 3
+                            }
+                          }} 
+                        />
+                      </Box>
+                      <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
+                        Due Date: {formatDate(item.endDate) || 'N/A'}
+                      </Typography>
+                    </Box>
+                  ))}
+                  {delayedRows.length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>No delayed PoCs</Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* In Progress PoCs Section - Coral/Orange Card */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Paper sx={{ 
+                p: 3,
+                borderRadius: 3,
+                minHeight: 350,
+                background: 'linear-gradient(180deg, #FF8A65 0%, #FF7043 100%)',
+                position: 'relative',
+                boxShadow: '0 4px 12px rgba(255, 107, 74, 0.3)'
+              }}>
+                {/* Header */}
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#fff', display: 'flex', alignItems: 'center', gap: 1 }}>
+                  In Progress PoCs
+                  <Typography sx={{ fontSize: '1.1rem' }}>⚙️</Typography>
+                </Typography>
+
+                {/* Content */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2,
+                  maxHeight: 280,
+                  overflow: 'auto',
+                  '&::-webkit-scrollbar': {
+                    width: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    bgcolor: 'transparent',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: 'rgba(255,255,255,0.4)',
+                    borderRadius: '3px',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.6)',
+                    }
+                  }
+                }}>
+                  {inProgressRows.map((item, idx) => (
+                    <Box key={idx} sx={{ 
+                      p: 2.5,
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                      borderRadius: 2,
+                      backdropFilter: 'blur(10px)'
+                    }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
+                        Project Name: {item.title || item.customer || 'N/A'}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
+                        Blockers: {item.currentBlockers || 'Next Milestone'}
+                      </Typography>
+                      {/* Progress Bar */}
+                      <Box sx={{ mb: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.75rem' }}>Progress</Typography>
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B4A' }}>{item.percent || 0}%</Typography>
+                        </Box>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={Number(item.percent) || 0} 
+                          sx={{ 
+                            height: 6, 
+                            borderRadius: 3,
+                            bgcolor: 'rgba(0,0,0,0.1)',
+                            '& .MuiLinearProgress-bar': { 
+                              bgcolor: '#FF6B4A',
+                              borderRadius: 3
+                            }
+                          }} 
+                        />
+                      </Box>
+                      <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
+                        Due Date: {formatDate(item.endDate) || 'N/A'}
+                      </Typography>
+                    </Box>
+                  ))}
+                  {inProgressRows.length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>No PoCs in progress</Typography>
+                    </Box>
+                  )}
+                </Box>
               </Paper>
             </Grid>
           </Grid>
