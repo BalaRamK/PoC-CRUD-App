@@ -60,50 +60,53 @@ export default function TopNavigation() {
     <>
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           bgcolor: '#ffffff',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           color: 'var(--text-dark)',
-          borderBottom: '1px solid var(--border-color)',
+          borderBottom: 'none',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>
-          {/* Logo Only */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Logo with Tagline */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box 
               component="img" 
               src="/images/qnu-logo.png" 
               alt="QNu Labs" 
-              sx={{ height: 36, width: 'auto', cursor: 'pointer' }}
+              sx={{ height: 40, width: 'auto', cursor: 'pointer' }}
+              onClick={() => navigate('/home')}
             />
           </Box>
 
           {/* Desktop Navigation Menu */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flex: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flex: 1 }}>
               {navItems.map(({ text, path }) => (
                 <Button
                   key={text}
                   component={NavLink}
                   to={path}
                   sx={{
-                    color: 'var(--text-light)',
+                    color: '#4A5568',
                     textTransform: 'none',
-                    fontSize: '0.95rem',
-                    fontWeight: 500,
+                    fontSize: '0.9375rem',
+                    fontWeight: 400,
                     transition: 'all 0.2s ease',
-                    borderRadius: '6px',
-                    px: 2,
-                    py: 1,
+                    borderRadius: '20px',
+                    px: 3,
+                    py: 0.75,
+                    minHeight: '40px',
                     '&.active': {
                       backgroundColor: 'var(--primary-orange)',
                       color: '#ffffff',
-                      fontWeight: 600,
+                      fontWeight: 500,
                     },
-                    '&:hover': {
+                    '&:hover:not(.active)': {
                       color: 'var(--text-dark)',
-                      backgroundColor: 'transparent',
+                      backgroundColor: 'rgba(240, 102, 73, 0.08)',
                     },
                   }}
                 >
@@ -121,21 +124,22 @@ export default function TopNavigation() {
                 sx={{
                   color: 'var(--primary-orange)',
                   textTransform: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
+                  fontSize: '0.9375rem',
+                  fontWeight: 400,
                   backgroundColor: 'transparent',
-                  border: '1px solid var(--primary-orange)',
-                  borderRadius: '4px',
-                  px: 2,
-                  py: 0.75,
+                  border: '1.5px solid var(--primary-orange)',
+                  borderRadius: '20px',
+                  px: 3,
+                  py: 0.625,
+                  minHeight: '40px',
                   transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: 'var(--active-bg)',
+                    backgroundColor: 'rgba(240, 102, 73, 0.08)',
                     borderColor: 'var(--primary-orange)',
                   },
                 }}
               >
-                Log out
+                Logout
               </Button>
             )}
 
