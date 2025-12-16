@@ -18,6 +18,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import WorkIcon from '@mui/icons-material/Work';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Helper for date formatting
 const formatDate = (dateString) => {
@@ -49,6 +50,7 @@ export default function Home() {
 
   // Tab state
   const [tabValue, setTabValue] = useState(0);
+  const [timePeriod, setTimePeriod] = useState('3 months');
 
   async function fetchRows() {
     setLoading(true);
@@ -205,148 +207,319 @@ export default function Home() {
       </Box>
 
       {/* Tabs Section */}
-      <Paper sx={{ borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, #fff 0%, #FFF3F0 100%)' }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={(e, newValue) => setTabValue(newValue)}
-          sx={{ 
-            borderBottom: '2px solid var(--border-color)',
-            '& .MuiTab-root': {
-              fontWeight: 600,
-              fontSize: '1rem',
-              textTransform: 'none',
-              minWidth: 'auto',
-              px: 3,
-              py: 1.5,
-              color: 'text.secondary',
-              '&.Mui-selected': {
-                color: 'var(--primary-orange)',
-              }
-            },
-            '& .MuiTabs-indicator': {
-              backgroundColor: 'var(--primary-orange)',
-              height: 3,
+      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+        <Button
+          onClick={() => setTabValue(0)}
+          sx={{
+            px: 3.5,
+            py: 1.25,
+            borderRadius: '10px',
+            textTransform: 'none',
+            fontSize: '0.9375rem',
+            fontWeight: 500,
+            backgroundColor: tabValue === 0 ? 'var(--primary-orange)' : '#F3F4F6',
+            color: tabValue === 0 ? '#ffffff' : '#4B5563',
+            '&:hover': {
+              backgroundColor: tabValue === 0 ? 'var(--primary-orange)' : '#E5E7EB',
             }
           }}
         >
-          <Tab label="PoC Status" />
-          <Tab label="Project Delivery Status" />
-        </Tabs>
+          PoC Status
+        </Button>
+        <Button
+          onClick={() => setTabValue(1)}
+          sx={{
+            px: 3.5,
+            py: 1.25,
+            borderRadius: '10px',
+            textTransform: 'none',
+            fontSize: '0.9375rem',
+            fontWeight: 500,
+            backgroundColor: tabValue === 1 ? 'var(--primary-orange)' : '#F3F4F6',
+            color: tabValue === 1 ? '#ffffff' : '#4B5563',
+            '&:hover': {
+              backgroundColor: tabValue === 1 ? 'var(--primary-orange)' : '#E5E7EB',
+            }
+          }}
+        >
+          Project Delivery Status
+        </Button>
+      </Box>
+
+      <Paper sx={{ borderRadius: 3, boxShadow: 'none', background: 'transparent' }}>
 
         {/* TAB 1: PoC Status */}
-        <Box sx={{ display: tabValue === 0 ? 'block' : 'none', p: 3 }}>
-          {/* PoC KPI Tiles */}
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> PoC Status Overview
-          </Typography>
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<DnsIcon />} label="Total PoCs" value={total} color="var(--primary-orange)" trend={{ delta: trendTotalPocs }} onClick={() => navigate('/poc-delivery-list')} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={completed} color="#22C55E" trend={{ delta: trendCompletedPocs }} onClick={() => navigate('/poc-delivery-list?status=Completed')} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<CancelOutlinedIcon />} label="Delayed" value={delayed} color="var(--primary-orange)" trend={{ delta: trendDelayedPocs }} onClick={() => navigate('/poc-delivery-list?status=Delayed')} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatTile icon={<HourglassEmptyIcon />} label="In Progress" value={inProgress} color="var(--light-orange-1)" trend={{ delta: trendInProgressPocs }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')} />
-            </Grid>
-          </Grid>
+        <Box sx={{ display: tabValue === 0 ? 'block' : 'none' }}>
+          {/* Status Summary Section */}
+          <Paper sx={{ 
+            p: 4, 
+            borderRadius: 3, 
+            background: 'linear-gradient(135deg, #FF6B4A 0%, #FF8F77 100%)',
+            color: '#fff',
+            position: 'relative',
+            mb: 3,
+            boxShadow: '0 8px 24px rgba(255, 107, 74, 0.3)'
+          }}>
+            {/* Header with Dropdown */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>Status Summary</Typography>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <Select
+                  value={timePeriod}
+                  onChange={(e) => setTimePeriod(e.target.value)}
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: '#fff',
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                    '& .MuiSvgIcon-root': { color: '#fff' }
+                  }}
+                >
+                  <MenuItem value="3 months">3 months</MenuItem>
+                  <MenuItem value="6 months">6 months</MenuItem>
+                  <MenuItem value="1 year">1 year</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-          {/* Overall PoC Progress */}
-          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: '0 10px 32px rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, #ffffff 0%, var(--active-bg) 100%)', position: 'relative', overflow: 'hidden' }}>
-            <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>Overall PoC Completion</Typography>
-                <Typography variant="h3" sx={{ fontWeight: 700, color: 'var(--primary-orange)' }}>{averageCompletion.toFixed(0)}%</Typography>
+            {/* Visual Status Bar */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                height: 40, 
+                borderRadius: 2,
+                overflow: 'hidden',
+                bgcolor: 'rgba(255,255,255,0.2)'
+              }}>
+                {/* Completed - Green */}
+                {completed > 0 && (
+                  <Box sx={{ 
+                    width: `${(completed / total) * 100}%`, 
+                    bgcolor: '#22C55E',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }} />
+                )}
+                {/* In Progress - Blue */}
+                {inProgress > 0 && (
+                  <Box sx={{ 
+                    width: `${(inProgress / total) * 100}%`, 
+                    bgcolor: '#3B82F6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }} />
+                )}
+                {/* Delayed - Yellow */}
+                {delayed > 0 && (
+                  <Box sx={{ 
+                    width: `${(delayed / total) * 100}%`, 
+                    bgcolor: '#FCD34D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }} />
+                )}
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={averageCompletion} 
-                sx={{ 
-                  height: 12, 
-                  borderRadius: 6, 
-                  bgcolor: 'var(--secondary-gray)', 
-                  '& .MuiLinearProgress-bar': { 
-                    bgcolor: 'var(--primary-orange)',
-                    borderRadius: 6
-                  } 
-                }} 
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                <Button 
-                  size="small" 
-                  onClick={() => navigate('/poc-delivery-list')} 
-                  sx={{ 
-                    color: 'var(--primary-orange)', 
-                    fontWeight: 600,
-                    '&:hover': { bgcolor: 'rgba(240, 102, 73, 0.08)' }
-                  }}
-                >
-                  View All PoCs →
-                </Button>
-                <Button 
-                  size="small" 
-                  onClick={() => navigate('/projects')} 
-                  sx={{ 
-                    color: 'var(--primary-orange)', 
-                    fontWeight: 600,
-                    '&:hover': { bgcolor: 'var(--active-bg)' }
-                  }}
-                >
-                  View All Issues →
-                </Button>
+              {/* Legend */}
+              <Box sx={{ display: 'flex', gap: 3, mt: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#22C55E' }} />
+                  <Typography variant="caption">Complete</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#3B82F6' }} />
+                  <Typography variant="caption">In-Progress</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FCD34D' }} />
+                  <Typography variant="caption">Delayed</Typography>
+                </Box>
               </Box>
             </Box>
+
+            {/* Stats Grid */}
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Total PoCs</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{total}</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Completed</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{completed}</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>In Progress</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{inProgress}</Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase' }}>Delayed</Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mt: 0.5 }}>{delayed}</Typography>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Arrow Button */}
+            <IconButton
+              onClick={() => navigate('/poc-delivery-list')}
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16,
+                bgcolor: 'rgba(255,255,255,0.25)',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' }
+              }}
+            >
+              <ArrowForwardIcon sx={{ color: '#fff' }} />
+            </IconButton>
           </Paper>
 
-          {/* Delayed & In Progress PoC Details */}
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            {delayed > 0 && (
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--active-bg) 0%, #fff 100%)' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CancelOutlinedIcon /> Delayed Projects ({delayed})
-                  </Typography>
-                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {delayedRows.map((item, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a', cursor: 'pointer' }} onClick={() => navigate('/poc-delivery-list?status=Delayed')}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
-                          <Chip label="Delayed" size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600 }} />
+          {/* Two Column Layout */}
+          <Grid container spacing={3}>
+            {/* Important Blockers Section */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Paper sx={{ 
+                p: 3, 
+                borderRadius: 3, 
+                background: 'linear-gradient(135deg, #FFB5A0 0%, #FFC9B8 100%)',
+                minHeight: 400,
+                position: 'relative',
+                boxShadow: '0 4px 16px rgba(255, 181, 160, 0.3)'
+              }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1F2937' }}>Important Blockers</Typography>
+                <Box sx={{ maxHeight: 300, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).slice(0, 3).map((item, idx) => (
+                    <Box key={idx} sx={{ 
+                      p: 2.5, 
+                      bgcolor: 'rgba(255,255,255,0.7)', 
+                      borderRadius: 2,
+                      backdropFilter: 'blur(10px)'
+                    }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
+                        Project Name: {item.title || item.customer || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 2, color: '#4B5563' }}>
+                        <strong>Blockers:</strong> {item.currentBlockers}
+                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
+                            <strong>⏰ Start Date</strong>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600 }}>
+                            {formatDate(item.startDate) || 'N/A'}
+                          </Typography>
                         </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Customer: {item.customer || 'N/A'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Lead: {item.deliveryLead || 'N/A'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Due: {formatDate(item.endDate)}</Typography>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography variant="caption" sx={{ color: '#6B7280', display: 'block' }}>
+                            <strong>⏱️ End Date</strong>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#1F2937', fontWeight: 600 }}>
+                            {formatDate(item.endDate) || 'N/A'}
+                          </Typography>
+                        </Box>
                       </Box>
+                    </Box>
+                  ))}
+                  {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>No blockers reported</Typography>
+                    </Box>
+                  )}
+                </Box>
+                <IconButton
+                  onClick={() => navigate('/poc-delivery-list')}
+                  sx={{
+                    position: 'absolute',
+                    bottom: 16,
+                    right: 16,
+                    bgcolor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' }
+                  }}
+                >
+                  <ArrowForwardIcon sx={{ color: '#1F2937' }} />
+                </IconButton>
+              </Paper>
+            </Grid>
+
+            {/* PoC Timeline Section */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Paper sx={{ 
+                p: 3, 
+                borderRadius: 3, 
+                background: 'linear-gradient(135deg, #FFE5E0 0%, #FFF0ED 100%)',
+                minHeight: 400,
+                position: 'relative',
+                boxShadow: '0 4px 16px rgba(255, 229, 224, 0.3)'
+              }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1F2937' }}>PoC Timeline</Typography>
+                
+                {/* Simple Timeline View */}
+                <Box sx={{ position: 'relative', mt: 4 }}>
+                  {/* Month Labels */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1 }}>
+                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June'].map(month => (
+                      <Typography key={month} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem' }}>
+                        {month}
+                      </Typography>
                     ))}
                   </Box>
-                </Paper>
-              </Grid>
-            )}
-            {inProgress > 0 && (
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--secondary-gray) 0%, #fff 100%)' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <HourglassEmptyIcon /> In Progress Projects ({inProgress})
-                  </Typography>
-                  <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {inProgressRows.map((item, idx) => (
-                      <Box key={idx} sx={{ p: 2, mb: 1, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe', cursor: 'pointer' }} onClick={() => navigate('/poc-delivery-list?status=In%20Progress')}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.title}</Typography>
-                          <Chip label={String(item.status).charAt(0).toUpperCase() + String(item.status).slice(1)} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600 }} />
+
+                  {/* Timeline Bars */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {rows.slice(0, 3).map((item, idx) => {
+                      // Calculate bar position based on dates (simplified)
+                      const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
+                      const endMonth = item.endDate ? dayjs(item.endDate).month() : 5;
+                      const leftPercent = (startMonth / 12) * 100;
+                      const widthPercent = ((endMonth - startMonth + 1) / 12) * 100;
+                      
+                      return (
+                        <Box key={idx} sx={{ position: 'relative', height: 32 }}>
+                          <Box sx={{
+                            position: 'absolute',
+                            left: `${leftPercent}%`,
+                            width: `${widthPercent}%`,
+                            height: 32,
+                            bgcolor: idx === 0 ? '#FF6B4A' : idx === 1 ? '#D32F2F' : '#FF8F77',
+                            borderRadius: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 1.5,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                          }}>
+                            <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.75rem' }}>
+                              {item.customer || item.title || `Project ${idx + 1}`}
+                            </Typography>
+                          </Box>
                         </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Customer: {item.customer || 'N/A'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Lead: {item.deliveryLead || 'N/A'}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Progress: {item.percent || 0}%</Typography>
-                      </Box>
-                    ))}
+                      );
+                    })}
                   </Box>
-                </Paper>
-              </Grid>
-            )}
+                </Box>
+
+                <IconButton
+                  onClick={() => navigate('/schedule')}
+                  sx={{
+                    position: 'absolute',
+                    bottom: 16,
+                    right: 16,
+                    bgcolor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' }
+                  }}
+                >
+                  <ArrowForwardIcon sx={{ color: '#1F2937' }} />
+                </IconButton>
+              </Paper>
+            </Grid>
           </Grid>
         </Box>
 
