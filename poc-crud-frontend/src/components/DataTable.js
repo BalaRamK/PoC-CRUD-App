@@ -35,8 +35,20 @@ const initialVisibleColumns = [
   "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent"
 ];
 
-const statusOptions = ['Completed', 'Delayed', 'On Track', 'Cancelled', 'Draft'];
-const phaseOptions = ['Discovery', 'Design', 'Development', 'Testing', 'Deployment'];
+const statusOptions = ['On Track', 'Delayed', 'Completed'];
+const phaseOptions = ['Delivery Initiation', 'Planning & Setup', 'Execution', 'Evaluation', 'Closure'];
+
+// Helper to auto-calculate if status should be delayed
+const calculateStatus = (endDate, currentStatus) => {
+  if (String(currentStatus).toLowerCase() === 'completed') {
+    return 'Completed';
+  }
+  const end = dayjs(endDate);
+  if (end.isValid() && end.isBefore(dayjs(), 'day')) {
+    return 'Delayed';
+  }
+  return currentStatus || 'On Track';
+};
 
 // Helper for status chip styling
 const getStatusChipProps = (status) => {
@@ -54,30 +66,8 @@ const getStatusChipProps = (status) => {
       label = 'Delayed';
       break;
     case 'on track':
-    case 'execution':
-    case 'in progress':
-      color = 'primary'; // Use primary for 'On Track' / 'In Progress'
-      label = status;
-      break;
-    case 'cancelled':
-      color = 'error';
-      label = 'Cancelled';
-      break;
-    case 'draft': // Inspired by billing image
       color = 'info';
-      label = 'Draft';
-      break;
-    case 'unpaid': // Inspired by billing image
-      color = 'warning';
-      label = 'Unpaid';
-      break;
-    case 'past due': // Inspired by billing image
-      color = 'error';
-      label = 'Past due';
-      break;
-    case 'paid': // Inspired by billing image
-      color = 'success';
-      label = 'Paid';
+      label = 'On Track';
       break;
     default:
       color = 'default';
@@ -132,7 +122,18 @@ export default function DataTable({ onFilteredDataChange }) {
   };
 
   function handleOpenAdd() {
-    setForm(allKeys.reduce((acc, key) => ({ ...acc, [key]: "" }), {}));
+    const newForm = allKeys.reduce((acc, key) => ({ ...acc, [key]: "" }), {});
+    // Auto-increment POC ID
+    if (rows.length > 0) {
+      const maxId = Math.max(...rows.map(r => {
+        const id = String(r.pocId || '').replace(/[^0-9]/g, '');
+        return id ? parseInt(id, 10) : 0;
+      }));
+      newForm.pocId = String((maxId + 1) || 1);
+    } else {
+      newForm.pocId = '1';
+    }
+    setForm(newForm);
     setEditIdx(null);
     setEditArrayIdx(null);
     setEditServerIdx(null);
@@ -176,8 +177,12 @@ export default function DataTable({ onFilteredDataChange }) {
   }
 
   function handleSave() {
-    const valuesArray = allKeys.map(k => form[k]);
-    const updatedRow = allKeys.reduce((acc, k) => ({ ...acc, [k]: form[k] }), {});
+    // Auto-calculate delayed status based on end date
+    const calculatedStatus = calculateStatus(form.endDate, form.status);
+    const formWithCalculatedStatus = { ...form, status: calculatedStatus };
+    
+    const valuesArray = allKeys.map(k => formWithCalculatedStatus[k]);
+    const updatedRow = allKeys.reduce((acc, k) => ({ ...acc, [k]: formWithCalculatedStatus[k] }), {});
 
     if (editArrayIdx === null) {
       // optimistic UI add
@@ -388,18 +393,67 @@ export default function DataTable({ onFilteredDataChange }) {
     }
 
     if (key === 'status') {
+      const calculatedStatus = calculateStatus(form.endDate, form.status);
+      const isCompleted = String(calculatedStatus).toLowerCase() === 'completed';
+      const isDelayed = String(calculatedStatus).toLowerCase() === 'delayed';
+      
+      // If delayed due to end date, allow change to Completed only
+      if (isDelayed) {
+        return (
+          <FormControl fullWidth size="small" key={key}>
+            <InputLabel>{label}</InputLabel>
+            <Select
+              name={key}
+              value={form.status || 'Delayed'}
+              label={label}
+              onChange={(e) => {
+                // Only allow changing to Completed from Delayed state
+                if (e.target.value === 'Completed') {
+                  handleChange({ target: { name: 'status', value: 'Completed' } });
+                }
+              }}
+            >
+              <MenuItem value="Delayed">Delayed (Auto-calculated from End Date)</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+            </Select>
+          </FormControl>
+        );
+      }
+      
+      // If completed, can't change
+      if (isCompleted) {
+        return (
+          <FormControl fullWidth size="small" key={key}>
+            <InputLabel>{label}</InputLabel>
+            <Select
+              name={key}
+              value="Completed"
+              label={label}
+              disabled
+            >
+              <MenuItem value="Completed">Completed</MenuItem>
+            </Select>
+          </FormControl>
+        );
+      }
+      
+      // On Track - can only change to Completed
       return (
         <FormControl fullWidth size="small" key={key}>
           <InputLabel>{label}</InputLabel>
           <Select
             name={key}
-            value={form[key]}
+            value={form.status || 'On Track'}
             label={label}
-            onChange={handleChange}
+            onChange={(e) => {
+              // Only allow Completed status change from On Track
+              if (e.target.value === 'Completed' || e.target.value === 'On Track') {
+                handleChange({ target: { name: 'status', value: e.target.value } });
+              }
+            }}
           >
-            {statusOptions.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
-            ))}
+            <MenuItem value="On Track">On Track</MenuItem>
+            <MenuItem value="Completed">Completed</MenuItem>
           </Select>
         </FormControl>
       );
