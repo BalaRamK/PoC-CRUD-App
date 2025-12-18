@@ -66,13 +66,14 @@ export default function Home() {
       if (data && data.success && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
 
+      // Ensure keys match your Excel columns (shared for mapping and filtering)
+      const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"];
+
       const normalized = data.map((item, idx) => {
         let values = [];
         if (Array.isArray(item.values)) values = Array.isArray(item.values[0]) ? item.values[0] : item.values;
         else if (Array.isArray(item)) values = item;
 
-        // Ensure keys match your Excel columns
-        const keys = ["pocId", "customer", "title", "salesOwner", "deliveryLead", "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent", "nextMilestone", "currentBlockers", "comments"];
         const mapped = keys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
 
         // Convert Excel serial dates for startDate/endDate if needed, as in DataTable.js
