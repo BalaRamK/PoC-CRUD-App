@@ -1,33 +1,24 @@
-# 📚 Navigation Restructure - Documentation Index
+# 📚 PoC CRUD App - Documentation Index
 
 ## 🎯 Quick Links (Start Here)
 
-### 🚀 I want to deploy this NOW
-→ Read: **`NAVIGATION_RESTRUCTURE_QUICKSTART.md`**
-- 5 minute deployment guide
-- Step-by-step instructions
-- Local testing & VM deployment
-
-### 📖 I want to understand what changed
+### 📖 I want to understand the application
 → Read: **`COMPLETE_OVERVIEW.md`**
-- Comprehensive overview
-- Before/after comparison
-- All changes documented
+- Comprehensive overview of the application
+- Architecture and components
+- Navigation structure
 
-### 🎨 I want to see visual diagrams
-→ Read: **`NAVIGATION_RESTRUCTURE_SUMMARY.md`**
-- Visual comparisons
-- Responsive layout diagrams
-- Component structure trees
+### 🚀 I want to deploy this application
+→ Read: **`DEPLOYMENT_GUIDE.md`** or **`QUICK_DEPLOY.md`**
+- Deployment instructions
+- Configuration setup
+- Production deployment steps
 
-### ✅ I want to test everything
-→ Read: **`DEPLOYMENT_CHECKLIST_NAV.md`**
-- Pre-deployment checklist
-- Testing procedures
-- Post-deployment verification
-
-### 📁 I want to understand the folders
-→ Read: **`FOLDER_STRUCTURE.md`**
+### 🖥️ I want to deploy to a VM
+→ Read: **`VM_DEPLOYMENT_GUIDE.md`** or **`VM_QUICK_START.md`**
+- VM-specific deployment steps
+- Server configuration
+- Troubleshooting guide
 - Folder organization details
 - File locations
 - Component organization

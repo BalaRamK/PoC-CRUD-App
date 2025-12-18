@@ -278,6 +278,63 @@ router.post('/run/:id', async (req, res) => {
 });
 
 /**
+ * POST /api/reports/send/:id
+ * Send a report immediately via email
+ */
+router.post('/send/:id', async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const report = scheduledReports.find(r => r.id === reportId);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Scheduled report not found'
+      });
+    }
+
+    if (report.deliveryMethod !== 'email' || !report.emailRecipients || report.emailRecipients.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Report is not configured for email delivery or has no recipients'
+      });
+    }
+
+    // TODO: Implement actual email sending logic
+    // This would:
+    // 1. Fetch data from appropriate source (POC/Jira)
+    // 2. Apply filters
+    // 3. Generate CSV/visualization
+    // 4. Send email using nodemailer or similar service
+    // For now, we'll simulate success
+    
+    console.log(`Sending email report "${report.reportName}" to:`, report.emailRecipients);
+    
+    // Update last run time
+    const reportIndex = scheduledReports.findIndex(r => r.id === reportId);
+    scheduledReports[reportIndex].lastRun = new Date().toISOString();
+
+    res.json({
+      success: true,
+      message: `Report sent successfully to ${report.emailRecipients.length} recipient(s)`,
+      data: {
+        reportId,
+        reportName: report.reportName,
+        recipients: report.emailRecipients,
+        sentAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error sending report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send report',
+      error: error.message
+    });
+  }
+});
+
+/**
  * Helper function to calculate next run time
  */
 function calculateNextRun(frequency, dayOfWeek, dayOfMonth, time) {

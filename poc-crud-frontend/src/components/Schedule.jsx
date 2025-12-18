@@ -12,6 +12,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import WorkIcon from '@mui/icons-material/Work';
 import axios from 'axios';
 
 export default function Schedule() {
@@ -121,17 +122,22 @@ export default function Schedule() {
       if (response.data.success) {
         console.log('Report Configuration Saved:', response.data.data);
         setSuccess(true);
+        
+        // If download is selected and not scheduled, trigger immediate export
+        if (deliveryMethod === 'download' && !scheduleEnabled) {
+          await handleImmediateExport(payload);
+        }
+        
+        // If email is selected and not scheduled, trigger immediate email
+        if (deliveryMethod === 'email' && !scheduleEnabled) {
+          await handleImmediateEmail(payload, response.data.data.id);
+        }
       } else {
         throw new Error(response.data.message || 'Failed to save report configuration');
       }
-      
-      // If download is selected and not scheduled, trigger immediate export
-      if (deliveryMethod === 'download' && !scheduleEnabled) {
-        handleImmediateExport(payload);
-      }
     } catch (err) {
       console.error('Error creating report:', err);
-      setError(err.message || 'Failed to create report configuration');
+      setError(err.response?.data?.message || err.message || 'Failed to create report configuration');
     } finally {
       setLoading(false);
     }
@@ -143,10 +149,10 @@ export default function Schedule() {
       let data = [];
       if (config.dataSource === 'poc') {
         const response = await axios.get('/api/items');
-        data = response.data?.data || [];
+        data = response.data?.data || response.data || [];
       } else if (config.dataSource === 'jira') {
-        const response = await axios.get(`/api/jira/project/${config.jiraProject}/issues`);
-        data = response.data?.data || [];
+        const response = await axios.get(`/api/jira/projects/${config.jiraProject}/issues`);
+        data = response.data?.data || response.data || [];
       }
 
       // Apply filters
@@ -176,7 +182,7 @@ export default function Schedule() {
         const headers = Object.keys(filtered[0]);
         const csvContent = [
           headers.join(','),
-          ...filtered.map(row => headers.map(h => `"${row[h] || ''}"`).join(','))
+          ...filtered.map(row => headers.map(h => `"${(row[h] || '').toString().replace(/"/g, '""')}"`).join(','))
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -188,10 +194,27 @@ export default function Schedule() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        throw new Error('No data available to export');
       }
     } catch (err) {
       console.error('Error exporting data:', err);
-      setError('Failed to export data');
+      throw new Error(err.message || 'Failed to export data');
+    }
+  };
+
+  const handleImmediateEmail = async (config, reportId) => {
+    try {
+      // Trigger backend to send email with report
+      const response = await axios.post(`/api/reports/send/${reportId}`);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to send email');
+      }
+    } catch (err) {
+      console.error('Error sending email:', err);
+      throw new Error(err.response?.data?.message || err.message || 'Failed to send email');
     }
   };
 
@@ -544,7 +567,7 @@ export default function Schedule() {
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-dark)', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
           <ScheduleIcon sx={{ color: 'var(--primary-orange)' }} />
-          Schedule Reports
+          Schedule Report
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Configure and schedule automated dashboard exports
@@ -623,6 +646,3 @@ export default function Schedule() {
     </Box>
   );
 }
-
-// Import WorkIcon for Jira card
-import WorkIcon from '@mui/icons-material/Work';
