@@ -89,7 +89,11 @@ export default function Home() {
         return { id: item.id ?? idx, index: item.index ?? idx, values, ...mapped };
       });
 
-      setRows(normalized);
+      const cleaned = normalized.filter(row =>
+        keys.some(key => String(row[key] ?? '').trim() !== '')
+      );
+
+      setRows(cleaned);
     } catch (e) {
       console.error('Home.fetchRows', e);
       setRows([]);
@@ -502,7 +506,7 @@ export default function Home() {
                       backdropFilter: 'blur(10px)'
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
-                        Project Name: {item.title || item.customer || 'N/A'}
+                        Project Name: {item.customer || item.title || 'N/A'}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
                         Blockers: {item.currentBlockers}
@@ -721,7 +725,7 @@ export default function Home() {
                       border: '1px solid #E0E0E0'
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#1F2937' }}>
-                        Project Name: {item.title || item.customer || 'N/A'}
+                        Project Name: {item.customer || item.title || 'N/A'}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1 }}>
                         Blockers: {item.currentBlockers}
@@ -785,7 +789,7 @@ export default function Home() {
                       backdropFilter: 'blur(10px)'
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
-                        Project Name: {item.title || item.customer || 'N/A'}
+                        Project Name: {item.customer || item.title || 'N/A'}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
                         Blockers: {item.currentBlockers || 'Next Milestone'}
@@ -869,7 +873,7 @@ export default function Home() {
                       backdropFilter: 'blur(10px)'
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
-                        Project Name: {item.title || item.customer || 'N/A'}
+                        Project Name: {item.customer || item.title || 'N/A'}
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#4B5563', display: 'block', mb: 1.5 }}>
                         Blockers: {item.currentBlockers || 'Next Milestone'}

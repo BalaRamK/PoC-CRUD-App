@@ -263,7 +263,11 @@ export default function DataTable({ onFilteredDataChange }) {
         };
       });
 
-      setRows(normalized);
+      const cleaned = normalized.filter(row =>
+        allKeys.some(key => String(row[key] ?? '').trim() !== '')
+      );
+
+      setRows(cleaned);
     } catch (err) {
       console.error('Failed to fetch rows', err?.response?.data || err.message || err);
       setRows([]);

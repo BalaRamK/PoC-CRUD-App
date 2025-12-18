@@ -27,7 +27,7 @@ const navItems = [
   { text: 'Project Delivery', path: '/projects' },
   { text: 'PoC Delivery', path: '/poc-delivery-list' },
   { text: 'Documents', path: '/documents' },
-  { text: 'Schedule', path: '/schedule' },
+  { text: 'Schedule Reports', path: '/schedule' },
 ];
 
 export default function TopNavigation() {
