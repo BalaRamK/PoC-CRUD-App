@@ -74,7 +74,11 @@ export default function Home() {
         if (Array.isArray(item.values)) values = Array.isArray(item.values[0]) ? item.values[0] : item.values;
         else if (Array.isArray(item)) values = item;
 
-        const mapped = keys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
+        // Support both array-of-values and object-shaped payloads
+        const mapped = keys.reduce((acc, key, i) => ({
+          ...acc,
+          [key]: values[i] ?? item[key] ?? ''
+        }), {});
 
         // Convert Excel serial dates for startDate/endDate if needed, as in DataTable.js
         const excelSerialToISO = (n) => {

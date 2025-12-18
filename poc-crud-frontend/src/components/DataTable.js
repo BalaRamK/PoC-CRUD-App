@@ -253,7 +253,11 @@ export default function DataTable({ onFilteredDataChange }) {
           return v;
         });
 
-        const mapped = allKeys.reduce((acc, key, i) => ({ ...acc, [key]: values[i] ?? '' }), {});
+        // Support both array-of-values and object-shaped payloads
+        const mapped = allKeys.reduce((acc, key, i) => ({
+          ...acc,
+          [key]: values[i] ?? item[key] ?? ''
+        }), {});
 
         return {
           id: item.id ?? idx,
