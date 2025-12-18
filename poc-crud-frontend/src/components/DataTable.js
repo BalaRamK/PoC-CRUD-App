@@ -21,7 +21,7 @@ import './ModernDialog.css'; // Import the new CSS file
 
 const allColumns = [
   "PoC ID", "Customer Name", "PoC Title", "Sales Owner", "Delivery Lead",
-  "Start Date", "End Date", "Estimated End Date", "Current Phase", "Status", "% Completion",
+  "Start Date", "Actual End Date", "Estimated End Date", "Current Phase", "Status", "% Completion",
   "Next Milestone", "Current Blockers", "Comments"
 ];
 
@@ -39,11 +39,12 @@ const statusOptions = ['On Track', 'Delayed', 'Completed'];
 const phaseOptions = ['Delivery Initiation', 'Planning & Setup', 'Execution', 'Evaluation', 'Closure'];
 
 // Helper to auto-calculate if status should be delayed
-const calculateStatus = (endDate, currentStatus) => {
+// Use planned (estimated) end date for delay calculation
+const calculateStatus = (estimatedEndDate, currentStatus) => {
   if (String(currentStatus).toLowerCase() === 'completed') {
     return 'Completed';
   }
-  const end = dayjs(endDate);
+  const end = dayjs(estimatedEndDate);
   if (end.isValid() && end.isBefore(dayjs(), 'day')) {
     return 'Delayed';
   }
@@ -177,8 +178,8 @@ export default function DataTable({ onFilteredDataChange }) {
   }
 
   function handleSave() {
-    // Auto-calculate delayed status based on end date
-    const calculatedStatus = calculateStatus(form.endDate, form.status);
+    // Auto-calculate delayed status based on planned end date
+    const calculatedStatus = calculateStatus(form.estimatedEndDate, form.status);
     const formWithCalculatedStatus = { ...form, status: calculatedStatus };
     
     const valuesArray = allKeys.map(k => formWithCalculatedStatus[k]);
@@ -612,30 +613,39 @@ export default function DataTable({ onFilteredDataChange }) {
         <Table size="small">
           <TableHead sx={{ bgcolor: 'var(--secondary-gray)' }}>
             <TableRow>
-              {allKeys.filter(key => visibleColumns.includes(key)).map((key) => {
-                const col = allColumns[allKeys.indexOf(key)];
-                return (
-                  <TableCell key={key} sx={{
-                    fontWeight: 600,
-                    position: 'sticky',
-                    top: 0,
-                    backgroundColor: 'var(--secondary-gray)',
-                    zIndex: 2,
-                    fontSize: '0.9rem',
-                    color: 'var(--text-dark)',
-                    borderBottom: '1px solid var(--border-color)'
-                  }}>
-                    <TableSortLabel
-                      active={orderBy === key}
-                      direction={orderBy === key ? order : 'asc'}
-                      onClick={() => handleRequestSort(key)}
-                      sx={{ '& .MuiTableSortLabel-icon': { color: 'var(--text-light) !important' } }}
-                    >
-                      {col}
-                    </TableSortLabel>
-                  </TableCell>
-                );
-              })}
+              {(() => {
+                // Compute display order: swap 'endDate' and 'estimatedEndDate' visually
+                const keysToShow = allKeys.filter(key => visibleColumns.includes(key));
+                const iEnd = keysToShow.indexOf('endDate');
+                const iEst = keysToShow.indexOf('estimatedEndDate');
+                if (iEnd !== -1 && iEst !== -1) {
+                  [keysToShow[iEnd], keysToShow[iEst]] = [keysToShow[iEst], keysToShow[iEnd]];
+                }
+                return keysToShow.map((key) => {
+                  const col = allColumns[allKeys.indexOf(key)];
+                  return (
+                    <TableCell key={key} sx={{
+                      fontWeight: 600,
+                      position: 'sticky',
+                      top: 0,
+                      backgroundColor: 'var(--secondary-gray)',
+                      zIndex: 2,
+                      fontSize: '0.9rem',
+                      color: 'var(--text-dark)',
+                      borderBottom: '1px solid var(--border-color)'
+                    }}>
+                      <TableSortLabel
+                        active={orderBy === key}
+                        direction={orderBy === key ? order : 'asc'}
+                        onClick={() => handleRequestSort(key)}
+                        sx={{ '& .MuiTableSortLabel-icon': { color: 'var(--text-light) !important' } }}
+                      >
+                        {col}
+                      </TableSortLabel>
+                    </TableCell>
+                  );
+                });
+              })()}
               <TableCell sx={{
                 fontWeight: 600,
                 position: 'sticky',
@@ -663,7 +673,14 @@ export default function DataTable({ onFilteredDataChange }) {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, rIdx) => (
                   <TableRow key={row.id ?? rIdx} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    {allKeys.filter(key => visibleColumns.includes(key)).map((k, cIdx) => (
+                    {(() => {
+                      const keysToShow = allKeys.filter(key => visibleColumns.includes(key));
+                      const iEnd = keysToShow.indexOf('endDate');
+                      const iEst = keysToShow.indexOf('estimatedEndDate');
+                      if (iEnd !== -1 && iEst !== -1) {
+                        [keysToShow[iEnd], keysToShow[iEst]] = [keysToShow[iEst], keysToShow[iEnd]];
+                      }
+                      return keysToShow.map((k, cIdx) => (
                       <TableCell key={cIdx} sx={{
                         maxWidth: 200,
                         whiteSpace: 'normal',
@@ -680,7 +697,8 @@ export default function DataTable({ onFilteredDataChange }) {
                           `${row[k]}%`
                         ) : row[k]}
                       </TableCell>
-                    ))}
+                      ));
+                    })()}
                     <TableCell sx={{ borderBottom: '1px solid var(--border-color)' }}>
                       <IconButton
                         aria-label="more"

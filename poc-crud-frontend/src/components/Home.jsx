@@ -166,9 +166,10 @@ export default function Home() {
   const isDelayed = (item) => {
     const status = String(item.status).toLowerCase();
     if (status === 'completed') return false;
-    const endDate = dayjs(item.endDate);
+    // Consider planned (estimated) end date for delay determination
+    const plannedEnd = dayjs(item.estimatedEndDate || item.endDate);
     const today = dayjs();
-    return endDate.isValid() && endDate.isBefore(today, 'day');
+    return plannedEnd.isValid() && plannedEnd.isBefore(today, 'day');
   };
 
   // Helper to filter rows by time period
