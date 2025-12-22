@@ -210,9 +210,15 @@ export default function DataTable({ onFilteredDataChange }) {
     setUserLoading(true);
     try {
       const token = await getToken();
+      const encodedSearch = encodeURIComponent(`"${searchText}"`);
       const response = await axios.get(
-        `https://graph.microsoft.com/v1.0/users?$search="${searchText}"&$top=10`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `https://graph.microsoft.com/v1.0/users?$filter=startsWith(displayName,'${searchText}') or startsWith(mail,'${searchText}')&$top=10`,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            ConsistencyLevel: 'eventual'
+          } 
+        }
       );
       const users = response.data.value?.map(u => ({
         id: u.id,
@@ -800,7 +806,8 @@ export default function DataTable({ onFilteredDataChange }) {
                         wordBreak: 'break-word',
                         fontSize: '0.85rem',
                         color: 'var(--text-dark)',
-                        borderBottom: '1px solid var(--border-color)'
+                        borderBottom: '1px solid var(--border-color)',
+                        textAlign: k === 'customer' ? 'center' : 'left'
                       }}>
                         {k === 'status' ? (
                           <Chip size="small" {...getStatusChipProps(row[k])} sx={{ borderRadius: '4px', height: '24px', fontSize: '0.75rem' }} />
@@ -812,8 +819,11 @@ export default function DataTable({ onFilteredDataChange }) {
                             sx={{
                               textTransform: 'none',
                               color: 'var(--primary-orange)',
-                              fontWeight: 600,
+                              fontWeight: 700,
+                              fontSize: '0.95rem',
                               px: 0,
+                              display: 'block',
+                              width: '100%',
                               '&:hover': { textDecoration: 'underline', background: 'transparent' }
                             }}
                           >
