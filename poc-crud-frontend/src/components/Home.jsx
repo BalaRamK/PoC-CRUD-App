@@ -165,7 +165,7 @@ export default function Home() {
   // Helper to calculate if a PoC is actually delayed based on dates
   const isDelayed = (item) => {
     const status = String(item.status).toLowerCase();
-    if (status === 'completed') return false;
+    if (status === 'completed' || status === 'on hold') return false;
     // Consider planned (estimated) end date for delay determination
     const plannedEnd = dayjs(item.estimatedEndDate || item.endDate);
     const today = dayjs();

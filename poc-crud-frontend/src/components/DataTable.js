@@ -3,7 +3,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination,
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Toolbar, Typography, Box, IconButton, TableSortLabel, Chip, Menu, MenuItem,
-  InputAdornment, Select, FormControl, InputLabel, Checkbox, ListItemText
+  InputAdornment, Select, FormControl, InputLabel, Checkbox, ListItemText,
+  Autocomplete, Avatar, CircularProgress
 } from "@mui/material";
 // Import specific icons for actions and toolbar if needed (MoreVertIcon, etc.)
 import AddIcon from '@mui/icons-material/Add';
@@ -18,6 +19,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
 import './ModernDialog.css'; // Import the new CSS file
+import { useAuth } from '../auth/AuthProvider';
 
 const allColumns = [
   "PoC ID", "Customer Name", "PoC Title", "Sales Owner", "Delivery Lead",
@@ -35,15 +37,15 @@ const initialVisibleColumns = [
   "startDate", "endDate", "estimatedEndDate", "phase", "status", "percent"
 ];
 
-const statusOptions = ['On Track', 'Delayed', 'Completed'];
+const statusOptions = ['On Track', 'Delayed', 'Completed', 'On Hold'];
 const phaseOptions = ['Delivery Initiation', 'Planning & Setup', 'Execution', 'Evaluation', 'Closure'];
 
 // Helper to auto-calculate if status should be delayed
-// Use planned (estimated) end date for delay calculation
+// Use planned (estimated) end date for delay calculation, but never override "On Hold"
 const calculateStatus = (estimatedEndDate, currentStatus) => {
-  if (String(currentStatus).toLowerCase() === 'completed') {
-    return 'Completed';
-  }
+  const lower = String(currentStatus).toLowerCase();
+  if (lower === 'completed') return 'Completed';
+  if (lower === 'on hold') return 'On Hold';
   const end = dayjs(estimatedEndDate);
   if (end.isValid() && end.isBefore(dayjs(), 'day')) {
     return 'Delayed';
@@ -69,6 +71,10 @@ const getStatusChipProps = (status) => {
     case 'on track':
       color = 'info';
       label = 'On Track';
+      break;
+    case 'on hold':
+      color = 'secondary';
+      label = 'On Hold';
       break;
     default:
       color = 'default';
@@ -100,6 +106,11 @@ export default function DataTable({ onFilteredDataChange }) {
   const [loading, setLoading] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState(initialVisibleColumns);
   const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
+
+  // AAD people picker state
+  const { getToken } = useAuth();
+  const [userOptions, setUserOptions] = useState([]);
+  const [userLoading, setUserLoading] = useState(false);
 
   // State for actions menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -171,6 +182,51 @@ export default function DataTable({ onFilteredDataChange }) {
     try { if (document && document.activeElement) document.activeElement.blur(); } catch (e) { }
     setViewOpen(true);
     handleMenuClose(); // Close menu if opened via menu
+  }
+
+  function handleEditFromView() {
+    if (!viewRow) return;
+    setViewOpen(false);
+    const arrIdx = rows.findIndex(r => (r.index ?? r.id) === (viewRow.index ?? viewRow.id));
+    setEditArrayIdx(arrIdx);
+    setEditServerIdx(viewRow.index ?? viewRow.id);
+    setEditIdx(arrIdx);
+    setForm({ ...viewRow });
+    setOpen(true);
+  }
+
+  function handleDeleteFromView() {
+    if (!viewRow) return;
+    setViewOpen(false);
+    handleDelete(viewRow);
+  }
+
+  // Fetch AAD users for autocomplete
+  async function fetchAADUsers(searchText) {
+    if (!searchText || searchText.length < 2) {
+      setUserOptions([]);
+      return;
+    }
+    setUserLoading(true);
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `https://graph.microsoft.com/v1.0/users?$search="${searchText}"&$top=10`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const users = response.data.value?.map(u => ({
+        id: u.id,
+        displayName: u.displayName || u.mail,
+        mail: u.mail,
+        photo: u.id
+      })) || [];
+      setUserOptions(users);
+    } catch (err) {
+      console.error('Error fetching AAD users:', err);
+      setUserOptions([]);
+    } finally {
+      setUserLoading(false);
+    }
   }
 
   function handleChange(e) {
@@ -384,6 +440,65 @@ export default function DataTable({ onFilteredDataChange }) {
   const renderFormInput = (key, i) => {
     const label = allColumns[i];
     
+    if (key === 'pocId') {
+      return (
+        <TextField
+          key={key}
+          label={label}
+          value={form[key] ?? ''}
+          disabled
+          fullWidth
+          variant="outlined"
+          size="small"
+        />
+      );
+    }
+
+    if (key === 'salesOwner' || key === 'deliveryLead') {
+      const val = form[key] ?? '';
+      return (
+        <Autocomplete
+          key={key}
+          options={userOptions}
+          getOptionLabel={(opt) => typeof opt === 'string' ? opt : (opt.displayName || '')}
+          value={val ? (typeof val === 'string' ? val : val.displayName || val) : null}
+          onInputChange={(e, v) => fetchAADUsers(v)}
+          onChange={(e, v) => setForm({ ...form, [key]: v ? (typeof v === 'string' ? v : v.displayName) : '' })}
+          loading={userLoading}
+          renderOption={(props, option) => (
+            <Box {...props} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem', backgroundColor: 'var(--primary-orange)' }}>
+                {option.displayName?.charAt(0) || 'U'}
+              </Avatar>
+              <Box>
+                <Typography variant="body2">{option.displayName}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{option.mail}</Typography>
+              </Box>
+            </Box>
+          )}
+          fullWidth
+          variant="outlined"
+          size="small"
+          freeSolo
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={label}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {userLoading && <CircularProgress color="inherit" size={20} />}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+        />
+      );
+    }
+    
     if (['startDate','endDate','estimatedEndDate','estimatedDeliveryDate'].includes(key)) {
       return (
         <TextField
@@ -402,11 +517,24 @@ export default function DataTable({ onFilteredDataChange }) {
     }
 
     if (key === 'status') {
-      const calculatedStatus = calculateStatus(form.endDate, form.status);
-      const isCompleted = String(calculatedStatus).toLowerCase() === 'completed';
-      const isDelayed = String(calculatedStatus).toLowerCase() === 'delayed';
-      
-      // If delayed due to end date, allow change to Completed only
+      const calculatedStatus = calculateStatus(form.estimatedEndDate, form.status);
+      const lowerStatus = String(calculatedStatus).toLowerCase();
+      const isCompleted = lowerStatus === 'completed';
+      const isDelayed = lowerStatus === 'delayed';
+
+      // If completed, lock the field
+      if (isCompleted) {
+        return (
+          <FormControl fullWidth size="small" key={key}>
+            <InputLabel>{label}</InputLabel>
+            <Select name={key} value="Completed" label={label} disabled>
+              <MenuItem value="Completed">Completed</MenuItem>
+            </Select>
+          </FormControl>
+        );
+      }
+
+      // If auto-delayed, allow moving to On Hold or Completed (not back to delayed)
       if (isDelayed) {
         return (
           <FormControl fullWidth size="small" key={key}>
@@ -416,37 +544,21 @@ export default function DataTable({ onFilteredDataChange }) {
               value={form.status || 'Delayed'}
               label={label}
               onChange={(e) => {
-                // Only allow changing to Completed from Delayed state
-                if (e.target.value === 'Completed') {
-                  handleChange({ target: { name: 'status', value: 'Completed' } });
+                const val = e.target.value;
+                if (val === 'Completed' || val === 'On Hold') {
+                  handleChange({ target: { name: 'status', value: val } });
                 }
               }}
             >
-              <MenuItem value="Delayed">Delayed (Auto-calculated from End Date)</MenuItem>
+              <MenuItem value="Delayed">Delayed (from planned end date)</MenuItem>
+              <MenuItem value="On Hold">On Hold</MenuItem>
               <MenuItem value="Completed">Completed</MenuItem>
             </Select>
           </FormControl>
         );
       }
-      
-      // If completed, can't change
-      if (isCompleted) {
-        return (
-          <FormControl fullWidth size="small" key={key}>
-            <InputLabel>{label}</InputLabel>
-            <Select
-              name={key}
-              value="Completed"
-              label={label}
-              disabled
-            >
-              <MenuItem value="Completed">Completed</MenuItem>
-            </Select>
-          </FormControl>
-        );
-      }
-      
-      // On Track - can only change to Completed
+
+      // Default: allow On Track / On Hold / Completed
       return (
         <FormControl fullWidth size="small" key={key}>
           <InputLabel>{label}</InputLabel>
@@ -455,13 +567,14 @@ export default function DataTable({ onFilteredDataChange }) {
             value={form.status || 'On Track'}
             label={label}
             onChange={(e) => {
-              // Only allow Completed status change from On Track
-              if (e.target.value === 'Completed' || e.target.value === 'On Track') {
-                handleChange({ target: { name: 'status', value: e.target.value } });
+              const val = e.target.value;
+              if (['On Track', 'On Hold', 'Completed'].includes(val)) {
+                handleChange({ target: { name: 'status', value: val } });
               }
             }}
           >
             <MenuItem value="On Track">On Track</MenuItem>
+            <MenuItem value="On Hold">On Hold</MenuItem>
             <MenuItem value="Completed">Completed</MenuItem>
           </Select>
         </FormControl>
@@ -682,7 +795,7 @@ export default function DataTable({ onFilteredDataChange }) {
                       }
                       return keysToShow.map((k, cIdx) => (
                       <TableCell key={cIdx} sx={{
-                        maxWidth: 200,
+                        maxWidth: 220,
                         whiteSpace: 'normal',
                         wordBreak: 'break-word',
                         fontSize: '0.85rem',
@@ -691,6 +804,21 @@ export default function DataTable({ onFilteredDataChange }) {
                       }}>
                         {k === 'status' ? (
                           <Chip size="small" {...getStatusChipProps(row[k])} sx={{ borderRadius: '4px', height: '24px', fontSize: '0.75rem' }} />
+                        ) : k === 'customer' ? (
+                          <Button
+                            variant="text"
+                            size="small"
+                            onClick={() => handleOpenView(row)}
+                            sx={{
+                              textTransform: 'none',
+                              color: 'var(--primary-orange)',
+                              fontWeight: 600,
+                              px: 0,
+                              '&:hover': { textDecoration: 'underline', background: 'transparent' }
+                            }}
+                          >
+                            {row[k] || 'N/A'}
+                          </Button>
                         ) : (['startDate','endDate','estimatedEndDate'].includes(k) && row[k]) ? (
                           dayjs(row[k]).isValid() ? dayjs(row[k]).format('DD MMM YYYY') : row[k]
                         ) : k === 'percent' && row[k] ? (
@@ -724,7 +852,6 @@ export default function DataTable({ onFilteredDataChange }) {
                         <MenuItem onClick={() => handleOpenView(row)}><VisibilityIcon fontSize="small" sx={{ mr: 1 }} /> Check Next Milestone</MenuItem>
                         <MenuItem onClick={() => handleOpenView(row)}><VisibilityIcon fontSize="small" sx={{ mr: 1 }} /> Check Blocker</MenuItem>
                         <MenuItem onClick={() => handleOpenView(row)}><VisibilityIcon fontSize="small" sx={{ mr: 1 }} /> View</MenuItem>
-                        <MenuItem onClick={() => handleOpenEdit(row)}><EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit</MenuItem>
                         <MenuItem onClick={() => handleDelete(row)} sx={{ color: 'error.main' }}><DeleteIcon fontSize="small" sx={{ mr: 1 }} /> Delete</MenuItem>
                       </Menu>
                     </TableCell>
@@ -820,8 +947,10 @@ export default function DataTable({ onFilteredDataChange }) {
                       ))}
                   </Box>
               </DialogContent>
-              <DialogActions>
-                  <Button onClick={() => setViewOpen(false)} variant="contained" sx={{ backgroundColor: 'var(--primary-orange)', '&:hover': { backgroundColor: 'var(--primary-orange-light)' } }}>Close</Button>
+              <DialogActions sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
+                  <Button onClick={() => setViewOpen(false)} variant="text" sx={{ color: 'var(--text-dark)' }}>Close</Button>
+                  <Button onClick={handleEditFromView} variant="contained" sx={{ backgroundColor: 'var(--primary-orange)', '&:hover': { backgroundColor: 'var(--primary-orange-light)' } }}>Edit</Button>
+                  <Button onClick={handleDeleteFromView} variant="contained" sx={{ backgroundColor: 'error.main', '&:hover': { backgroundColor: 'error.dark' } }}>Delete</Button>
               </DialogActions>
           </Box>
       </Dialog>
