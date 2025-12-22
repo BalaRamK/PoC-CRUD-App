@@ -40,6 +40,18 @@ const initialVisibleColumns = [
 const statusOptions = ['On Track', 'Delayed', 'Completed', 'On Hold'];
 const phaseOptions = ['Delivery Initiation', 'Planning & Setup', 'Execution', 'Evaluation', 'Closure'];
 
+// Helper to auto-calculate % completion based on phase
+const calculatePercentByPhase = (phase) => {
+  const phaseMap = {
+    'Delivery Initiation': 20,
+    'Planning & Setup': 40,
+    'Execution': 60,
+    'Evaluation': 80,
+    'Closure': 100
+  };
+  return phaseMap[phase] || 0;
+};
+
 // Helper to auto-calculate if status should be delayed
 // Use planned (estimated) end date for delay calculation, but never override "On Hold"
 const calculateStatus = (estimatedEndDate, currentStatus) => {
@@ -595,7 +607,11 @@ export default function DataTable({ onFilteredDataChange }) {
             name={key}
             value={form[key]}
             label={label}
-            onChange={handleChange}
+            onChange={(e) => {
+              const phase = e.target.value;
+              const autoPercent = calculatePercentByPhase(phase);
+              setForm({ ...form, phase, percent: String(autoPercent) });
+            }}
           >
             {phaseOptions.map(option => (
               <MenuItem key={option} value={option}>{option}</MenuItem>
@@ -892,20 +908,6 @@ export default function DataTable({ onFilteredDataChange }) {
 
       {/* Add/Edit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth={false} className="modern-dialog">
-        <Box className="dialog-sidebar">
-            <Box className="sidebar-header">
-                <Typography variant="h5">{editIdx === null ? "Create New PoC" : "Edit PoC"}</Typography>
-                <Typography variant="body1">
-                    {editIdx === null
-                        ? "Fill in the details below to add a new proof of concept to the tracker."
-                        : `You are editing the PoC titled "${form.title || ''}".`
-                    }
-                </Typography>
-            </Box>
-            <Box className="sidebar-footer">
-                <Typography variant="body2">Ensure all fields are accurate and up-to-date.</Typography>
-            </Box>
-        </Box>
         <Box className="dialog-main-content">
             <DialogTitle>{editIdx === null ? "Add Row" : "Edit Row"}</DialogTitle>
             <DialogContent>
@@ -924,17 +926,6 @@ export default function DataTable({ onFilteredDataChange }) {
 
       {/* View Dialog */}
       <Dialog open={viewOpen} onClose={() => setViewOpen(false)} fullWidth maxWidth={false} className="modern-dialog">
-          <Box className="dialog-sidebar">
-              <Box className="sidebar-header">
-                  <Typography variant="h5">PoC Details</Typography>
-                  <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
-                      Viewing details for "{viewRow?.title || 'N/A'}"
-                  </Typography>
-              </Box>
-              <Box className="sidebar-footer">
-                  <Typography variant="body2">ID: {viewRow?.pocId || 'N/A'}</Typography>
-              </Box>
-          </Box>
           <Box className="dialog-main-content">
               <DialogTitle>View Full Details</DialogTitle>
               <DialogContent>

@@ -598,7 +598,7 @@ export default function Home() {
                 </Box>
                 
                 {/* Simple Timeline View */}
-                <Box sx={{ position: 'relative', mt: 3, maxHeight: 250, overflow: 'auto', pr: 1,
+                <Box sx={{ position: 'relative', mt: 3, maxHeight: 350, overflow: 'auto', pr: 1,
                   '&::-webkit-scrollbar': { width: '6px' },
                   '&::-webkit-scrollbar-thumb': { 
                     bgcolor: 'rgba(0,0,0,0.2)',
@@ -606,57 +606,85 @@ export default function Home() {
                     '&:hover': { bgcolor: 'rgba(0,0,0,0.3)' }
                   }
                 }}>
-                  {/* Month Labels - Dynamic based on filtered data */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1 }}>
-                    {timelineMonths.map((month, idx) => (
-                      <Typography key={idx} variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem', fontWeight: 500 }}>
-                        {month}
-                      </Typography>
-                    ))}
-                  </Box>
+                  {/* Calendar Grid Container */}
+                  <Box sx={{ position: 'relative' }}>
+                    {/* Vertical Date Lines */}
+                    <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+                      {timelineMonths.map((month, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            position: 'absolute',
+                            left: `${((idx + 1) / timelineMonths.length) * 100}%`,
+                            top: 0,
+                            bottom: 0,
+                            width: '1px',
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }}
+                        />
+                      ))}
+                    </Box>
 
-                  {/* Timeline Bars - Show all filtered items */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {filteredRows.map((item, idx) => {
-                      const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
-                      const endMonth = item.endDate ? dayjs(item.endDate).month() : 5;
-                      const leftPercent = (startMonth / 12) * 100;
-                      const widthPercent = Math.max(((endMonth - startMonth + 1) / 12) * 100, 8);
-                      
-                      const colors = ['#FF6B4A', '#D32F2F', '#FF8F77', '#F06649', '#FF7A5C', '#E85A3F', '#FF9980'];
-                      const color = colors[idx % colors.length];
-                      
-                      const tooltipText = `${item.customer || item.title || 'N/A'}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}\nStatus: ${item.status || 'N/A'}`;
-                      
-                      return (
-                        <Tooltip key={idx} title={tooltipText} arrow>
-                          <Box sx={{ position: 'relative', height: 32, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                            <Box sx={{
-                              position: 'absolute',
-                              left: `${leftPercent}%`,
-                              width: `${widthPercent}%`,
-                              height: 28,
-                              bgcolor: color,
-                              borderRadius: 2,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              px: 1,
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                              transition: 'all 0.2s ease',
-                              '&:hover': {
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-                                transform: 'scaleY(1.15)'
-                              }
-                            }}>
-                              <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {item.customer || item.title || `Project ${idx + 1}`}
-                              </Typography>
+                    {/* Month Labels - Dynamic based on filtered data */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 1, position: 'relative', zIndex: 1 }}>
+                      {timelineMonths.map((month, idx) => (
+                        <Box key={idx} sx={{ flex: 1, textAlign: 'center' }}>
+                          <Typography variant="caption" sx={{ color: '#4B5563', fontSize: '0.75rem', fontWeight: 600 }}>
+                            {month}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+
+                    {/* Timeline Bars - Show all filtered items */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, position: 'relative', zIndex: 2 }}>
+                      {filteredRows.map((item, idx) => {
+                        const startMonth = item.startDate ? dayjs(item.startDate).month() : 0;
+                        const endMonth = item.endDate ? dayjs(item.endDate).month() : 5;
+                        const leftPercent = (startMonth / 12) * 100;
+                        const widthPercent = Math.max(((endMonth - startMonth + 1) / 12) * 100, 8);
+                        
+                        const colors = ['#FF6B4A', '#D32F2F', '#FF8F77', '#F06649', '#FF7A5C', '#E85A3F', '#FF9980'];
+                        const color = colors[idx % colors.length];
+                        
+                        const tooltipText = `${item.customer || item.title || 'N/A'}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}\nStatus: ${item.status || 'N/A'}`;
+                        
+                        return (
+                          <Tooltip key={idx} title={tooltipText} arrow>
+                            <Box sx={{ position: 'relative', height: 28, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                              <Box sx={{
+                                position: 'absolute',
+                                left: `${leftPercent}%`,
+                                width: `${widthPercent}%`,
+                                height: 24,
+                                bgcolor: color,
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                px: 1,
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                                  transform: 'scaleY(1.2)',
+                                  zIndex: 10
+                                }
+                              }}>
+                                <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.65rem', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {item.customer || item.title || `Project ${idx + 1}`}
+                                </Typography>
+                              </Box>
                             </Box>
-                          </Box>
-                        </Tooltip>
-                      );
-                    })}
+                          </Tooltip>
+                        );
+                      })}
+                      {filteredRows.length === 0 && (
+                        <Box sx={{ textAlign: 'center', py: 3 }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280' }}>No projects in this period</Typography>
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
 

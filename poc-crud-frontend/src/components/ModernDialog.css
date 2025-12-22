@@ -1,22 +1,17 @@
 /* src/components/ModernDialog.css */
 
 .modern-dialog .MuiDialog-paper {
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   display: flex;
-  flex-direction: row;
-  max-width: 900px;
+  flex-direction: column;
+  max-width: 600px;
   width: 100%;
+  background-color: #ffffff;
 }
 
 .dialog-sidebar {
-  width: 280px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  color: #f8fafc;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: none;
 }
 
 .sidebar-header .MuiTypography-root {
@@ -38,13 +33,13 @@
 .dialog-main-content {
   flex: 1;
   padding: 32px;
-  background-color: #f8fafc; /* Lighter background for the content area */
+  background-color: #ffffff;
 }
 
 .dialog-main-content .MuiDialogTitle-root {
   padding: 0 0 24px 0;
   font-weight: 700;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: #1e293b;
 }
 
@@ -71,28 +66,28 @@
 
 .dialog-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
 .view-details-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
 }
 
 .view-detail-item {
-    padding: 12px;
-    background-color: #fff;
+    padding: 16px;
+    background-color: #f8fafc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
 }
 
 .view-detail-item-label {
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #64748b;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
