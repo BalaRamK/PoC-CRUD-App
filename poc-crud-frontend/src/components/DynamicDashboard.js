@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Box, Typography, Grid, Select, MenuItem, FormControl, InputLabel, Paper } from '@mui/material';
+import { Card, CardContent } from './ui/card';
 import DataTable from './DataTable';
 import { BarChart, PieChart } from './Charts';
 import Export from './Export';
@@ -48,19 +49,21 @@ export default function DynamicDashboard() {
       <Typography variant="h4" sx={{ mb: 2 }}>
         Dynamic Dashboard
       </Typography>
-      <Paper sx={{ p: 2, mb: 2, borderRadius: 2, boxShadow: 'var(--shadow-light)', bgcolor: 'var(--card-bg)' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={4}>
-            <StatTile icon={<AssessmentIcon />} label="Total Items" value={summary.total} color="#7c3aed" />
+      <Card className="mb-4">
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatTile icon={<AssessmentIcon />} label="Total Items" value={summary.total} color="#7c3aed" />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatTile icon={<HourglassBottomIcon />} label="In Progress" value={summary.inProg} color="#2563EB" />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={summary.done} color="#22C55E" />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <StatTile icon={<HourglassBottomIcon />} label="In Progress" value={summary.inProg} color="#2563EB" />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <StatTile icon={<CheckCircleOutlineIcon />} label="Completed" value={summary.done} color="#22C55E" />
-          </Grid>
-        </Grid>
-      </Paper>
+        </CardContent>
+      </Card>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Export data={filteredData} chartId="chart-container" tableId="table-container" />

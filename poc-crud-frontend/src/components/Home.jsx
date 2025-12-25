@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab,
+  Button as MUIButton, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip
 } from '@mui/material';
+import { Button as UIButton } from './ui/button';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -297,43 +298,19 @@ export default function Home() {
       </Box>
 
       {/* Tabs Section */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button
+      <Box sx={{ mb: 3, display: 'flex', gap: 12 }}>
+        <UIButton
           onClick={() => setTabValue(0)}
-          sx={{
-            px: 3.5,
-            py: 1.25,
-            borderRadius: '10px',
-            textTransform: 'none',
-            fontSize: '0.9375rem',
-            fontWeight: 500,
-            backgroundColor: tabValue === 0 ? 'var(--primary-orange)' : '#F3F4F6',
-            color: tabValue === 0 ? '#ffffff' : '#4B5563',
-            '&:hover': {
-              backgroundColor: tabValue === 0 ? 'var(--primary-orange)' : '#E5E7EB',
-            }
-          }}
+          className={tabValue === 0 ? 'bg-[var(--primary-orange)] text-white' : 'bg-neutral-100 text-neutral-700'}
         >
           PoC Status
-        </Button>
-        <Button
+        </UIButton>
+        <UIButton
           onClick={() => setTabValue(1)}
-          sx={{
-            px: 3.5,
-            py: 1.25,
-            borderRadius: '10px',
-            textTransform: 'none',
-            fontSize: '0.9375rem',
-            fontWeight: 500,
-            backgroundColor: tabValue === 1 ? 'var(--primary-orange)' : '#F3F4F6',
-            color: tabValue === 1 ? '#ffffff' : '#4B5563',
-            '&:hover': {
-              backgroundColor: tabValue === 1 ? 'var(--primary-orange)' : '#E5E7EB',
-            }
-          }}
+          className={tabValue === 1 ? 'bg-[var(--primary-orange)] text-white' : 'bg-neutral-100 text-neutral-700'}
         >
           Project Delivery Status
-        </Button>
+        </UIButton>
       </Box>
 
       <Paper sx={{ borderRadius: 3, boxShadow: 'none', background: 'transparent' }}>
@@ -1133,7 +1110,7 @@ export default function Home() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 2 }}>
-          <Button 
+          <MUIButton 
             onClick={() => {
               setCustomDateDialogOpen(false);
               setTimePeriod('full timeline');
@@ -1141,19 +1118,14 @@ export default function Home() {
             sx={{ color: 'var(--text-light)' }}
           >
             Cancel
-          </Button>
-          <Button 
+          </MUIButton>
+          <UIButton 
             onClick={() => setCustomDateDialogOpen(false)}
-            variant="contained"
             disabled={!customStartDate || !customEndDate}
-            sx={{
-              bgcolor: 'var(--primary-orange)',
-              '&:hover': { bgcolor: 'var(--light-orange-1)' },
-              '&:disabled': { bgcolor: '#E5E7EB', color: '#9CA3AF' }
-            }}
+            className={!customStartDate || !customEndDate ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed' : 'bg-[var(--primary-orange)] text-white'}
           >
             Apply
-          </Button>
+          </UIButton>
         </DialogActions>
       </Dialog>
     </Box>

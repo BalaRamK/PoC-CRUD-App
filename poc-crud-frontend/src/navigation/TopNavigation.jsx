@@ -5,18 +5,16 @@ import {
   AppBar,
   Toolbar,
   Box,
-  Button,
+  Button as MUIButton,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Typography,
   Divider,
   useMediaQuery,
   useTheme,
   Drawer,
 } from '@mui/material';
+import { Button as UIButton } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '../components/ui/dialog';
 
 // Icons
 import MenuIcon from '@mui/icons-material/Menu';
@@ -85,33 +83,14 @@ export default function TopNavigation() {
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flex: 1 }}>
               {navItems.map(({ text, path }) => (
-                <Button
-                  key={text}
-                  component={NavLink}
-                  to={path}
-                  sx={{
-                    color: '#4A5568',
-                    textTransform: 'none',
-                    fontSize: '0.9375rem',
-                    fontWeight: 400,
-                    transition: 'all 0.2s ease',
-                    borderRadius: '20px',
-                    px: 3,
-                    py: 0.75,
-                    minHeight: '40px',
-                    '&.active': {
-                      backgroundColor: 'var(--primary-orange)',
-                      color: '#ffffff',
-                      fontWeight: 500,
-                    },
-                    '&:hover:not(.active)': {
-                      color: 'var(--text-dark)',
-                      backgroundColor: 'rgba(240, 102, 73, 0.08)',
-                    },
-                  }}
+                <UIButton
+                  asChild
+                  className="px-3 py-2 rounded-full text-sm font-medium hover:bg-primary-100 data-[state=active]:bg-[var(--primary-orange)] data-[state=active]:text-white"
                 >
-                  {text}
-                </Button>
+                  <NavLink to={path} className={({ isActive }) => isActive ? 'data-[state=active]' : ''}>
+                    {text}
+                  </NavLink>
+                </UIButton>
               ))}
             </Box>
           )}
@@ -119,28 +98,13 @@ export default function TopNavigation() {
           {/* Right Side - Logout Button */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {!isMobile && (
-              <Button
+              <UIButton
                 onClick={handleLogout}
-                sx={{
-                  color: 'var(--primary-orange)',
-                  textTransform: 'none',
-                  fontSize: '0.9375rem',
-                  fontWeight: 400,
-                  backgroundColor: 'transparent',
-                  border: '1.5px solid var(--primary-orange)',
-                  borderRadius: '20px',
-                  px: 3,
-                  py: 0.625,
-                  minHeight: '40px',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: 'rgba(240, 102, 73, 0.08)',
-                    borderColor: 'var(--primary-orange)',
-                  },
-                }}
+                variant="outline"
+                className="border border-[var(--primary-orange)] text-[var(--primary-orange)] rounded-full"
               >
                 Logout
-              </Button>
+              </UIButton>
             )}
 
             {/* Mobile Menu Toggle */}
@@ -231,17 +195,17 @@ export default function TopNavigation() {
       </Drawer>
 
       {/* Logout Confirmation Dialog */}
-      <Dialog open={logoutOpen} onClose={cancelLogout}>
-        <DialogTitle>Confirm logout</DialogTitle>
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent>
-          <Typography>Are you sure you want to sign out?</Typography>
+          <DialogHeader>
+            <DialogTitle>Confirm logout</DialogTitle>
+            <DialogDescription>Are you sure you want to sign out?</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <UIButton variant="outline" onClick={cancelLogout}>Cancel</UIButton>
+            <UIButton onClick={confirmLogout} className="bg-[var(--primary-orange)] text-white">Sign out</UIButton>
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelLogout}>Cancel</Button>
-          <Button onClick={confirmLogout} autoFocus sx={{ color: 'var(--primary-orange)' }}>
-            Sign out
-          </Button>
-        </DialogActions>
       </Dialog>
     </>
   );

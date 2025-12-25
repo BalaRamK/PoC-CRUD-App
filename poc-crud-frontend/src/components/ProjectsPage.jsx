@@ -3,6 +3,8 @@ import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, Chip, IconButton, Tooltip
 } from '@mui/material';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Button as UIButton } from './ui/button';
 import { Visibility } from '@mui/icons-material';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -156,9 +158,11 @@ export default function JiraProjectsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 600, color: 'var(--text-dark)', mb: 3 }}>
-        Jira Projects Overview
-      </Typography>
+      <Card className="mb-3">
+        <CardHeader>
+          <CardTitle>Jira Projects Overview</CardTitle>
+        </CardHeader>
+      </Card>
 
       {error && (
         <Paper sx={{ p: 2, mb: 3, bgcolor: '#ffebee', borderRadius: 2 }}>
@@ -166,40 +170,42 @@ export default function JiraProjectsPage() {
         </Paper>
       )}
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 8px 28px rgba(0,0,0,0.07)' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#f3f4f6' }}>
-              <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Project Name
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Completion %
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Total Tasks/Issues
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Completed
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Bugs
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Start Date
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                End Date
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Status
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <Card>
+        <CardContent>
+          <TableContainer component={Box}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f3f4f6' }}>
+                  <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Project Name
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Completion %
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Total Tasks/Issues
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Completed
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Bugs
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Start Date
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    End Date
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Status
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
@@ -309,13 +315,14 @@ export default function JiraProjectsPage() {
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="View Project Details">
-                        <IconButton 
-                          size="small" 
+                        <UIButton
+                          variant="ghost"
+                          size="icon"
                           onClick={() => setSelectedProject({ key: project.key, name: project.name })}
-                          sx={{ color: '#7c3aed' }}
+                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                         >
                           <Visibility fontSize="small" />
-                        </IconButton>
+                        </UIButton>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
@@ -325,6 +332,8 @@ export default function JiraProjectsPage() {
           </TableBody>
         </Table>
       </TableContainer>
+        </CardContent>
+      </Card>
 
       {/* Summary Stats */}
       {projectsData.length > 0 && (

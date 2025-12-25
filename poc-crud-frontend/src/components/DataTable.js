@@ -729,18 +729,15 @@ export default function DataTable({ onFilteredDataChange }) {
               </MenuItem>
             ))}
           </Menu>
-          <Button startIcon={<FileDownloadIcon />} variant="outlined" size="small" sx={{ textTransform: 'none', borderColor: 'var(--border-color)', color: 'var(--text-dark)', borderRadius: '8px' }}>
+          <MUIButton startIcon={<FileDownloadIcon />} variant="outlined" size="small" sx={{ textTransform: 'none', borderColor: 'var(--border-color)', color: 'var(--text-dark)', borderRadius: '8px' }}>
             Export
-          </Button>
-          <Button startIcon={<FilterListIcon />} variant="outlined" size="small" sx={{ textTransform: 'none', borderColor: 'var(--border-color)', color: 'var(--text-dark)', borderRadius: '8px' }}>
+          </MUIButton>
+          <MUIButton startIcon={<FilterListIcon />} variant="outlined" size="small" sx={{ textTransform: 'none', borderColor: 'var(--border-color)', color: 'var(--text-dark)', borderRadius: '8px' }}>
             Filter
-          </Button>
-          <Button startIcon={<AddIcon />} variant="contained" onClick={handleOpenAdd} sx={{
-            backgroundColor: 'var(--primary-orange)', textTransform: 'none', borderRadius: '8px',
-            '&:hover': { backgroundColor: 'var(--primary-orange-light)' }
-          }}>
+          </MUIButton>
+          <UIButton onClick={handleOpenAdd} className="bg-[var(--primary-orange)] text-white">
             Add Row
-          </Button>
+          </UIButton>
         </Box>
       </Toolbar>
       
@@ -916,10 +913,8 @@ export default function DataTable({ onFilteredDataChange }) {
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => setOpen(false)} variant="text">Cancel</Button>
-                <Button onClick={handleSave} variant="contained" sx={{ backgroundColor: 'var(--primary-orange)', '&:hover': { backgroundColor: 'var(--primary-orange-light)' } }}>
-                    Save
-                </Button>
+              <MUIButton onClick={() => setOpen(false)} variant="text">Cancel</MUIButton>
+              <UIButton onClick={handleSave} className="bg-[var(--primary-orange)] text-white">Save</UIButton>
             </DialogActions>
         </Box>
       </Dialog>
@@ -950,8 +945,8 @@ export default function DataTable({ onFilteredDataChange }) {
               </DialogContent>
               <DialogActions sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
                   <Button onClick={() => setViewOpen(false)} variant="text" sx={{ color: 'var(--text-dark)' }}>Close</Button>
-                  <Button onClick={handleEditFromView} variant="contained" sx={{ backgroundColor: 'var(--primary-orange)', '&:hover': { backgroundColor: 'var(--primary-orange-light)' } }}>Edit</Button>
-                  <Button onClick={handleDeleteFromView} variant="contained" sx={{ backgroundColor: 'error.main', '&:hover': { backgroundColor: 'error.dark' } }}>Delete</Button>
+                  <UIButton onClick={handleEditFromView} className="bg-[var(--primary-orange)] text-white">Edit</UIButton>
+                  <UIButton onClick={handleDeleteFromView} className="bg-red-600 text-white">Delete</UIButton>
               </DialogActions>
           </Box>
       </Dialog>

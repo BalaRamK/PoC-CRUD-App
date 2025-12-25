@@ -1,37 +1,18 @@
 import React from 'react';
-import { Box, Toolbar } from '@mui/material';
 import TopNavigation from '../navigation/TopNavigation';
 
 export default function DashboardLayout({ children }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'var(--page-bg)' }}>
+    <div className="min-h-screen flex flex-col bg-neutral-50">
       {/* Top Navigation Bar */}
       <TopNavigation />
 
       {/* Main Content Area */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 3, md: 4 },
-          mt: '72px', // Height of AppBar
-          overflow: 'auto',
-        }}
-      >
-        {/* Content Container with responsive padding */}
-        <Box
-          sx={{
-            maxWidth: '100%',
-            mx: 'auto',
-            bgcolor: 'var(--card-bg)',
-            borderRadius: { xs: '12px', md: '16px' },
-            boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
-            overflow: 'hidden',
-          }}
-        >
+      <main className="flex-1 mt-[72px] overflow-auto px-4 sm:px-6 md:px-8">
+        <div className="mx-auto bg-white rounded-xl shadow-soft">
           {children}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </main>
+    </div>
   );
 }
