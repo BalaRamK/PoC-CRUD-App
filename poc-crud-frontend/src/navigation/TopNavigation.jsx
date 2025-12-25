@@ -168,10 +168,10 @@ export default function TopNavigation() {
               }}
             >
               {text}
-            </Button>
+            </MUIButton>
           ))}
           <Divider sx={{ my: 1 }} />
-          <Button
+          <MUIButton
             fullWidth
             onClick={handleLogout}
             sx={{
@@ -190,7 +190,7 @@ export default function TopNavigation() {
             }}
           >
             Log out
-          </Button>
+          </MUIButton>
         </Box>
       </Drawer>
 
