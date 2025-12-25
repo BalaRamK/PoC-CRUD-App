@@ -139,7 +139,7 @@ export default function TopNavigation() {
       >
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0 }}>
           {navItems.map(({ text, path }) => (
-            <Button
+            <MUIButton
               key={text}
               component={NavLink}
               to={path}
