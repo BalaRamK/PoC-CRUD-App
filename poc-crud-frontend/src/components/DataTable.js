@@ -674,7 +674,7 @@ export default function DataTable({ onFilteredDataChange }) {
             PoC Delivery List
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Button
+            <MUIButton
               size="small"
               variant={filterStatus === '' ? 'contained' : 'outlined'}
               onClick={() => setFilterStatus('')}
@@ -690,9 +690,9 @@ export default function DataTable({ onFilteredDataChange }) {
               }}
             >
               All ({rows.length})
-            </Button>
+            </MUIButton>
             {[...new Set(rows.map(r => r.status).filter(Boolean))].map(status => (
-              <Button
+              <MUIButton
                 key={status}
                 size="small"
                 variant={filterStatus === status ? 'contained' : 'outlined'}
@@ -709,7 +709,7 @@ export default function DataTable({ onFilteredDataChange }) {
                 }}
               >
                 {status} ({rows.filter(r => r.status === status).length})
-              </Button>
+              </MUIButton>
             ))}
           </Box>
         </Box>
@@ -826,7 +826,7 @@ export default function DataTable({ onFilteredDataChange }) {
                         {k === 'status' ? (
                           <Chip size="small" {...getStatusChipProps(row[k])} sx={{ borderRadius: '4px', height: '24px', fontSize: '0.75rem' }} />
                         ) : k === 'customer' ? (
-                          <Button
+                          <MUIButton
                             variant="text"
                             size="small"
                             onClick={() => handleOpenView(row)}
@@ -842,7 +842,7 @@ export default function DataTable({ onFilteredDataChange }) {
                             }}
                           >
                             {row[k] || 'N/A'}
-                          </Button>
+                          </MUIButton>
                         ) : (['startDate','endDate','estimatedEndDate'].includes(k) && row[k]) ? (
                           dayjs(row[k]).isValid() ? dayjs(row[k]).format('DD MMM YYYY') : row[k]
                         ) : k === 'percent' && row[k] ? (
@@ -945,7 +945,7 @@ export default function DataTable({ onFilteredDataChange }) {
                   </Box>
               </DialogContent>
               <DialogActions sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
-                  <Button onClick={() => setViewOpen(false)} variant="text" sx={{ color: 'var(--text-dark)' }}>Close</Button>
+                  <MUIButton onClick={() => setViewOpen(false)} variant="text" sx={{ color: 'var(--text-dark)' }}>Close</MUIButton>
                   <UIButton onClick={handleEditFromView} className="bg-[var(--primary-orange)] text-white">Edit</UIButton>
                   <UIButton onClick={handleDeleteFromView} className="bg-red-600 text-white">Delete</UIButton>
               </DialogActions>
