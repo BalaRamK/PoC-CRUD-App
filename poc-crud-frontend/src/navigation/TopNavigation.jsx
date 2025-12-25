@@ -85,9 +85,17 @@ export default function TopNavigation() {
               {navItems.map(({ text, path }) => (
                 <UIButton
                   asChild
-                  className="px-3 py-2 rounded-full text-sm font-medium hover:bg-primary-100 data-[state=active]:bg-[var(--primary-orange)] data-[state=active]:text-white"
+                  key={text}
+                  className="px-3 py-2 rounded-full text-sm font-medium hover:bg-primary-100"
                 >
-                  <NavLink to={path} className={({ isActive }) => isActive ? 'data-[state=active]' : ''}>
+                  <NavLink
+                    to={path}
+                    className={({ isActive }) =>
+                      isActive
+                        ? 'bg-[var(--primary-orange)] text-white'
+                        : 'text-[var(--text-dark)] hover:bg-gray-100'
+                    }
+                  >
                     {text}
                   </NavLink>
                 </UIButton>
@@ -140,6 +148,7 @@ export default function TopNavigation() {
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0 }}>
           {navItems.map(({ text, path }) => (
             <MUIButton
+              key={text}
               key={text}
               component={NavLink}
               to={path}

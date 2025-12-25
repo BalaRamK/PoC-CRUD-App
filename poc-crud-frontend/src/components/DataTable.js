@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination,
-  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  Button as MUIButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Toolbar, Typography, Box, IconButton, TableSortLabel, Chip, Menu, MenuItem,
   InputAdornment, Select, FormControl, InputLabel, Checkbox, ListItemText,
   Autocomplete, Avatar, CircularProgress
@@ -15,6 +15,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'; // For consolidated act
 import FileDownloadIcon from '@mui/icons-material/FileDownload'; // For Export
 import FilterListIcon from '@mui/icons-material/FilterList'; // For Filter
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import { Button as UIButton } from './ui/button';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
