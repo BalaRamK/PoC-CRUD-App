@@ -86,14 +86,15 @@ export default function TopNavigation() {
                 <UIButton
                   asChild
                   key={text}
-                  className="px-3 py-2 rounded-full text-sm font-medium hover:bg-primary-100"
+                  variant="ghost"
+                  className="px-3 py-2 rounded-full text-sm font-medium"
                 >
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
                       isActive
-                        ? 'bg-[var(--primary-orange)] text-white'
-                        : 'text-[var(--text-dark)] hover:bg-gray-100'
+                        ? 'bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)]'
+                        : 'bg-transparent text-[var(--text-dark)] hover:bg-gray-100'
                     }
                   >
                     {text}
