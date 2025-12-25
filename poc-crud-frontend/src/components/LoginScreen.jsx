@@ -78,6 +78,9 @@ export default function LoginScreen() {
         </div>
 
         <Typography className="login-footer">After successful sign-in you'll be redirected to the Dashboard Home</Typography>
+        <Typography className="login-credit">
+          Photo: <a href="https://unsplash.com/photos/person-using-stylus-on-tablet-with-charts-vWkwul5Bpbs" target="_blank" rel="noopener noreferrer">Unsplash</a>
+        </Typography>
       </div>
     </div>
   );

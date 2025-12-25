@@ -4,7 +4,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 30%, #ee5a6f 60%, #c44569 100%);
+  /* Background layers: subtle dark overlay, Unsplash image, original gradient */
+  background:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url('https://source.unsplash.com/vWkwul5Bpbs/1600x900'),
+    linear-gradient(135deg, #ff9a56 0%, #ff6b6b 30%, #ee5a6f 60%, #c44569 100%);
+  background-size: cover, cover, 100% 100%;
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
   position: relative;
   overflow: hidden;
 }
@@ -131,6 +138,17 @@
   margin-top: 16px;
 }
 
+.login-credit {
+  font-size: 11px;
+  color: #a0aec0;
+  margin-top: 6px;
+}
+
+.login-credit a {
+  color: #a0aec0;
+  text-decoration: underline;
+}
+
 @media (max-width:600px) {
   .login-card { 
     width: 92%; 
@@ -143,5 +161,11 @@
   .login-buttons .MuiButton-root { 
     width: 100%; 
     max-width: 280px;
+  }
+  .login-credit {
+    font-size: 10px;
+  }
+  .login-root {
+    background-position: center 30%;
   }
 }
