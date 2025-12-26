@@ -74,7 +74,7 @@ export default function LoginScreen() {
       <div className="login-right-panel">
         <div className="login-form-container">
           <div className="login-brand">
-            <h1 className="login-brand-name">QNU LABS</h1>
+            <img src="/images/qnu-logo.png" alt="QNU LABS" className="login-brand-logo" />
           </div>
 
           <div className="login-welcome">

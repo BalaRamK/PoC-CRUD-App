@@ -94,10 +94,12 @@ export default function TopNavigation() {
                   asChild
                   key={text}
                   variant="ghost"
-                  className="px-4 py-2 rounded-full text-sm font-medium"
+                  className="px-4 py-2 text-sm font-medium"
+                  style={{ borderRadius: '8px' }}
                 >
                   <NavLink
                     to={path}
+                    style={{ borderRadius: '8px' }}
                     className={({ isActive }) =>
                       isActive
                         ? 'bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)]'
