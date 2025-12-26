@@ -62,7 +62,7 @@ export default function TopNavigation() {
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           bgcolor: '#ffffff',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
           color: 'var(--text-dark)',
           borderBottom: 'none',
         }}
@@ -76,14 +76,6 @@ export default function TopNavigation() {
               alt="QNu Labs" 
               sx={{ height: 32, width: 'auto' }}
             />
-            <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-              <Typography sx={{ fontSize: '10px', color: '#666', fontWeight: 400, letterSpacing: '0.5px' }}>
-                Proactively
-              </Typography>
-              <Typography sx={{ fontSize: '10px', color: '#666', fontWeight: 400, letterSpacing: '0.5px' }}>
-                Quantum !
-              </Typography>
-            </Box>
           </Box>
 
           {/* Desktop Navigation Menu */}
@@ -94,12 +86,12 @@ export default function TopNavigation() {
                   asChild
                   key={text}
                   variant="ghost"
-                  className="px-4 py-2 text-sm font-medium"
-                  style={{ borderRadius: '8px' }}
+                  className="px-4 py-8 text-sm font-medium"
+                  style={{ borderRadius: '10px' }}
                 >
                   <NavLink
                     to={path}
-                    style={{ borderRadius: '8px' }}
+                    style={{ borderRadius: '10px' }}
                     className={({ isActive }) =>
                       isActive
                         ? 'bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)]'
