@@ -68,8 +68,8 @@ export default function TopNavigation() {
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>
-          {/* Logo with Tagline */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => navigate('/home')}>
+          {/* Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/home')}>
             <Box 
               component="img" 
               src="/images/qnu-logo.png" 
@@ -86,7 +86,7 @@ export default function TopNavigation() {
                   asChild
                   key={text}
                   variant="ghost"
-                  className="px-4 py-8 text-sm font-medium"
+                  className="px-6 py-2 text-sm font-medium"
                   style={{ borderRadius: '10px' }}
                 >
                   <NavLink
