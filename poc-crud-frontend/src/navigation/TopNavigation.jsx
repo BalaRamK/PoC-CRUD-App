@@ -25,7 +25,7 @@ const navItems = [
   { text: 'Project Delivery', path: '/projects' },
   { text: 'PoC Delivery', path: '/poc-delivery-list' },
   { text: 'Documents', path: '/documents' },
-  { text: 'Schedule Reports', path: '/schedule' },
+  { text: 'Schedule', path: '/schedule' },
 ];
 
 export default function TopNavigation() {
@@ -69,32 +69,39 @@ export default function TopNavigation() {
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>
           {/* Logo with Tagline */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }} onClick={() => navigate('/home')}>
             <Box 
               component="img" 
               src="/images/qnu-logo.png" 
               alt="QNu Labs" 
-              sx={{ height: 40, width: 'auto', cursor: 'pointer' }}
-              onClick={() => navigate('/home')}
+              sx={{ height: 32, width: 'auto' }}
             />
+            <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+              <Typography sx={{ fontSize: '10px', color: '#666', fontWeight: 400, letterSpacing: '0.5px' }}>
+                Proactively
+              </Typography>
+              <Typography sx={{ fontSize: '10px', color: '#666', fontWeight: 400, letterSpacing: '0.5px' }}>
+                Quantum !
+              </Typography>
+            </Box>
           </Box>
 
           {/* Desktop Navigation Menu */}
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flex: 1 }}>
+            <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flex: 1 }}>
               {navItems.map(({ text, path }) => (
                 <UIButton
                   asChild
                   key={text}
                   variant="ghost"
-                  className="px-3 py-2 rounded-full text-sm font-medium"
+                  className="px-4 py-2 rounded-full text-sm font-medium"
                 >
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
                       isActive
                         ? 'bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)]'
-                        : 'bg-transparent text-[var(--text-dark)] hover:bg-gray-100'
+                        : 'bg-transparent text-gray-700 hover:bg-gray-100'
                     }
                   >
                     {text}

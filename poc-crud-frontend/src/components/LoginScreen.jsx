@@ -15,7 +15,7 @@ export default function LoginScreen() {
     // If user is already signed in, navigate to the app home
     if (user) {
       console.log('[LoginScreen] user already signed in; navigating to /home');
-      navigate('/home'); // <--- CHANGE THIS LINE
+      navigate('/home');
     }
   }, [user, navigate]);
 
@@ -27,7 +27,7 @@ export default function LoginScreen() {
       // login(true) returns the response when popup is used; check for success
       if (resp && resp.account) {
         console.log('[LoginScreen] popup login successful; navigating to /home');
-        navigate('/home'); // <--- CHANGE THIS LINE
+        navigate('/home');
       } else {
         // resp may be null if redirect fallback occurred; wait briefly to let msal update account
         setTimeout(() => {
@@ -60,27 +60,74 @@ export default function LoginScreen() {
 
   return (
     <div className="login-root">
-      <div className="login-bg-decor" aria-hidden="true"></div>
-      <div className="login-card">
-        <Typography component="h5">Sign in to QNu Labs
-          <br />Delivery Dashboard</Typography>
-        <Typography className="login-subtext">Choose a sign-in method</Typography>
-
-        {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-
-        <div className="login-buttons">
-          <Button variant="contained" color="primary" onClick={handlePopup} disabled={loading}>
-            {loading ? <CircularProgress size={20} color="inherit" /> : 'SIGN IN (POP UP)'}
-          </Button>
-          <Button variant="outlined" color="primary" onClick={handleRedirect} disabled={loading}>
-            SIGN IN (REDIRECT)
-          </Button>
+      {/* Left Panel - Image Section */}
+      <div className="login-left-panel">
+        <div className="login-left-content">
+          <div className="login-left-header">
+            <span className="login-theme-text">Welcome</span>
+          </div>
+          <div className="login-image-overlay"></div>
         </div>
+      </div>
 
-        <Typography className="login-footer">After successful sign-in you'll be redirected to the Dashboard Home</Typography>
-        <Typography className="login-credit">
-          Photo: <a href="https://unsplash.com/photos/person-using-stylus-on-tablet-with-charts-vWkwul5Bpbs" target="_blank" rel="noopener noreferrer">Unsplash</a>
-        </Typography>
+      {/* Right Panel - Form Section */}
+      <div className="login-right-panel">
+        <div className="login-form-container">
+          <div className="login-brand">
+            <h1 className="login-brand-name">QNU LABS</h1>
+          </div>
+
+          <div className="login-welcome">
+            <h2 className="login-title">Welcome Back!</h2>
+            <p className="login-subtitle">Welcome to QNu Labs Delivery Dashboard</p>
+          </div>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>
+              {error}
+            </Alert>
+          )}
+
+          <div className="login-form">
+            <div className="login-divider">
+              <span className="login-divider-text">Sign in with Microsoft</span>
+            </div>
+
+            <Button
+              variant="outlined"
+              className="login-btn-microsoft"
+              onClick={handlePopup}
+              disabled={loading}
+            >
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <>
+                  <svg className="login-microsoft-icon" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 0h11v11H0z" fill="#f25022"/>
+                    <path d="M12 0h11v11H12z" fill="#7fba00"/>
+                    <path d="M0 12h11v11H0z" fill="#00a4ef"/>
+                    <path d="M12 12h11v11H12z" fill="#ffb900"/>
+                  </svg>
+                  Sign in with Microsoft (Popup)
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="contained"
+              className="login-btn-primary"
+              onClick={handleRedirect}
+              disabled={loading}
+            >
+              Sign in with Microsoft (Redirect)
+            </Button>
+
+            <p className="login-signup-text">
+              Secure authentication via Azure Active Directory
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
