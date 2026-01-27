@@ -82,25 +82,18 @@ export default function TopNavigation() {
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flex: 1 }}>
               {navItems.map(({ text, path }) => (
-                <UIButton
-                  asChild
+                <NavLink
+                  to={path}
                   key={text}
-                  variant="ghost"
-                  className="px-6 py-2 text-sm font-medium"
-                  style={{ borderRadius: '10px' }}
+                  className={({ isActive }) =>
+                    isActive
+                      ? 'px-6 py-2 text-sm font-medium rounded-[10px] bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)] inline-block'
+                      : 'px-6 py-2 text-sm font-medium rounded-[10px] bg-transparent text-gray-700 hover:bg-gray-100 inline-block'
+                  }
+                  style={{ textDecoration: 'none', display: 'inline-block', borderRadius: '10px' }}
                 >
-                  <NavLink
-                    to={path}
-                    style={{ borderRadius: '10px' }}
-                    className={({ isActive }) =>
-                      isActive
-                        ? 'bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)]'
-                        : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                    }
-                  >
-                    {text}
-                  </NavLink>
-                </UIButton>
+                  {text}
+                </NavLink>
               ))}
             </Box>
           )}
