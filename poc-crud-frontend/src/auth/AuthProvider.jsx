@@ -17,21 +17,30 @@ function AuthInner({ children }) {
   useEffect(() => {
     let cancelled = false;
     if (!instance || !instance.handleRedirectPromise) return;
-    instance.handleRedirectPromise()
-      .then((resp) => {
-        if (cancelled) return;
-        if (resp && resp.account && instance.setActiveAccount) {
-          try {
-            instance.setActiveAccount(resp.account);
-          } catch (e) {
-            console.warn('Failed to set active account from redirect response', e);
+    
+    // Wait a bit to ensure instance is fully initialized
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      instance.handleRedirectPromise()
+        .then((resp) => {
+          if (cancelled) return;
+          if (resp && resp.account && instance.setActiveAccount) {
+            try {
+              instance.setActiveAccount(resp.account);
+            } catch (e) {
+              console.warn('Failed to set active account from redirect response', e);
+            }
           }
-        }
-      })
-      .catch((e) => {
-        console.warn('handleRedirectPromise error', e);
-      });
-    return () => { cancelled = true; };
+        })
+        .catch((e) => {
+          console.warn('handleRedirectPromise error', e);
+        });
+    }, 100);
+    
+    return () => { 
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [instance]);
 
   // helper to get token for given scopes
@@ -109,13 +118,18 @@ export function AuthProviderWrapper({ children }) {
       setCryptoOk(false);
       return;
     }
-    try {
-      const _pca = new PublicClientApplication(msalConfig);
-      setPca(_pca);
-    } catch (e) {
-      console.warn('Failed to initialize MSAL PublicClientApplication', e);
-      setCryptoOk(false);
+    async function initializeMSAL() {
+      try {
+        const _pca = new PublicClientApplication(msalConfig);
+        // Initialize MSAL before using it
+        await _pca.initialize();
+        setPca(_pca);
+      } catch (e) {
+        console.warn('Failed to initialize MSAL PublicClientApplication', e);
+        setCryptoOk(false);
+      }
     }
+    initializeMSAL();
   }, []);
 
   if (!cryptoOk) {

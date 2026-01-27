@@ -12,6 +12,13 @@ export default function AuthCallback() {
     let cancelled = false;
     async function handle() {
       try {
+        // Wait for instance to be initialized
+        if (!instance) {
+          // Wait a bit for initialization
+          await new Promise(resolve => setTimeout(resolve, 100));
+          if (cancelled) return;
+        }
+        
         const resp = await instance.handleRedirectPromise();
         // If resp contains account, set active account and navigate to home
         if (!cancelled) {
@@ -21,11 +28,11 @@ export default function AuthCallback() {
             } catch (e) {
               console.warn('setActiveAccount failed', e);
             }
-            navigate('/home'); // <--- CHANGE THIS LINE
+            navigate('/home');
           } else {
             // No account in response — still try to navigate to home if an account exists
             const active = instance.getActiveAccount && instance.getActiveAccount();
-            if (active) navigate('/home'); // <--- CHANGE THIS LINE
+            if (active) navigate('/home');
             else setError('Could not complete sign-in. No account available.');
           }
         }
