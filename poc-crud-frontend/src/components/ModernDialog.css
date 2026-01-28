@@ -1,13 +1,15 @@
 /* src/components/ModernDialog.css */
 
 .modern-dialog .MuiDialog-paper {
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  max-width: 600px;
+  max-width: 700px;
   width: 100%;
   background-color: #ffffff;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
 }
 
 .dialog-sidebar {
@@ -32,15 +34,17 @@
 
 .dialog-main-content {
   flex: 1;
-  padding: 32px;
+  padding: 40px;
   background-color: #ffffff;
 }
 
 .dialog-main-content .MuiDialogTitle-root {
-  padding: 0 0 24px 0;
+  padding: 0 0 28px 0;
   font-weight: 700;
-  font-size: 1.6rem;
-  color: #1e293b;
+  font-size: 1.75rem;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .dialog-main-content .MuiDialogContent-root {
@@ -77,10 +81,16 @@
 }
 
 .view-detail-item {
-    padding: 16px;
-    background-color: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    padding: 20px;
+    background-color: #F8FAFC;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    transition: all 0.2s ease;
+}
+
+.view-detail-item:hover {
+    background-color: #F1F5F9;
+    border-color: #CBD5E1;
 }
 
 .view-detail-item-label {

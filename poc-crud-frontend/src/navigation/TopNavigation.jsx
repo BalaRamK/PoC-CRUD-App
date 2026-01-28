@@ -62,9 +62,11 @@ export default function TopNavigation() {
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           bgcolor: '#ffffff',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
           color: 'var(--text-dark)',
-          borderBottom: 'none',
+          borderBottom: '1px solid #E2E8F0',
+          backdropFilter: 'blur(10px)',
+          background: 'rgba(255, 255, 255, 0.95)',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, md: 4 } }}>

@@ -1,10 +1,11 @@
-/* Modern Split-Screen Login Design */
+/* Modern SaaS Login Design */
 .login-root {
   min-height: 100vh;
   display: flex;
   flex-direction: row;
-  background: #ffffff;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
   overflow: hidden;
+  position: relative;
 }
 
 /* Left Panel - Purple gradient matching cs.qnulabs.com */
@@ -86,50 +87,56 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: transparent;
   padding: 40px;
+  position: relative;
+  z-index: 1;
 }
 
 .login-form-container {
   width: 100%;
-  max-width: 440px;
-  padding: 20px;
+  max-width: 480px;
+  padding: 48px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
 }
 
 .login-brand {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 48px;
 }
 
 .login-brand-logo {
-  height: 40px;
+  height: 48px;
   width: auto;
   display: block;
   margin: 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .login-welcome {
-  text-align: center;
+  text-align: left;
   margin-bottom: 40px;
 }
 
 .login-title {
-  font-size: 42px;
+  font-size: 36px;
   font-weight: 700;
-  color: #1F2937;
-  margin: 0 0 8px 0;
+  color: #0F172A;
+  margin: 0 0 12px 0;
   line-height: 1.2;
-  background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .login-subtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 16px;
+  color: #64748B;
   margin: 0;
   font-weight: 400;
+  line-height: 1.5;
 }
 
 .login-form {
@@ -164,29 +171,32 @@
 .login-btn-microsoft,
 .login-btn-primary {
   width: 100%;
-  padding: 16px 24px !important;
+  padding: 14px 24px !important;
   border-radius: 12px !important;
   font-size: 15px !important;
   font-weight: 600 !important;
   text-transform: none !important;
-  margin-bottom: 16px !important;
-  transition: all 0.3s ease !important;
+  margin-bottom: 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 12px !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
 .login-btn-microsoft {
   background: #ffffff !important;
-  color: #475569 !important;
-  border: 2px solid #e2e8f0 !important;
+  color: #334155 !important;
+  border: 1.5px solid #E2E8F0 !important;
 }
 
 .login-btn-microsoft:hover {
-  background: #f8fafc !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  background: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px);
 }
 
 .login-microsoft-icon {
@@ -197,13 +207,13 @@
 .login-btn-primary {
   background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%) !important;
   color: #ffffff !important;
-  border: 2px solid transparent !important;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(124, 58, 237, 0.1) !important;
 }
 
 .login-btn-primary:hover {
   background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%) !important;
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4) !important;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35), 0 0 0 1px rgba(124, 58, 237, 0.15) !important;
   transform: translateY(-2px);
 }
 
@@ -215,9 +225,10 @@
 
 .login-signup-text {
   text-align: center;
-  margin: 24px 0;
+  margin: 32px 0 0 0;
   font-size: 13px;
-  color: #64748b;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
 /* Responsive Design */

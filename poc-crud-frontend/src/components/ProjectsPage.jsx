@@ -157,10 +157,63 @@ export default function JiraProjectsPage() {
   }
 
   return (
-    <Box>
-      <Card className="mb-3">
-        <CardHeader>
-          <CardTitle>Jira Projects Overview</CardTitle>
+    <Box sx={{ px: 0, py: 0 }}>
+      <Box sx={{ mb: 4, pb: 3 }}>
+        <Typography 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#7C3AED', 
+            mb: 1.5, 
+            fontSize: '0.875rem', 
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
+          }}
+        >
+          Project Management
+        </Typography>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#0F172A', 
+            fontSize: '2.5rem', 
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            mb: 0.5
+          }}
+        >
+          Jira Projects Overview
+        </Typography>
+        <Typography 
+          sx={{ 
+            color: '#64748B', 
+            fontSize: '1rem',
+            fontWeight: 400
+          }}
+        >
+          Track and manage all your delivery projects
+        </Typography>
+      </Box>
+      
+      <Card className="mb-4" sx={{ 
+        borderRadius: '16px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+        border: '1px solid #E2E8F0',
+        overflow: 'hidden'
+      }}>
+        <CardHeader sx={{ 
+          pb: 2,
+          borderBottom: '1px solid #E2E8F0',
+          background: '#F8FAFC'
+        }}>
+          <CardTitle sx={{ 
+            fontSize: '1.25rem',
+            fontWeight: 600,
+            color: '#0F172A',
+            letterSpacing: '-0.01em'
+          }}>
+            Projects List
+          </CardTitle>
         </CardHeader>
       </Card>
 
@@ -170,37 +223,42 @@ export default function JiraProjectsPage() {
         </Paper>
       )}
 
-      <Card>
-        <CardContent>
+      <Card sx={{ 
+        borderRadius: '16px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+        border: '1px solid #E2E8F0',
+        overflow: 'hidden'
+      }}>
+        <CardContent sx={{ p: 0 }}>
           <TableContainer component={Box}>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f3f4f6' }}>
-                  <TableCell sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                <TableRow sx={{ bgcolor: '#F8FAFC', borderBottom: '2px solid #E2E8F0' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Project Name
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Completion %
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Total Tasks/Issues
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Completed
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Bugs
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Start Date
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     End Date
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Status
                   </TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 700, color: 'var(--text-dark)', borderBottom: '2px solid #e5e7eb' }}>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#64748B', fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>
                     Actions
                   </TableCell>
                 </TableRow>
@@ -227,7 +285,9 @@ export default function JiraProjectsPage() {
                     key={project.key}
                     hover
                     sx={{
-                      '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.02)' }
+                      '&:hover': { bgcolor: '#F8FAFC' },
+                      borderBottom: '1px solid #E2E8F0',
+                      transition: 'background-color 0.2s ease'
                     }}
                   >
                     <TableCell sx={{ fontWeight: 600, color: '#7c3aed' }}>

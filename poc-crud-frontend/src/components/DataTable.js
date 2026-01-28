@@ -660,7 +660,45 @@ export default function DataTable({ onFilteredDataChange }) {
   };
 
   return (
-    <Box>
+    <Box sx={{ px: 0, py: 0 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, pb: 3 }}>
+        <Typography 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#7C3AED', 
+            mb: 1.5, 
+            fontSize: '0.875rem', 
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
+          }}
+        >
+          PoC Management
+        </Typography>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#0F172A', 
+            fontSize: '2.5rem', 
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            mb: 0.5
+          }}
+        >
+          PoC Delivery List
+        </Typography>
+        <Typography 
+          sx={{ 
+            color: '#64748B', 
+            fontSize: '1rem',
+            fontWeight: 400
+          }}
+        >
+          Manage and track all your proof of concept deliveries
+        </Typography>
+      </Box>
+
       <Toolbar sx={{
         px: 0,
         display: 'flex',
@@ -670,8 +708,8 @@ export default function DataTable({ onFilteredDataChange }) {
         mb: 2,
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1, maxWidth: '100%' }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mr: 2, color: 'var(--text-dark)' }}>
-            PoC Delivery List
+          <Typography variant="h6" sx={{ fontWeight: 600, mr: 2, color: '#0F172A', fontSize: '1.125rem', letterSpacing: '-0.01em' }}>
+            Filters & Actions
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <MUIButton
@@ -680,12 +718,13 @@ export default function DataTable({ onFilteredDataChange }) {
               onClick={() => setFilterStatus('')}
               sx={{
                 borderRadius: '8px', textTransform: 'none', px: 1.5, py: 0.5,
-                bgcolor: filterStatus === '' ? 'var(--primary-orange)' : 'transparent',
-                color: filterStatus === '' ? 'white' : 'var(--text-dark)',
-                borderColor: 'var(--border-color)',
+                bgcolor: filterStatus === '' ? 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' : 'transparent',
+                color: filterStatus === '' ? 'white' : '#64748B',
+                borderColor: '#E2E8F0',
+                boxShadow: filterStatus === '' ? '0 2px 8px rgba(124, 58, 237, 0.2)' : 'none',
                 '&:hover': {
-                  bgcolor: filterStatus === '' ? 'var(--primary-orange-light)' : 'var(--secondary-gray)',
-                  borderColor: 'var(--border-color)',
+                  bgcolor: filterStatus === '' ? 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' : '#F8FAFC',
+                  borderColor: filterStatus === '' ? 'transparent' : '#CBD5E1',
                 }
               }}
             >
@@ -699,12 +738,13 @@ export default function DataTable({ onFilteredDataChange }) {
                 onClick={() => setFilterStatus(status)}
                 sx={{
                   borderRadius: '8px', textTransform: 'none', px: 1.5, py: 0.5,
-                  bgcolor: filterStatus === status ? 'var(--primary-orange)' : 'transparent',
-                  color: filterStatus === status ? 'white' : 'var(--text-dark)',
-                  borderColor: 'var(--border-color)',
+                  bgcolor: filterStatus === status ? 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' : 'transparent',
+                  color: filterStatus === status ? 'white' : '#64748B',
+                  borderColor: '#E2E8F0',
+                  boxShadow: filterStatus === status ? '0 2px 8px rgba(124, 58, 237, 0.2)' : 'none',
                   '&:hover': {
-                    bgcolor: filterStatus === status ? 'var(--primary-orange-light)' : 'var(--secondary-gray)',
-                    borderColor: 'var(--border-color)',
+                    bgcolor: filterStatus === status ? 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' : '#F8FAFC',
+                    borderColor: filterStatus === status ? 'transparent' : '#CBD5E1',
                   }
                 }}
               >
@@ -736,13 +776,29 @@ export default function DataTable({ onFilteredDataChange }) {
           <MUIButton startIcon={<FilterListIcon />} variant="outlined" size="small" sx={{ textTransform: 'none', borderColor: 'var(--border-color)', color: 'var(--text-dark)', borderRadius: '8px' }}>
             Filter
           </MUIButton>
-          <UIButton onClick={handleOpenAdd} className="bg-[var(--primary-orange)] text-white">
+          <UIButton 
+            onClick={handleOpenAdd} 
+            className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white shadow-md hover:shadow-lg transition-all"
+            style={{
+              borderRadius: '10px',
+              fontWeight: 600,
+              padding: '8px 20px'
+            }}
+          >
             Add Row
           </UIButton>
         </Box>
       </Toolbar>
       
-      <TableContainer component={Paper} sx={{ mt: 1, overflow: 'auto', maxHeight: '65vh', borderRadius: 2, boxShadow: 'var(--shadow-light)' }}>
+      <TableContainer component={Paper} sx={{ 
+        mt: 2, 
+        overflow: 'auto', 
+        maxHeight: '65vh', 
+        borderRadius: '16px', 
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+        border: '1px solid #E2E8F0',
+        background: '#ffffff'
+      }}>
         <Table size="small">
           <TableHead sx={{ bgcolor: 'var(--secondary-gray)' }}>
             <TableRow>
@@ -915,7 +971,17 @@ export default function DataTable({ onFilteredDataChange }) {
             </DialogContent>
             <DialogActions>
               <MUIButton onClick={() => setOpen(false)} variant="text">Cancel</MUIButton>
-              <UIButton onClick={handleSave} className="bg-[var(--primary-orange)] text-white">Save</UIButton>
+              <UIButton 
+                onClick={handleSave} 
+                className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white shadow-md hover:shadow-lg transition-all"
+                style={{
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  padding: '8px 24px'
+                }}
+              >
+                Save
+              </UIButton>
             </DialogActions>
         </Box>
       </Dialog>
@@ -946,7 +1012,17 @@ export default function DataTable({ onFilteredDataChange }) {
               </DialogContent>
               <DialogActions sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', pt: 2 }}>
                   <MUIButton onClick={() => setViewOpen(false)} variant="text" sx={{ color: 'var(--text-dark)' }}>Close</MUIButton>
-                  <UIButton onClick={handleEditFromView} className="bg-[var(--primary-orange)] text-white">Edit</UIButton>
+                  <UIButton 
+                    onClick={handleEditFromView} 
+                    className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white shadow-md hover:shadow-lg transition-all"
+                    style={{
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      padding: '8px 24px'
+                    }}
+                  >
+                    Edit
+                  </UIButton>
                   <UIButton onClick={handleDeleteFromView} className="bg-red-600 text-white">Delete</UIButton>
               </DialogActions>
           </Box>

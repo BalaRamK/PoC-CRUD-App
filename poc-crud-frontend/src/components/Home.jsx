@@ -290,46 +290,118 @@ export default function Home() {
 
 
   return (
-    <Box sx={{ px: 4, py: 3 }}>
+    <Box sx={{ px: 0, py: 0 }}>
       {/* Header with Title */}
-      <Box sx={{ mb: 4, py: 2 }}>
-        <Typography sx={{ fontWeight: 500, color: 'var(--primary-orange)', mb: 1, fontSize: '0.95rem', letterSpacing: '0.3px' }}>Ready to Conquer?</Typography>
-        <Typography variant="h3" sx={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '2rem', lineHeight: 1.2 }}>Welcome Back, {user?.name || 'Guest'}!</Typography>
+      <Box sx={{ mb: 5, pb: 3 }}>
+        <Typography 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#7C3AED', 
+            mb: 1.5, 
+            fontSize: '0.875rem', 
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase'
+          }}
+        >
+          Dashboard Overview
+        </Typography>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#0F172A', 
+            fontSize: '2.5rem', 
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            mb: 0.5
+          }}
+        >
+          Welcome back, {user?.name || 'Guest'}
+        </Typography>
+        <Typography 
+          sx={{ 
+            color: '#64748B', 
+            fontSize: '1rem',
+            fontWeight: 400
+          }}
+        >
+          Here's what's happening with your projects today
+        </Typography>
       </Box>
 
       {/* Tabs Section */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 12 }}>
+      <Box sx={{ mb: 4, display: 'flex', gap: 2 }}>
         <UIButton
           onClick={() => setTabValue(0)}
-          className={tabValue === 0 ? 'bg-[var(--primary-orange)] text-white' : 'bg-neutral-100 text-neutral-700'}
+          className={tabValue === 0 
+            ? 'bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white shadow-md hover:shadow-lg transition-all' 
+            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all'}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '10px',
+            fontWeight: 600,
+            fontSize: '0.9375rem',
+            transition: 'all 0.2s ease'
+          }}
         >
           PoC Status
         </UIButton>
         <UIButton
           onClick={() => setTabValue(1)}
-          className={tabValue === 1 ? 'bg-[var(--primary-orange)] text-white' : 'bg-neutral-100 text-neutral-700'}
+          className={tabValue === 1 
+            ? 'bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white shadow-md hover:shadow-lg transition-all' 
+            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all'}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '10px',
+            fontWeight: 600,
+            fontSize: '0.9375rem',
+            transition: 'all 0.2s ease'
+          }}
         >
           Project Delivery Status
         </UIButton>
       </Box>
 
-      <Paper sx={{ borderRadius: 3, boxShadow: 'none', background: 'transparent' }}>
+      <Box sx={{ background: 'transparent' }}>
 
         {/* TAB 1: PoC Status */}
         <Box sx={{ display: tabValue === 0 ? 'block' : 'none' }}>
           {/* Status Summary Section */}
           <Paper sx={{ 
-            p: 4, 
-            borderRadius: 3, 
+            p: 5, 
+            borderRadius: '20px', 
             background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
             color: '#fff',
             position: 'relative',
-            mb: 3,
-            boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)'
+            mb: 4,
+            boxShadow: '0 20px 60px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            overflow: 'hidden'
           }}>
+            {/* Decorative background elements */}
+            <Box sx={{
+              position: 'absolute',
+              top: -50,
+              right: -50,
+              width: 200,
+              height: 200,
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.1)',
+              filter: 'blur(40px)'
+            }} />
+            <Box sx={{
+              position: 'absolute',
+              bottom: -30,
+              left: -30,
+              width: 150,
+              height: 150,
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.08)',
+              filter: 'blur(30px)'
+            }} />
             {/* Header with Dropdown */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>Status Summary</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem', letterSpacing: '-0.01em' }}>Status Summary</Typography>
               <FormControl size="small" sx={{ minWidth: 140 }}>
                 <Select
                   value={timePeriod}
@@ -422,25 +494,25 @@ export default function Home() {
             </Box>
 
             {/* Stats Grid with Dividers */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch' }}>
-              <Box sx={{ flex: 1, py: 1 }}>
-                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Total PoCs</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{total}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', position: 'relative', zIndex: 1 }}>
+              <Box sx={{ flex: 1, py: 1.5 }}>
+                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Total PoCs</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{total}</Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1 }}>
-                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Completed</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{completed}</Typography>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1.5 }}>
+                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Completed</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{completed}</Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1 }}>
-                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>In Progress</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{inProgress}</Typography>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1.5 }}>
+                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>In Progress</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{inProgress}</Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.3)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1 }}>
-                <Typography variant="caption" sx={{ opacity: 0.9, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 0.5 }}>Delayed</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1 }}>{delayed}</Typography>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
+              <Box sx={{ flex: 1, py: 1.5 }}>
+                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Delayed</Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{delayed}</Typography>
               </Box>
             </Box>
 
@@ -471,22 +543,41 @@ export default function Home() {
             {/* Important Blockers Section */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper sx={{ 
-                p: 3, 
-                borderRadius: 3, 
-                background: 'linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)',
+                p: 4, 
+                borderRadius: '16px', 
+                background: '#ffffff',
                 minHeight: 300,
                 position: 'relative',
-                boxShadow: '0 4px 16px rgba(196, 181, 253, 0.3)',
-                border: '3px solid #7C3AED'
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #E2E8F0',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                  transform: 'translateY(-2px)'
+                }
               }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1F2937' }}>Important Blockers</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                  <Box sx={{ 
+                    width: 4, 
+                    height: 24, 
+                    borderRadius: '2px', 
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' 
+                  }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em' }}>Important Blockers</Typography>
+                </Box>
                 <Box sx={{ maxHeight: 230, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).slice(0, 3).map((item, idx) => (
                     <Box key={idx} sx={{ 
-                      p: 2.5, 
-                      bgcolor: 'rgba(255,255,255,0.8)', 
-                      borderRadius: 2,
-                      backdropFilter: 'blur(10px)'
+                      p: 3, 
+                      bgcolor: '#F8FAFC', 
+                      borderRadius: '12px',
+                      border: '1px solid #E2E8F0',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: '#F1F5F9',
+                        borderColor: '#CBD5E1',
+                        transform: 'translateX(4px)'
+                      }
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
                         Project Name: {item.customer || item.title || 'N/A'}
@@ -537,15 +628,29 @@ export default function Home() {
             {/* PoC Timeline Section */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper sx={{ 
-                p: 3, 
-                borderRadius: 3, 
-                background: 'linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 100%)',
+                p: 4, 
+                borderRadius: '16px', 
+                background: '#ffffff',
                 minHeight: 300,
                 position: 'relative',
-                boxShadow: '0 4px 16px rgba(237, 233, 254, 0.3)'
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #E2E8F0',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                  transform: 'translateY(-2px)'
+                }
               }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>PoC Timeline</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ 
+                      width: 4, 
+                      height: 24, 
+                      borderRadius: '2px', 
+                      background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' 
+                    }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em' }}>PoC Timeline</Typography>
+                  </Box>
                   <FormControl size="small" sx={{ minWidth: 100 }}>
                     <Select
                       value={timePeriod}
@@ -683,32 +788,38 @@ export default function Home() {
 
           {/* Three Column Layout - Reminders, Delayed, In Progress */}
           <Grid container spacing={3} sx={{ mt: 2 }}>
-            {/* Reminders Section - Blue Border Card */}
+            {/* Reminders Section */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ 
                 p: 0,
-                borderRadius: 3,
+                borderRadius: '16px',
                 minHeight: 350,
                 position: 'relative',
                 overflow: 'hidden',
-                border: '3px solid #1E88E5',
-                boxShadow: '0 4px 12px rgba(30, 136, 229, 0.2)'
+                background: '#ffffff',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                  transform: 'translateY(-2px)'
+                }
               }}>
                 {/* Header */}
                 <Box sx={{ 
-                  bgcolor: '#4A90E2',
-                  p: 2.5,
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
+                  p: 3,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1
+                  gap: 1.5
                 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff' }}>Reminders</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#fff', fontSize: '1.125rem', letterSpacing: '-0.01em' }}>Reminders</Typography>
                   <Typography sx={{ color: '#fff', fontSize: '1.2rem' }}>⏰</Typography>
                 </Box>
 
                 {/* Content */}
                 <Box sx={{ 
-                  p: 2.5, 
+                  p: 3, 
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: 2,
@@ -721,19 +832,24 @@ export default function Home() {
                     bgcolor: 'transparent',
                   },
                   '&::-webkit-scrollbar-thumb': {
-                    bgcolor: 'rgba(0,0,0,0.2)',
+                    bgcolor: 'rgba(0,0,0,0.15)',
                     borderRadius: '3px',
                     '&:hover': {
-                      bgcolor: 'rgba(0,0,0,0.3)',
+                      bgcolor: 'rgba(0,0,0,0.25)',
                     }
                   }
                 }}>
                   {rows.filter(r => r.currentBlockers && r.currentBlockers.trim()).map((item, idx) => (
                     <Box key={idx} sx={{ 
-                      p: 2,
-                      bgcolor: '#fff',
-                      borderRadius: 2,
-                      border: '1px solid #E0E0E0'
+                      p: 2.5,
+                      bgcolor: '#F8FAFC',
+                      borderRadius: '12px',
+                      border: '1px solid #E2E8F0',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: '#F1F5F9',
+                        borderColor: '#CBD5E1'
+                      }
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, color: '#1F2937' }}>
                         Project Name: {item.customer || item.title || 'N/A'}
@@ -755,21 +871,35 @@ export default function Home() {
               </Paper>
             </Grid>
 
-            {/* Delayed PoCs Section - Light Pink Card */}
+            {/* Delayed PoCs Section */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ 
-                p: 3,
-                borderRadius: 3,
+                p: 4,
+                borderRadius: '16px',
                 minHeight: 350,
-                background: 'linear-gradient(180deg, #DDD6FE 0%, #EDE9FE 100%)',
+                background: '#ffffff',
                 position: 'relative',
-                boxShadow: '0 4px 12px rgba(196, 181, 253, 0.3)'
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                  transform: 'translateY(-2px)'
+                }
               }}>
                 {/* Header */}
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  Delayed PoCs
-                  <Typography sx={{ fontSize: '1.1rem' }}>⏱️</Typography>
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                  <Box sx={{ 
+                    width: 4, 
+                    height: 24, 
+                    borderRadius: '2px', 
+                    background: 'linear-gradient(135deg, #EF4444 0%, #F87171 100%)' 
+                  }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    Delayed PoCs
+                    <Typography sx={{ fontSize: '1.1rem' }}>⏱️</Typography>
+                  </Typography>
+                </Box>
 
                 {/* Content */}
                 <Box sx={{ 
@@ -794,10 +924,16 @@ export default function Home() {
                 }}>
                   {delayedRows.map((item, idx) => (
                     <Box key={idx} sx={{ 
-                      p: 2.5,
-                      bgcolor: 'rgba(255,255,255,0.8)',
-                      borderRadius: 2,
-                      backdropFilter: 'blur(10px)'
+                      p: 3,
+                      bgcolor: '#FEF2F2',
+                      borderRadius: '12px',
+                      border: '1px solid #FECACA',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: '#FEE2E2',
+                        borderColor: '#FCA5A5',
+                        transform: 'translateX(4px)'
+                      }
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
                         Project Name: {item.customer || item.title || 'N/A'}
@@ -815,12 +951,12 @@ export default function Home() {
                           variant="determinate" 
                           value={Number(item.percent) || 0} 
                           sx={{ 
-                            height: 6, 
-                            borderRadius: 3,
-                            bgcolor: 'rgba(0,0,0,0.1)',
+                            height: 8, 
+                            borderRadius: 4,
+                            bgcolor: 'rgba(239, 68, 68, 0.1)',
                             '& .MuiLinearProgress-bar': { 
-                              bgcolor: '#D32F2F',
-                              borderRadius: 3
+                              background: 'linear-gradient(90deg, #EF4444 0%, #F87171 100%)',
+                              borderRadius: 4
                             }
                           }} 
                         />
@@ -839,21 +975,35 @@ export default function Home() {
               </Paper>
             </Grid>
 
-            {/* In Progress PoCs Section - Coral/Orange Card */}
+            {/* In Progress PoCs Section */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ 
-                p: 3,
-                borderRadius: 3,
+                p: 4,
+                borderRadius: '16px',
                 minHeight: 350,
-                background: 'linear-gradient(180deg, #A78BFA 0%, #8B5CF6 100%)',
+                background: '#ffffff',
                 position: 'relative',
-                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)'
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                  transform: 'translateY(-2px)'
+                }
               }}>
                 {/* Header */}
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#fff', display: 'flex', alignItems: 'center', gap: 1 }}>
-                  In Progress PoCs
-                  <Typography sx={{ fontSize: '1.1rem' }}>⚙️</Typography>
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                  <Box sx={{ 
+                    width: 4, 
+                    height: 24, 
+                    borderRadius: '2px', 
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' 
+                  }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    In Progress PoCs
+                    <Typography sx={{ fontSize: '1.1rem' }}>⚙️</Typography>
+                  </Typography>
+                </Box>
 
                 {/* Content */}
                 <Box sx={{ 
@@ -878,10 +1028,16 @@ export default function Home() {
                 }}>
                   {inProgressRows.map((item, idx) => (
                     <Box key={idx} sx={{ 
-                      p: 2.5,
-                      bgcolor: 'rgba(255,255,255,0.9)',
-                      borderRadius: 2,
-                      backdropFilter: 'blur(10px)'
+                      p: 3,
+                      bgcolor: '#F0F9FF',
+                      borderRadius: '12px',
+                      border: '1px solid #BAE6FD',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: '#E0F2FE',
+                        borderColor: '#7DD3FC',
+                        transform: 'translateX(4px)'
+                      }
                     }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#1F2937' }}>
                         Project Name: {item.customer || item.title || 'N/A'}
@@ -893,18 +1049,18 @@ export default function Home() {
                       <Box sx={{ mb: 1 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                           <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.75rem' }}>Progress</Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#FF6B4A' }}>{item.percent || 0}%</Typography>
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: '#7C3AED' }}>{item.percent || 0}%</Typography>
                         </Box>
                         <LinearProgress 
                           variant="determinate" 
                           value={Number(item.percent) || 0} 
                           sx={{ 
-                            height: 6, 
-                            borderRadius: 3,
-                            bgcolor: 'rgba(0,0,0,0.1)',
+                            height: 8, 
+                            borderRadius: 4,
+                            bgcolor: 'rgba(124, 58, 237, 0.1)',
                             '& .MuiLinearProgress-bar': { 
-                              bgcolor: '#FF6B4A',
-                              borderRadius: 3
+                              background: 'linear-gradient(90deg, #7C3AED 0%, #8B5CF6 100%)',
+                              borderRadius: 4
                             }
                           }} 
                         />
@@ -929,9 +1085,18 @@ export default function Home() {
         <Box sx={{ display: tabValue === 1 ? 'block' : 'none', p: 3 }}>
 
           {/* Overall Jira Projects Metrics (Delivery Projects Only) */}
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DnsIcon sx={{ color: 'var(--primary-orange)' }} /> Delivery Projects Overview
-          </Typography>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+              <Box sx={{ 
+                width: 4, 
+                height: 24, 
+                borderRadius: '2px', 
+                background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' 
+              }} />
+              <Typography variant="h5" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.5rem', letterSpacing: '-0.01em' }}>
+                Delivery Projects Overview
+              </Typography>
+            </Box>
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatTile 
@@ -972,19 +1137,60 @@ export default function Home() {
           </Grid>
 
           {/* Project Details Cards */}
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'var(--text-dark)' }}>Project Details</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4, mt: 5 }}>
+            <Box sx={{ 
+              width: 4, 
+              height: 24, 
+              borderRadius: '2px', 
+              background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)' 
+            }} />
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.5rem', letterSpacing: '-0.01em' }}>
+              Project Details
+            </Typography>
+          </Box>
           
           <Grid container spacing={2} sx={{ mb: 4 }}>
             {/* In Progress Projects */}
             {inProgressProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--secondary-gray) 0%, #fff 100%)' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#2563EB', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <HourglassEmptyIcon /> In Progress Projects ({inProgressProjectsData.length})
-                  </Typography>
+                <Paper sx={{ 
+                  p: 4, 
+                  borderRadius: '16px', 
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+                  border: '1px solid #E2E8F0',
+                  background: '#ffffff',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                    <Box sx={{ 
+                      width: 4, 
+                      height: 24, 
+                      borderRadius: '2px', 
+                      background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)' 
+                    }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <HourglassEmptyIcon sx={{ fontSize: '1.25rem', color: '#3B82F6' }} /> In Progress Projects ({inProgressProjectsData.length})
+                    </Typography>
+                  </Box>
                   <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
                     {inProgressProjectsData.slice(0, 5).map((project, idx) => (
-                      <Box key={idx} sx={{ p: 2.5, mb: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #bfdbfe' }}>
+                      <Box key={idx} sx={{ 
+                        p: 3, 
+                        mb: 2, 
+                        bgcolor: '#F0F9FF', 
+                        borderRadius: '12px', 
+                        border: '1px solid #BAE6FD',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: '#E0F2FE',
+                          borderColor: '#7DD3FC',
+                          transform: 'translateX(4px)'
+                        }
+                      }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
                           <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{project.name}</Typography>
                           <Chip label={project.key} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1e40af', fontWeight: 600, ml: 1 }} />
@@ -1018,13 +1224,44 @@ export default function Home() {
             {/* Delayed Projects */}
             {delayedProjectsData.length > 0 && (
               <Grid size={{ xs: 12, md: 6 }}>
-                <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 8px 28px rgba(0,0,0,0.07)', background: 'linear-gradient(135deg, var(--active-bg) 0%, #fff 100%)' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#F59E0B', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CancelOutlinedIcon /> Delayed Projects ({delayedProjectsData.length})
-                  </Typography>
+                <Paper sx={{ 
+                  p: 4, 
+                  borderRadius: '16px', 
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+                  border: '1px solid #E2E8F0',
+                  background: '#ffffff',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(239, 68, 68, 0.1)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                    <Box sx={{ 
+                      width: 4, 
+                      height: 24, 
+                      borderRadius: '2px', 
+                      background: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' 
+                    }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#0F172A', fontSize: '1.25rem', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CancelOutlinedIcon sx={{ fontSize: '1.25rem', color: '#F59E0B' }} /> Delayed Projects ({delayedProjectsData.length})
+                    </Typography>
+                  </Box>
                   <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
                     {delayedProjectsData.slice(0, 5).map((project, idx) => (
-                      <Box key={idx} sx={{ p: 2.5, mb: 2, bgcolor: '#fff', borderRadius: 2, border: '1px solid #fde68a' }}>
+                      <Box key={idx} sx={{ 
+                        p: 3, 
+                        mb: 2, 
+                        bgcolor: '#FEF3C7', 
+                        borderRadius: '12px', 
+                        border: '1px solid #FDE68A',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: '#FDE68A',
+                          borderColor: '#FCD34D',
+                          transform: 'translateX(4px)'
+                        }
+                      }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
                           <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-dark)', flex: 1 }}>{project.name}</Typography>
                           <Chip label={project.key} size="small" sx={{ bgcolor: '#FEF3C7', color: '#92400E', fontWeight: 600, ml: 1 }} />
@@ -1064,7 +1301,7 @@ export default function Home() {
 
 
         </Box>
-      </Paper>
+      </Box>
 
       {/* Custom Date Range Dialog */}
       <Dialog 
