@@ -1135,6 +1135,7 @@ export default function Home() {
               />
             </Grid>
           </Grid>
+          </Box>
 
           {/* Project Details Cards */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4, mt: 5 }}>
