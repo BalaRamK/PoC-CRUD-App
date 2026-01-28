@@ -5,10 +5,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
 
 :root {
-  /* Core palette */
-  --primary-orange: #F06649; /* requested primary */
-  --light-orange-1: #F58B6D; /* lighter shade */
-  --light-orange-2: #FAD0BF; /* lightest shade */
+  /* Core palette - Purple/Indigo scheme matching cs.qnulabs.com */
+  --primary-orange: #7C3AED; /* Purple primary (was orange) */
+  --light-orange-1: #8B5CF6; /* Lighter purple */
+  --light-orange-2: #C4B5FD; /* Lightest purple */
 
   /* Neutrals */
   --secondary-gray: #F3F5F8;
@@ -19,12 +19,12 @@
   --border-color: #E5E7EB;
 
   /* Accents */
-  --active-bg: #FFE4DC;
+  --active-bg: #EDE9FE;
   --active-text: var(--primary-orange);
 
   /* Effects */
   --shadow-light: 0px 6px 24px rgba(0, 0, 0, 0.06);
-  --focus-ring: 0 0 0 3px rgba(240, 102, 73, 0.25);
+  --focus-ring: 0 0 0 3px rgba(124, 58, 237, 0.25);
 }
 
 * {

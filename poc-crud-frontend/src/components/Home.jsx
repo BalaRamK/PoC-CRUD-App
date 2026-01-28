@@ -321,11 +321,11 @@ export default function Home() {
           <Paper sx={{ 
             p: 4, 
             borderRadius: 3, 
-            background: 'linear-gradient(135deg, #FF6B4A 0%, #FF8F77 100%)',
+            background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
             color: '#fff',
             position: 'relative',
             mb: 3,
-            boxShadow: '0 8px 24px rgba(255, 107, 74, 0.3)'
+            boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)'
           }}>
             {/* Header with Dropdown */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -462,7 +462,7 @@ export default function Home() {
                 }
               }}
             >
-              <ArrowForwardIcon sx={{ color: '#FF6B4A' }} />
+              <ArrowForwardIcon sx={{ color: '#7C3AED' }} />
             </IconButton>
           </Paper>
 
@@ -473,11 +473,11 @@ export default function Home() {
               <Paper sx={{ 
                 p: 3, 
                 borderRadius: 3, 
-                background: 'linear-gradient(135deg, #FFB5A0 0%, #FFC9B8 100%)',
+                background: 'linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)',
                 minHeight: 300,
                 position: 'relative',
-                boxShadow: '0 4px 16px rgba(255, 181, 160, 0.3)',
-                border: '3px solid #1E88E5'
+                boxShadow: '0 4px 16px rgba(196, 181, 253, 0.3)',
+                border: '3px solid #7C3AED'
               }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1F2937' }}>Important Blockers</Typography>
                 <Box sx={{ maxHeight: 230, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -539,10 +539,10 @@ export default function Home() {
               <Paper sx={{ 
                 p: 3, 
                 borderRadius: 3, 
-                background: 'linear-gradient(135deg, #FFE5E0 0%, #FFF0ED 100%)',
+                background: 'linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 100%)',
                 minHeight: 300,
                 position: 'relative',
-                boxShadow: '0 4px 16px rgba(255, 229, 224, 0.3)'
+                boxShadow: '0 4px 16px rgba(237, 233, 254, 0.3)'
               }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>PoC Timeline</Typography>
@@ -621,7 +621,7 @@ export default function Home() {
                         const leftPercent = (startMonth / 12) * 100;
                         const widthPercent = Math.max(((endMonth - startMonth + 1) / 12) * 100, 8);
                         
-                        const colors = ['#FF6B4A', '#D32F2F', '#FF8F77', '#F06649', '#FF7A5C', '#E85A3F', '#FF9980'];
+                        const colors = ['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE', '#F5F3FF'];
                         const color = colors[idx % colors.length];
                         
                         const tooltipText = `${item.customer || item.title || 'N/A'}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}\nStatus: ${item.status || 'N/A'}`;
@@ -761,9 +761,9 @@ export default function Home() {
                 p: 3,
                 borderRadius: 3,
                 minHeight: 350,
-                background: 'linear-gradient(180deg, #FFD8CC 0%, #FFCDB8 100%)',
+                background: 'linear-gradient(180deg, #DDD6FE 0%, #EDE9FE 100%)',
                 position: 'relative',
-                boxShadow: '0 4px 12px rgba(255, 181, 160, 0.3)'
+                boxShadow: '0 4px 12px rgba(196, 181, 253, 0.3)'
               }}>
                 {/* Header */}
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#1F2937', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -845,9 +845,9 @@ export default function Home() {
                 p: 3,
                 borderRadius: 3,
                 minHeight: 350,
-                background: 'linear-gradient(180deg, #FF8A65 0%, #FF7043 100%)',
+                background: 'linear-gradient(180deg, #A78BFA 0%, #8B5CF6 100%)',
                 position: 'relative',
-                boxShadow: '0 4px 12px rgba(255, 107, 74, 0.3)'
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)'
               }}>
                 {/* Header */}
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5, color: '#fff', display: 'flex', alignItems: 'center', gap: 1 }}>

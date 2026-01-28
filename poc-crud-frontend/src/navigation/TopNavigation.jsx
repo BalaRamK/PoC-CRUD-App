@@ -87,8 +87,8 @@ export default function TopNavigation() {
                   key={text}
                   className={({ isActive }) =>
                     isActive
-                      ? 'px-6 py-2 text-sm font-medium rounded-[10px] bg-[var(--primary-orange)] text-white hover:bg-[var(--primary-orange)] inline-block'
-                      : 'px-6 py-2 text-sm font-medium rounded-[10px] bg-transparent text-gray-700 hover:bg-gray-100 inline-block'
+                      ? 'px-6 py-2 text-sm font-medium rounded-[10px] bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white hover:from-[#8B5CF6] hover:to-[#A78BFA] inline-block shadow-md'
+                      : 'px-6 py-2 text-sm font-medium rounded-[10px] bg-transparent text-gray-700 hover:bg-purple-50 hover:text-[#7C3AED] inline-block transition-colors'
                   }
                   style={{ textDecoration: 'none', display: 'inline-block', borderRadius: '10px' }}
                 >
@@ -104,7 +104,7 @@ export default function TopNavigation() {
               <UIButton
                 onClick={handleLogout}
                 variant="outline"
-                className="border border-[var(--primary-orange)] text-[var(--primary-orange)] rounded-full"
+                className="border border-[#7C3AED] text-[#7C3AED] rounded-full hover:bg-purple-50"
               >
                 Logout
               </UIButton>
@@ -207,7 +207,7 @@ export default function TopNavigation() {
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
             <UIButton variant="outline" onClick={cancelLogout}>Cancel</UIButton>
-            <UIButton onClick={confirmLogout} className="bg-[var(--primary-orange)] text-white">Sign out</UIButton>
+            <UIButton onClick={confirmLogout} className="bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] text-white hover:from-[#8B5CF6] hover:to-[#A78BFA] shadow-md">Sign out</UIButton>
           </div>
         </DialogContent>
       </Dialog>

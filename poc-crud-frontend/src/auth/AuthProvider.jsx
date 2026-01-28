@@ -67,8 +67,18 @@ function AuthInner({ children }) {
   async function login(popup = true) {
     try {
       if (popup) {
-        const resp = await instance.loginPopup(loginRequest);
-        return resp;
+        try {
+          const resp = await instance.loginPopup(loginRequest);
+          return resp;
+        } catch (popupError) {
+          // Suppress Cross-Origin-Opener-Policy warnings for popup
+          if (popupError.message && popupError.message.includes('Cross-Origin-Opener-Policy')) {
+            console.warn('Popup blocked by COOP policy, falling back to redirect');
+          }
+          // if popup fails, fallback to redirect
+          await instance.loginRedirect(loginRequest);
+          return null;
+        }
       } else {
         await instance.loginRedirect(loginRequest);
         return null;
