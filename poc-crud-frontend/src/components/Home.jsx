@@ -371,37 +371,23 @@ export default function Home() {
           <Paper sx={{ 
             p: 5, 
             borderRadius: '20px', 
-            background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
-            color: '#fff',
+            background: '#ffffff',
+            border: '1px solid #E2E8F0',
             position: 'relative',
             mb: 4,
-            boxShadow: '0 20px 60px rgba(124, 58, 237, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
             overflow: 'hidden'
           }}>
-            {/* Decorative background elements */}
-            <Box sx={{
-              position: 'absolute',
-              top: -50,
-              right: -50,
-              width: 200,
-              height: 200,
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.1)',
-              filter: 'blur(40px)'
-            }} />
-            <Box sx={{
-              position: 'absolute',
-              bottom: -30,
-              left: -30,
-              width: 150,
-              height: 150,
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)',
-              filter: 'blur(30px)'
-            }} />
             {/* Header with Dropdown */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
-              <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem', letterSpacing: '-0.01em' }}>Status Summary</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem', letterSpacing: '-0.01em', color: '#0F172A', mb: 0.5 }}>
+                  Status Summary
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748B', fontSize: '0.875rem' }}>
+                  Overview of all PoC statuses
+                </Typography>
+              </Box>
               <FormControl size="small" sx={{ minWidth: 140 }}>
                 <Select
                   value={timePeriod}
@@ -413,13 +399,18 @@ export default function Home() {
                     }
                   }}
                   sx={{
-                    bgcolor: '#fff',
-                    color: '#1F2937',
-                    borderRadius: 2,
+                    bgcolor: '#F8FAFC',
+                    color: '#0F172A',
+                    borderRadius: '10px',
                     fontWeight: 500,
                     fontSize: '0.875rem',
+                    border: '1px solid #E2E8F0',
                     '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                    '& .MuiSvgIcon-root': { color: '#1F2937' }
+                    '& .MuiSvgIcon-root': { color: '#64748B' },
+                    '&:hover': {
+                      bgcolor: '#F1F5F9',
+                      borderColor: '#CBD5E1'
+                    }
                   }}
                 >
                   <MenuItem value="3 months">3 months</MenuItem>
@@ -431,26 +422,27 @@ export default function Home() {
             </Box>
 
             {/* Visual Status Bar - Segmented */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 4 }}>
               <Box sx={{ 
                 display: 'flex', 
-                height: 40, 
-                borderRadius: 2,
+                height: 48, 
+                borderRadius: '12px',
                 overflow: 'hidden',
-                gap: '2px',
-                bgcolor: 'rgba(255,255,255,0.2)',
-                p: 0.5
+                gap: '3px',
+                bgcolor: '#F1F5F9',
+                p: 0.5,
+                border: '1px solid #E2E8F0'
               }}>
                 {filteredRows.map((item, idx) => {
                   const status = String(item.status).toLowerCase();
-                  let color = '#DC2626'; // red for delayed
+                  let color = '#EF4444'; // red for delayed
                   
                   if (status === 'completed') {
-                    color = '#FFFFFF'; // white for completed
+                    color = '#10B981'; // green for completed
                   } else if (isDelayed(item)) {
-                    color = '#DC2626'; // red for delayed
+                    color = '#EF4444'; // red for delayed
                   } else if (['execution', 'in progress', 'on track'].includes(status)) {
-                    color = '#FDE047'; // bright yellow for in progress
+                    color = '#F59E0B'; // amber for in progress
                   }
                   
                   const tooltipText = `${item.customer || item.title || 'N/A'}\nStatus: ${status}\nStart: ${formatDate(item.startDate)}\nEnd: ${formatDate(item.endDate)}`;
@@ -462,13 +454,12 @@ export default function Home() {
                           flex: 1,
                           bgcolor: color,
                           minWidth: '4px',
-                          borderRadius: 1,
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                          borderRadius: '8px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
                           '&:hover': {
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-                            transform: 'scaleY(1.2)'
+                            opacity: 0.9,
+                            transform: 'scaleY(1.1)'
                           }
                         }} 
                       />
@@ -477,42 +468,108 @@ export default function Home() {
                 })}
               </Box>
               {/* Legend */}
-              <Box sx={{ display: 'flex', gap: 3, mt: 2, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FFFFFF', border: '1px solid rgba(255,255,255,0.5)' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>Complete</Typography>
+              <Box sx={{ display: 'flex', gap: 3, mt: 2.5, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: '#10B981', border: '2px solid #D1FAE5' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8125rem', fontWeight: 500, color: '#64748B' }}>Complete</Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FDE047', border: '1px solid rgba(255,255,255,0.3)' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>In-Progress</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: '#F59E0B', border: '2px solid #FEF3C7' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8125rem', fontWeight: 500, color: '#64748B' }}>In-Progress</Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#DC2626', border: '1px solid rgba(255,255,255,0.3)' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.8rem', fontWeight: 500 }}>Delayed</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ width: 14, height: 14, borderRadius: '50%', bgcolor: '#EF4444', border: '2px solid #FEE2E2' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.8125rem', fontWeight: 500, color: '#64748B' }}>Delayed</Typography>
                 </Box>
               </Box>
             </Box>
 
             {/* Stats Grid with Dividers */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', position: 'relative', zIndex: 1 }}>
-              <Box sx={{ flex: 1, py: 1.5 }}>
-                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Total PoCs</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{total}</Typography>
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 3,
+              pt: 2
+            }}>
+              <Box sx={{ 
+                p: 3, 
+                borderRadius: '12px', 
+                bgcolor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#F1F5F9',
+                  borderColor: '#CBD5E1',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                }
+              }}>
+                <Typography variant="caption" sx={{ textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1.5, letterSpacing: '0.05em', fontWeight: 600, color: '#64748B' }}>
+                  Total PoCs
+                </Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, letterSpacing: '-0.02em', color: '#0F172A' }}>
+                  {total}
+                </Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1.5 }}>
-                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Completed</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{completed}</Typography>
+              <Box sx={{ 
+                p: 3, 
+                borderRadius: '12px', 
+                bgcolor: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#D1FAE5',
+                  borderColor: '#6EE7B7',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)'
+                }
+              }}>
+                <Typography variant="caption" sx={{ textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1.5, letterSpacing: '0.05em', fontWeight: 600, color: '#047857' }}>
+                  Completed
+                </Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, letterSpacing: '-0.02em', color: '#059669' }}>
+                  {completed}
+                </Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1.5 }}>
-                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>In Progress</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{inProgress}</Typography>
+              <Box sx={{ 
+                p: 3, 
+                borderRadius: '12px', 
+                bgcolor: '#FFFBEB',
+                border: '1px solid #FDE68A',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#FEF3C7',
+                  borderColor: '#FCD34D',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)'
+                }
+              }}>
+                <Typography variant="caption" sx={{ textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1.5, letterSpacing: '0.05em', fontWeight: 600, color: '#92400E' }}>
+                  In Progress
+                </Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, letterSpacing: '-0.02em', color: '#D97706' }}>
+                  {inProgress}
+                </Typography>
               </Box>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255,255,255,0.25)', mx: 3 }} />
-              <Box sx={{ flex: 1, py: 1.5 }}>
-                <Typography variant="caption" sx={{ opacity: 0.95, textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1, letterSpacing: '0.05em', fontWeight: 600 }}>Delayed</Typography>
-                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '3rem', lineHeight: 1, letterSpacing: '-0.02em' }}>{delayed}</Typography>
+              <Box sx={{ 
+                p: 3, 
+                borderRadius: '12px', 
+                bgcolor: '#FEF2F2',
+                border: '1px solid #FECACA',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#FEE2E2',
+                  borderColor: '#FCA5A5',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)'
+                }
+              }}>
+                <Typography variant="caption" sx={{ textTransform: 'uppercase', fontSize: '0.75rem', display: 'block', mb: 1.5, letterSpacing: '0.05em', fontWeight: 600, color: '#991B1B' }}>
+                  Delayed
+                </Typography>
+                <Typography variant="h2" sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, letterSpacing: '-0.02em', color: '#DC2626' }}>
+                  {delayed}
+                </Typography>
               </Box>
             </Box>
 
