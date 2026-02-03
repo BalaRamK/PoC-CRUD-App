@@ -24,10 +24,7 @@ app.use('/api/items', itemsRouter);
 app.use('/api/jira', jiraRouter);
 app.use('/api/reports', reportsRouter);
 
-// JSON error responses (no HTML stack traces)
-app.use(errorHandler);
-
-// Confirm which backend code is running (items GET returns 200 + success:false on Excel failure)
+// Debug and version routes (before error handler so they always respond)
 app.get('/api/version', (req, res) => {
   res.json({
     version: require('./package.json').version,
@@ -35,8 +32,6 @@ app.get('/api/version', (req, res) => {
     code: 'EXCEL_UNAVAILABLE'
   });
 });
-
-// Jira connection test (auth + reachability)
 app.get('/api/debug/jira', async (req, res) => {
   try {
     const result = await getJiraConnectionTest();
@@ -45,8 +40,6 @@ app.get('/api/debug/jira', async (req, res) => {
     res.status(500).json({ ok: false, message: e?.message || String(e) });
   }
 });
-
-// Proxy status (no Graph call) – use this to confirm proxy is loaded
 app.get('/api/debug/proxy', (req, res) => {
   try {
     const { isProxyEnabled } = require('./lib/proxyAxios');
@@ -60,8 +53,6 @@ app.get('/api/debug/proxy', (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
-// Read-only debug endpoint to help diagnose Graph discovery issues
 app.get('/api/debug', async (req, res) => {
   try {
     const info = await getDebugInfo();
@@ -72,6 +63,9 @@ app.get('/api/debug', async (req, res) => {
     res.status(500).json({ ok: false, error: err?.response?.data || err.message || String(err) });
   }
 });
+
+// JSON error responses for routes that call next(err)
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
