@@ -3,6 +3,7 @@ const axios = require('axios');
 const { ConfidentialClientApplication } = require('@azure/msal-node');
 const { getProxyConfig, getProxyHeaders, isProxyEnabled } = require('../lib/proxyAxios');
 const { msalProxyNetworkClient } = require('../lib/msalProxyNetworkClient');
+const { isCurlFallbackActive, curlRequest } = require('../lib/curlProxyClient');
 
 const config = {
   auth: {
@@ -15,6 +16,38 @@ const config = {
 };
 
 const cca = new ConfidentialClientApplication(config);
+
+/** GET/POST/PATCH to Graph API; uses curl when PROXY_USE_CURL_FALLBACK is set. */
+async function graphFetch(method, url, accessToken, body) {
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    Accept: 'application/json',
+    ...(body != null && { 'Content-Type': 'application/json' }),
+  };
+  if (isCurlFallbackActive()) {
+    const bodyStr = body != null ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined;
+    const { statusCode, data } = curlRequest({ method, url, headers, body: bodyStr });
+    if (statusCode >= 400) {
+      const err = new Error(data?.error?.message || data || `Graph ${statusCode}`);
+      err.response = { status: statusCode, data: (() => { try { return JSON.parse(data); } catch { return data; } })() };
+      throw err;
+    }
+    try { return data ? JSON.parse(data) : {}; } catch { return {}; }
+  }
+  if (method === 'GET') {
+    const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), ...headers } });
+    return resp.data;
+  }
+  if (method === 'POST') {
+    const resp = await axios.post(url, body, { ...getProxyConfig(), headers: { ...getProxyHeaders(), ...headers } });
+    return resp.data;
+  }
+  if (method === 'PATCH') {
+    const resp = await axios.patch(url, body, { ...getProxyConfig(), headers: { ...getProxyHeaders(), ...headers } });
+    return resp.data;
+  }
+  throw new Error('Unsupported method: ' + method);
+}
 
 async function getAccessToken() {
   // Log non-secret diagnostic info to help identify misconfiguration that causes
@@ -38,8 +71,8 @@ async function getAccessToken() {
 
 async function getSiteId(accessToken) {
   const url = `https://graph.microsoft.com/v1.0/sites/${process.env.SHAREPOINT_HOST}:${process.env.SHAREPOINT_SITE_PATH}`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-  return resp.data.id;
+  const data = await graphFetch('GET', url, accessToken);
+  return data.id;
 }
 
 async function getFileItemId(siteId, accessToken) {
@@ -47,8 +80,8 @@ async function getFileItemId(siteId, accessToken) {
   if (process.env.EXCEL_ITEM_ID) {
     try {
       const idUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${process.env.EXCEL_ITEM_ID}`;
-      const idResp = await axios.get(idUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-      return idResp.data.id;
+      const idData = await graphFetch('GET', idUrl, accessToken);
+      return idData.id;
     } catch (err) {
       console.warn('EXCEL_ITEM_ID provided but validation failed:', err?.response?.data || err.message || err);
       // fall through to path-based lookup
@@ -60,8 +93,8 @@ async function getFileItemId(siteId, accessToken) {
   if (filePath && !filePath.startsWith('/')) filePath = '/' + filePath;
   // Use trailing colon form to request metadata for the path
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:${filePath}:`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-  return resp.data.id;
+  const data = await graphFetch('GET', url, accessToken);
+  return data.id;
 }
 
 // Diagnostic: return site/item/table discovery info (read-only)
@@ -72,20 +105,19 @@ async function getDebugInfo() {
     const accessToken = tokenResp?.accessToken;
 
     const siteUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SHAREPOINT_HOST}:${process.env.SHAREPOINT_SITE_PATH}`;
-    const siteResp = await axios.get(siteUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    const siteId = siteResp.data.id;
+    const siteData = await graphFetch('GET', siteUrl, accessToken);
+    const siteId = siteData.id;
 
     // get file metadata
     const fileUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:${process.env.EXCEL_FILE_PATH}`;
-    const fileResp = await axios.get(fileUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    const itemId = fileResp.data.id;
+    const fileData = await graphFetch('GET', fileUrl, accessToken);
+    const itemId = fileData.id;
 
     // get table range (if table exists)
     let tableRange = null;
     try {
       const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${process.env.EXCEL_TABLE_NAME}/range`;
-      const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-      tableRange = rangeResp.data;
+      tableRange = await graphFetch('GET', tableRangeUrl, accessToken);
     } catch (e) {
       tableRange = { error: e?.response?.data || e.message };
     }
@@ -94,7 +126,7 @@ async function getDebugInfo() {
       ok: true,
       token: { hasAccessToken: !!accessToken, expiresOn: tokenResp.expiresOn || null },
       site: { url: siteUrl, id: siteId },
-      file: { path: process.env.EXCEL_FILE_PATH, id: itemId, name: fileResp.data.name },
+      file: { path: process.env.EXCEL_FILE_PATH, id: itemId, name: fileData.name },
       tableRange
     };
   } catch (err) {
@@ -110,8 +142,8 @@ async function getRows() {
   const tableName = process.env.EXCEL_TABLE_NAME;
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/rows`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-  return resp.data.value; // Array of rows
+  const data = await graphFetch('GET', url, accessToken);
+  return data.value; // Array of rows
 }
 
 // CREATE (add new row)
@@ -122,9 +154,8 @@ async function addRow(valuesArray) {
   const tableName = process.env.EXCEL_TABLE_NAME;
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/rows/add`;
-  const payload = { values: [valuesArray] }; // Example: ["Value1", "Value2", ...]
-  const resp = await axios.post(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-  return resp.data;
+  const payload = { values: [valuesArray] };
+  return await graphFetch('POST', url, accessToken, payload);
 }
 
 // UPDATE (update specific cell, advanced)
@@ -134,9 +165,8 @@ async function updateCell(address, value) {
   const itemId = await getFileItemId(siteId, accessToken);
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('Sheet1')/range(address='${address}')`;
-  const payload = { values: [[value]] }; // Address example: "A2"
-  const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-  return resp.data;
+  const payload = { values: [[value]] };
+  return await graphFetch('PATCH', url, accessToken, payload);
 }
 
 // DELETE (blank cell or remove row logic, non-trivial – requires API logic)
@@ -150,8 +180,8 @@ async function updateRow(rowIndex, valuesArray) {
 
   try {
     const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/range`;
-    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    const address = rangeResp?.data?.address; // e.g. "Sheet1!A1:M10"
+    const rangeData = await graphFetch('GET', tableRangeUrl, accessToken);
+    const address = rangeData?.address; // e.g. "Sheet1!A1:M10"
     if (!address) throw new Error('Could not determine table range address');
 
     const [sheetPart, cellsPart] = address.split('!');
@@ -175,8 +205,7 @@ async function updateRow(rowIndex, valuesArray) {
 
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('${encodeURIComponent(sheetName)}')/range(address='${targetRange}')`;
     const payload = { values: [valuesArray] };
-    const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    return resp.data;
+    return await graphFetch('PATCH', url, accessToken, payload);
   } catch (err) {
     console.error('sharepoint.updateRow error', err?.response?.status, err?.response?.data || err.message || err);
     throw err;
@@ -192,8 +221,8 @@ async function deleteRow(rowIndex) {
 
   try {
     const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/range`;
-    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    const address = rangeResp?.data?.address;
+    const rangeData = await graphFetch('GET', tableRangeUrl, accessToken);
+    const address = rangeData?.address;
     if (!address) throw new Error('Could not determine table range address');
 
     const [sheetPart, cellsPart] = address.split('!');
@@ -213,13 +242,11 @@ async function deleteRow(rowIndex) {
     const targetRow = start.row + 1 + Number(rowIndex);
     const targetRange = `${sheetName}!${start.colLetters}${targetRow}:${end.colLetters}${targetRow}`;
 
-    // compute number of columns
     const numCols = columnLetterToNumber(end.colLetters) - columnLetterToNumber(start.colLetters) + 1;
     const emptyValues = [Array(numCols).fill('')];
 
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('${encodeURIComponent(sheetName)}')/range(address='${targetRange}')`;
-    const resp = await axios.patch(url, { values: emptyValues }, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
-    return resp.data;
+    return await graphFetch('PATCH', url, accessToken, { values: emptyValues });
   } catch (err) {
     console.error('sharepoint.deleteRow error', err?.response?.status, err?.response?.data || err.message || err);
     throw err;

@@ -21,7 +21,7 @@ Optional (if Node gets 503 through proxy but curl works):
 
 - `PROXY_MIMIC_CURL=true` – use a curl-like User-Agent on CONNECT
 - `PROXY_USER_AGENT=curl/7.68.0` – custom User-Agent for CONNECT (overrides default)
-- **`PROXY_USE_CURL_FALLBACK=true`** – run Jira API requests via a **curl subprocess** instead of Node’s proxy agent. Use this when `curl -x PROXY https://...` works from the server but the app still gets 503. Requires `curl` installed on the server. If you see “curl: try 'curl --help'”, ensure the server has the latest code: `grep execFileSync sharepoint-crud-backend/services/jira.service.js` should show a match (we use execFileSync so curl receives the args).
+- **`PROXY_USE_CURL_FALLBACK=true`** – run **Jira**, **Microsoft Graph**, and **MSAL token** (login.microsoftonline.com) requests via a **curl subprocess** instead of Node’s proxy agent. Use when `curl -x PROXY https://...` works but the app gets 502/503. Fixes both “Excel data temporarily unavailable” (Graph) and Jira 503. Requires `curl` on the server.
 
 All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this proxy (30s timeout, User-Agent sent). Set `BACKEND_USE_PROXY=false` to force direct connection. Leave proxy unset when no proxy is required.
 
@@ -114,6 +114,7 @@ You should see JSON with `version` and `itemsErrorFormat`. If you still get HTML
 
 The app returns "Excel data temporarily unavailable" with `detail: Request failed with status code 502` or `503` when the proxy or Microsoft (login.microsoftonline.com / graph.microsoft.com) returns that status.
 
+- **Same fix as Jira:** If you already use **`PROXY_USE_CURL_FALLBACK=true`** for Jira, the same setting routes **MSAL token** and **Microsoft Graph** requests through curl. Deploy the latest backend and restart; Excel/Graph should then work like Jira.
 - **502 Bad Gateway** – proxy could not get a valid response from the upstream server (Microsoft). Often proxy/firewall or upstream timeout.
 - **503 Service Unavailable** – proxy or Microsoft temporarily unavailable.
 
