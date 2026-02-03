@@ -6,6 +6,7 @@ const app = express();
 const itemsRouter = require('./routes/items.routes');
 const jiraRouter = require('./routes/jira.routes');
 const reportsRouter = require('./routes/reports.routes');
+const errorHandler = require('./middleware/error.middleware');
 const { getDebugInfo } = require('./services/sharepoint.service');
 
 app.use(cors()); 
@@ -21,6 +22,9 @@ app.use((req, res, next) => {
 app.use('/api/items', itemsRouter);
 app.use('/api/jira', jiraRouter);
 app.use('/api/reports', reportsRouter);
+
+// JSON error responses (no HTML stack traces)
+app.use(errorHandler);
 
 // Confirm which backend code is running (items GET returns 200 + success:false on Excel failure)
 app.get('/api/version', (req, res) => {
