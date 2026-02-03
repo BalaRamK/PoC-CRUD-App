@@ -65,9 +65,12 @@ Another process is holding port 3000, so your new app never bound to it. Fix:
 
 You should see JSON with `version` and `itemsErrorFormat`. If you still get HTML "Cannot GET /api/version", repeat step 1 and ensure the PID on 3000 matches the PM2 PID.
 
-### Excel returns 503 (Service Unavailable)
+### Excel returns 502 or 503 (Bad Gateway / Service Unavailable)
 
-The app returns "Excel data temporarily unavailable" with `detail: Request failed with status code 503` when the proxy or Microsoft (login.microsoftonline.com / graph.microsoft.com) returns HTTP 503.
+The app returns "Excel data temporarily unavailable" with `detail: Request failed with status code 502` or `503` when the proxy or Microsoft (login.microsoftonline.com / graph.microsoft.com) returns that status.
+
+- **502 Bad Gateway** – proxy could not get a valid response from the upstream server (Microsoft). Often proxy/firewall or upstream timeout.
+- **503 Service Unavailable** – proxy or Microsoft temporarily unavailable.
 
 1. **Confirm proxy is used**  
    Startup log should show `[proxyAxios] Outbound: proxy http://...`. If not, set `HTTPS_PROXY` (or `HTTP_PROXY`) in `.env`.
@@ -76,13 +79,13 @@ The app returns "Excel data temporarily unavailable" with `detail: Request faile
    ```bash
    curl -s -o /dev/null -w "%{http_code}" -x http://YOUR_PROXY:PORT https://login.microsoftonline.com
    ```  
-   Expect 302 (or 200). If you get 503, the proxy or firewall is blocking or returning 503 for that host.
+   Expect 302 (or 200). If you get 502 or 503, the proxy or firewall is blocking or failing for that host.
 
 3. **Check backend logs**  
    ```bash
    grep ITEMS_DEBUG /home/admin_/.pm2/logs/poc-backend-error-0.log
    ```  
-   If you see `MSAL token ... returned 503`, the token request (login.microsoftonline.com) is getting 503. If you see `step=Graph` and 503, Graph API is returning 503.
+   Look for `MSAL token ... returned 502/503` (token request) or `step=Graph` and status 502/503 (Graph API).
 
 4. **Fix**  
-   Ensure the proxy and corporate firewall allow outbound HTTPS to `login.microsoftonline.com` and `graph.microsoft.com`. If the proxy returns 503 for these hosts, work with your network team to allow or fix the proxy.
+   Ensure the proxy and corporate firewall allow outbound HTTPS to `login.microsoftonline.com` and `graph.microsoft.com`. For 502, check proxy timeouts and that upstream (Microsoft) is reachable from the proxy. Work with your network team to allow or fix the proxy.
