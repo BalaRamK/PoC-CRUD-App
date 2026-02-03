@@ -44,10 +44,24 @@ npm start
 
 ```bash
 cd /path/to/sharepoint-crud-backend
+git pull
 npm install
-pm2 start ecosystem.config.cjs
+pm2 restart poc-backend   # or: pm2 start ecosystem.config.cjs
 pm2 save
 ```
+
+### Verify deployed code (Jira returns JSON, not HTML 500)
+
+If the app still gets HTML 500 for `/api/jira/projects`, the server may be running old code or a cached response. On the server:
+
+```bash
+cd /opt/PoC-CRUD-App/sharepoint-crud-backend
+grep -n sendJiraError routes/jira.routes.js   # should show line 5, 14, etc.
+pm2 restart poc-backend
+curl -s http://localhost:3000/api/jira/projects | head -c 200
+```
+
+You should see JSON (`{"success":false,"error":{...}}` or `{"success":true,"data":[...]}`). If you see `<!DOCTYPE html>`, the process serving port 3000 is not this repo—check `sudo ss -tlnp | grep 3000` and `pm2 show poc-backend` (PID must match). If curl to localhost returns JSON but the browser still gets HTML, the reverse proxy (e.g. nginx) may be caching 500; disable caching for `/api/` or restart nginx.
 
 ### Port 3000 already in use (curl returns 404 but logs show app started)
 
