@@ -3,7 +3,9 @@
  * Use this when HTTPS_PROXY/HTTP_PROXY is set so token acquisition works behind a corporate proxy.
  */
 const axios = require('axios');
-const { getProxyConfig } = require('./proxyAxios');
+const { getProxyConfig, getProxyHeaders } = require('./proxyAxios');
+
+const MSAL_TIMEOUT_MS = 30000; // 30s for proxy + login.microsoftonline.com
 
 /**
  * Implements INetworkModule for @azure/msal-node so token requests go through the proxy.
@@ -14,13 +16,14 @@ const msalProxyNetworkClient = {
       ...getProxyConfig(),
       method: 'GET',
       url,
-      headers: options.headers || {},
-      timeout: timeout || 10000,
+      headers: { ...getProxyHeaders(), ...(options.headers || {}) },
+      timeout: timeout || MSAL_TIMEOUT_MS,
       validateStatus: () => true, // so we get response even on 4xx/5xx
     };
     const response = await axios(axiosConfig);
     if (response.status >= 400) {
-      console.error(`[ITEMS_DEBUG] MSAL token (GET) returned ${response.status} url=${(url || '').substring(0, 60)}`);
+      const bodyPreview = typeof response.data === 'string' ? response.data.substring(0, 300) : JSON.stringify(response.data).substring(0, 300);
+      console.error(`[ITEMS_DEBUG] MSAL token (GET) returned ${response.status} url=${(url || '').substring(0, 60)} body=${bodyPreview}`);
     }
     const headers = {};
     if (response.headers && typeof response.headers === 'object') {
@@ -41,14 +44,15 @@ const msalProxyNetworkClient = {
       ...getProxyConfig(),
       method: 'POST',
       url,
-      headers: options.headers || {},
+      headers: { ...getProxyHeaders(), ...(options.headers || {}) },
       data: options.body,
-      timeout: 10000,
+      timeout: MSAL_TIMEOUT_MS,
       validateStatus: () => true,
     };
     const response = await axios(axiosConfig);
     if (response.status >= 400) {
-      console.error(`[ITEMS_DEBUG] MSAL token (POST) returned ${response.status} url=${(url || '').substring(0, 60)}`);
+      const bodyPreview = typeof response.data === 'string' ? response.data.substring(0, 300) : JSON.stringify(response.data).substring(0, 300);
+      console.error(`[ITEMS_DEBUG] MSAL token (POST) returned ${response.status} url=${(url || '').substring(0, 60)} body=${bodyPreview}`);
     }
     const headers = {};
     if (response.headers && typeof response.headers === 'object') {

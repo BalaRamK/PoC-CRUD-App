@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const { ConfidentialClientApplication } = require('@azure/msal-node');
-const { getProxyConfig, isProxyEnabled } = require('../lib/proxyAxios');
+const { getProxyConfig, getProxyHeaders, isProxyEnabled } = require('../lib/proxyAxios');
 const { msalProxyNetworkClient } = require('../lib/msalProxyNetworkClient');
 
 const config = {
@@ -38,7 +38,7 @@ async function getAccessToken() {
 
 async function getSiteId(accessToken) {
   const url = `https://graph.microsoft.com/v1.0/sites/${process.env.SHAREPOINT_HOST}:${process.env.SHAREPOINT_SITE_PATH}`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
   return resp.data.id;
 }
 
@@ -47,7 +47,7 @@ async function getFileItemId(siteId, accessToken) {
   if (process.env.EXCEL_ITEM_ID) {
     try {
       const idUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${process.env.EXCEL_ITEM_ID}`;
-      const idResp = await axios.get(idUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+      const idResp = await axios.get(idUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
       return idResp.data.id;
     } catch (err) {
       console.warn('EXCEL_ITEM_ID provided but validation failed:', err?.response?.data || err.message || err);
@@ -60,7 +60,7 @@ async function getFileItemId(siteId, accessToken) {
   if (filePath && !filePath.startsWith('/')) filePath = '/' + filePath;
   // Use trailing colon form to request metadata for the path
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:${filePath}:`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
   return resp.data.id;
 }
 
@@ -72,19 +72,19 @@ async function getDebugInfo() {
     const accessToken = tokenResp?.accessToken;
 
     const siteUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SHAREPOINT_HOST}:${process.env.SHAREPOINT_SITE_PATH}`;
-    const siteResp = await axios.get(siteUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const siteResp = await axios.get(siteUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     const siteId = siteResp.data.id;
 
     // get file metadata
     const fileUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:${process.env.EXCEL_FILE_PATH}`;
-    const fileResp = await axios.get(fileUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const fileResp = await axios.get(fileUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     const itemId = fileResp.data.id;
 
     // get table range (if table exists)
     let tableRange = null;
     try {
       const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${process.env.EXCEL_TABLE_NAME}/range`;
-      const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+      const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
       tableRange = rangeResp.data;
     } catch (e) {
       tableRange = { error: e?.response?.data || e.message };
@@ -110,7 +110,7 @@ async function getRows() {
   const tableName = process.env.EXCEL_TABLE_NAME;
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/rows`;
-  const resp = await axios.get(url, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+  const resp = await axios.get(url, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
   return resp.data.value; // Array of rows
 }
 
@@ -123,7 +123,7 @@ async function addRow(valuesArray) {
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/rows/add`;
   const payload = { values: [valuesArray] }; // Example: ["Value1", "Value2", ...]
-  const resp = await axios.post(url, payload, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+  const resp = await axios.post(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
   return resp.data;
 }
 
@@ -135,7 +135,7 @@ async function updateCell(address, value) {
 
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('Sheet1')/range(address='${address}')`;
   const payload = { values: [[value]] }; // Address example: "A2"
-  const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+  const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
   return resp.data;
 }
 
@@ -150,7 +150,7 @@ async function updateRow(rowIndex, valuesArray) {
 
   try {
     const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/range`;
-    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     const address = rangeResp?.data?.address; // e.g. "Sheet1!A1:M10"
     if (!address) throw new Error('Could not determine table range address');
 
@@ -175,7 +175,7 @@ async function updateRow(rowIndex, valuesArray) {
 
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('${encodeURIComponent(sheetName)}')/range(address='${targetRange}')`;
     const payload = { values: [valuesArray] };
-    const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const resp = await axios.patch(url, payload, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     return resp.data;
   } catch (err) {
     console.error('sharepoint.updateRow error', err?.response?.status, err?.response?.data || err.message || err);
@@ -192,7 +192,7 @@ async function deleteRow(rowIndex) {
 
   try {
     const tableRangeUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/tables/${tableName}/range`;
-    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const rangeResp = await axios.get(tableRangeUrl, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     const address = rangeResp?.data?.address;
     if (!address) throw new Error('Could not determine table range address');
 
@@ -218,7 +218,7 @@ async function deleteRow(rowIndex) {
     const emptyValues = [Array(numCols).fill('')];
 
     const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${itemId}/workbook/worksheets('${encodeURIComponent(sheetName)}')/range(address='${targetRange}')`;
-    const resp = await axios.patch(url, { values: emptyValues }, { ...getProxyConfig(), headers: { Authorization: `Bearer ${accessToken}` } });
+    const resp = await axios.patch(url, { values: emptyValues }, { ...getProxyConfig(), headers: { ...getProxyHeaders(), Authorization: `Bearer ${accessToken}` } });
     return resp.data;
   } catch (err) {
     console.error('sharepoint.deleteRow error', err?.response?.status, err?.response?.data || err.message || err);

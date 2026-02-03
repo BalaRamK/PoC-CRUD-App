@@ -12,7 +12,12 @@ When running behind a corporate proxy, set one of:
 - `HTTP_PROXY` – same format
 - `PROXY_URL` – same format
 
-All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this proxy. Leave unset when no proxy is required.
+Optional proxy auth (if the proxy requires it):
+
+- `PROXY_USERNAME` – proxy username
+- `PROXY_PASSWORD` – proxy password
+
+All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this proxy (30s timeout, User-Agent sent). Set `BACKEND_USE_PROXY=false` to force direct connection. Leave proxy unset when no proxy is required.
 
 ### Jira
 
@@ -89,3 +94,10 @@ The app returns "Excel data temporarily unavailable" with `detail: Request faile
 
 4. **Fix**  
    Ensure the proxy and corporate firewall allow outbound HTTPS to `login.microsoftonline.com` and `graph.microsoft.com`. For 502, check proxy timeouts and that upstream (Microsoft) is reachable from the proxy. Work with your network team to allow or fix the proxy.
+
+5. **503 from proxy (CONNECT / SSL inspection)**  
+   Many corporate proxies return 503 when they cannot establish an HTTPS tunnel correctly:
+   - **Protocol detection** – The proxy must handle HTTPS **CONNECT** correctly (establish the tunnel to Microsoft, not forward the CONNECT request to Microsoft). Ask your network team to enable "detect protocol" or proper CONNECT handling for `login.microsoftonline.com` and `graph.microsoft.com`.
+   - **SSL inspection** – If the proxy does MITM SSL inspection, exclude `login.microsoftonline.com` and `graph.microsoft.com` from inspection (allowlist). Microsoft endpoints often fail when inspected.
+   - **Proxy auth** – If the proxy requires authentication, set in `.env`: `PROXY_USERNAME` and `PROXY_PASSWORD`. The app will send them with the CONNECT request.
+   - **Timeouts** – The app uses a 30s timeout for proxy + upstream. If the proxy is slow, increase is not configurable yet; ensure the proxy responds within 30s.
