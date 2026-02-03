@@ -8,6 +8,17 @@ const { isCurlFallbackActive, curlRequest } = require('./curlProxyClient');
 
 const MSAL_TIMEOUT_MS = 30000; // 30s for proxy + login.microsoftonline.com
 
+/** MSAL expects body as object when it's JSON; returning raw string causes "Cannot create property 'status' on string". */
+function parseJsonBody(data) {
+  if (data == null) return data;
+  if (typeof data !== 'string') return data;
+  const s = data.trim();
+  if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+    try { return JSON.parse(data); } catch { return data; }
+  }
+  return data;
+}
+
 function toHeaderObj(headers) {
   const out = {};
   if (headers && typeof headers === 'object') {
@@ -30,7 +41,7 @@ const msalProxyNetworkClient = {
       if (statusCode >= 400) {
         console.error(`[ITEMS_DEBUG] MSAL token (GET) returned ${statusCode} url=${(url || '').substring(0, 60)} body=${(data || '').substring(0, 300)}`);
       }
-      return { status: statusCode, body: data, headers: {} };
+      return { status: statusCode, body: parseJsonBody(data), headers: {} };
     }
     const axiosConfig = {
       ...getProxyConfig(),
@@ -56,7 +67,7 @@ const msalProxyNetworkClient = {
       if (statusCode >= 400) {
         console.error(`[ITEMS_DEBUG] MSAL token (POST) returned ${statusCode} url=${(url || '').substring(0, 60)} body=${(data || '').substring(0, 300)}`);
       }
-      return { status: statusCode, body: data, headers: {} };
+      return { status: statusCode, body: parseJsonBody(data), headers: {} };
     }
     const axiosConfig = {
       ...getProxyConfig(),
