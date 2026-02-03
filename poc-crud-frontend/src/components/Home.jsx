@@ -385,7 +385,7 @@ export default function Home() {
                 {excelError}
               </Typography>
               <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
-                Jira / Projects data below may still work. To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY).
+                Jira / Projects data below may still work. To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY). A 503 means the proxy or Microsoft returned Service Unavailable—allow login.microsoftonline.com and graph.microsoft.com.
               </Typography>
             </Alert>
           )}

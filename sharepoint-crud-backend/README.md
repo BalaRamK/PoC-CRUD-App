@@ -64,3 +64,25 @@ Another process is holding port 3000, so your new app never bound to it. Fix:
    ```
 
 You should see JSON with `version` and `itemsErrorFormat`. If you still get HTML "Cannot GET /api/version", repeat step 1 and ensure the PID on 3000 matches the PM2 PID.
+
+### Excel returns 503 (Service Unavailable)
+
+The app returns "Excel data temporarily unavailable" with `detail: Request failed with status code 503` when the proxy or Microsoft (login.microsoftonline.com / graph.microsoft.com) returns HTTP 503.
+
+1. **Confirm proxy is used**  
+   Startup log should show `[proxyAxios] Outbound: proxy http://...`. If not, set `HTTPS_PROXY` (or `HTTP_PROXY`) in `.env`.
+
+2. **Test proxy to Azure AD**  
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}" -x http://YOUR_PROXY:PORT https://login.microsoftonline.com
+   ```  
+   Expect 302 (or 200). If you get 503, the proxy or firewall is blocking or returning 503 for that host.
+
+3. **Check backend logs**  
+   ```bash
+   grep ITEMS_DEBUG /home/admin_/.pm2/logs/poc-backend-error-0.log
+   ```  
+   If you see `MSAL token ... returned 503`, the token request (login.microsoftonline.com) is getting 503. If you see `step=Graph` and 503, Graph API is returning 503.
+
+4. **Fix**  
+   Ensure the proxy and corporate firewall allow outbound HTTPS to `login.microsoftonline.com` and `graph.microsoft.com`. If the proxy returns 503 for these hosts, work with your network team to allow or fix the proxy.

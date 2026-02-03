@@ -808,7 +808,7 @@ export default function DataTable({ onFilteredDataChange }) {
             {loadError}
           </Typography>
           <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
-            To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY). Add/Edit may also fail until Graph is reachable.
+            To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY). A 503 means the proxy or Microsoft returned Service Unavailable—allow login.microsoftonline.com and graph.microsoft.com. Add/Edit may also fail until Graph is reachable.
           </Typography>
         </Alert>
       )}
