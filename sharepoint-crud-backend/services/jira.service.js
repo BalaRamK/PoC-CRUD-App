@@ -1,14 +1,51 @@
 require('dotenv').config();
 const axios = require('axios');
-const { getProxyConfig, getProxyHeaders } = require('../lib/proxyAxios');
+const { execSync } = require('child_process');
+const { getProxyConfig, getProxyHeaders, getProxyUrlForCurl } = require('../lib/proxyAxios');
 
 const JIRA_API_URL = process.env.JIRA_API_URL;
 const JIRA_USER_EMAIL = process.env.JIRA_USER_EMAIL;
 const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN;
 const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY;
 
+// When true, use curl subprocess for Jira requests (bypasses Node proxy agent; use when Squid 503 with Node but curl works)
+const USE_CURL_FALLBACK = (process.env.PROXY_USE_CURL_FALLBACK === 'true' || process.env.PROXY_USE_CURL_FALLBACK === '1') && getProxyUrlForCurl();
+
 // Basic Auth header for Jira API token
 const authHeader = `Basic ${Buffer.from(`${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}`).toString('base64')}`;
+
+/**
+ * Run GET request via curl (use when proxy works with curl but not with Node's agent).
+ * @param {string} fullUrl - Full URL including query string
+ * @returns {{ data: any, statusCode: number }}
+ */
+function jiraCurlGet(fullUrl) {
+  const proxyUrl = getProxyUrlForCurl();
+  const args = [
+    '-s', '-S',
+    '-w', '\n%{http_code}',
+    '-H', `Authorization: ${authHeader}`,
+    '-H', 'Accept: application/json',
+    '--connect-timeout', '10',
+    '--max-time', '20',
+    fullUrl
+  ];
+  if (proxyUrl) {
+    args.splice(2, 0, '-x', proxyUrl);
+  }
+  const out = execSync('curl', args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });
+  const lastNewline = out.lastIndexOf('\n');
+  const body = lastNewline >= 0 ? out.slice(0, lastNewline) : out;
+  const statusStr = lastNewline >= 0 ? out.slice(lastNewline + 1).trim() : '200';
+  const statusCode = parseInt(statusStr, 10) || 200;
+  let data;
+  try {
+    data = body ? JSON.parse(body) : {};
+  } catch {
+    data = body;
+  }
+  return { data, statusCode };
+}
 
 /**
  * Fetches issues from Jira, optionally filtered by project.
@@ -51,17 +88,28 @@ async function getJiraIssues({ jql, projectKey } = {}) {
         console.log('[JiraService] Fetching issues from URL:', url);
         console.log('[JiraService] Request params for issues:', params);
 
-        const response = await axios.get(url, {
-            ...getProxyConfig(),
-            headers: {
-                ...getProxyHeaders(),
-                'Authorization': authHeader,
-                'Accept': 'application/json'
-            },
-            params: params,
-        });
+        let response;
+        if (USE_CURL_FALLBACK) {
+            const qs = new URLSearchParams(params).toString();
+            const fullUrl = `${url}?${qs}`;
+            const res = jiraCurlGet(fullUrl);
+            response = { status: res.statusCode, data: res.data };
+        } else {
+            response = await axios.get(url, {
+                ...getProxyConfig(),
+                headers: {
+                    ...getProxyHeaders(),
+                    'Authorization': authHeader,
+                    'Accept': 'application/json'
+                },
+                params: params,
+            });
+        }
 
         console.log('[JiraService] Issues API Response Status:', response.status);
+        if (response.status >= 400) {
+            throw Object.assign(new Error(response.data?.message || 'Jira issues request failed'), { response: { status: response.status, data: response.data } });
+        }
         console.log('[JiraService] Total issues returned:', response.data.issues?.length || 0);
         console.log('[JiraService] First issue full details:', JSON.stringify(response.data.issues?.[0], null, 2));
 
@@ -115,17 +163,28 @@ async function getJiraProjects() {
         console.log('[JiraService] Fetching projects from URL:', url);
         console.log('[JiraService] Request params:', params);
 
-        const response = await axios.get(url, {
-            ...getProxyConfig(),
-            headers: {
-                ...getProxyHeaders(),
-                'Authorization': authHeader,
-                'Accept': 'application/json'
-            },
-            params: params,
-        });
+        let response;
+        if (USE_CURL_FALLBACK) {
+            const qs = new URLSearchParams(params).toString();
+            const fullUrl = `${url}?${qs}`;
+            const res = jiraCurlGet(fullUrl);
+            response = { status: res.statusCode, data: res.data };
+        } else {
+            response = await axios.get(url, {
+                ...getProxyConfig(),
+                headers: {
+                    ...getProxyHeaders(),
+                    'Authorization': authHeader,
+                    'Accept': 'application/json'
+                },
+                params: params,
+            });
+        }
 
         console.log('[JiraService] Projects API Response Status:', response.status);
+        if (response.status >= 400) {
+            throw Object.assign(new Error(response.data?.message || 'Jira projects request failed'), { response: { status: response.status, data: response.data } });
+        }
         console.log('[JiraService] Projects API Response Data (partial):', response.data.values ? response.data.values.slice(0, 2) : response.data); // Log first 2 projects or full data
 
         return response.data.values.map(project => ({
@@ -161,6 +220,26 @@ async function getJiraConnectionTest() {
     }
     const url = `${base}/myself`;
     try {
+        if (USE_CURL_FALLBACK) {
+            const { data, statusCode } = jiraCurlGet(url);
+            if (statusCode >= 400) {
+                return {
+                    ok: false,
+                    status: statusCode,
+                    message: 'Jira returned error',
+                    detail: data
+                };
+            }
+            return {
+                ok: true,
+                status: statusCode,
+                user: {
+                    key: data.accountId,
+                    name: data.displayName,
+                    email: data.emailAddress
+                }
+            };
+        }
         const response = await axios.get(url, {
             ...getProxyConfig(),
             headers: {

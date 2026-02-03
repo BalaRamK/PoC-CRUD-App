@@ -82,4 +82,13 @@ function isProxyEnabled() {
   return !!httpsAgent;
 }
 
-module.exports = { getProxyConfig, getProxyHeaders, isProxyEnabled };
+/**
+ * Proxy URL string for use with curl -x (includes auth if PROXY_USERNAME/PROXY_PASSWORD set).
+ * Returns null if no proxy. Used when PROXY_USE_CURL_FALLBACK=true.
+ */
+function getProxyUrlForCurl() {
+  if (!proxyEnv || useProxyEnv === 'false' || useProxyEnv === '0') return null;
+  return buildProxyUrl();
+}
+
+module.exports = { getProxyConfig, getProxyHeaders, isProxyEnabled, getProxyUrlForCurl };

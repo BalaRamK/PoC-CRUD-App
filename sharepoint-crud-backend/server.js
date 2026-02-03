@@ -42,12 +42,15 @@ app.get('/api/debug/jira', async (req, res) => {
 });
 app.get('/api/debug/proxy', (req, res) => {
   try {
-    const { isProxyEnabled } = require('./lib/proxyAxios');
+    const { isProxyEnabled, getProxyUrlForCurl } = require('./lib/proxyAxios');
     const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.PROXY_URL;
+    const curlFallbackEnv = process.env.PROXY_USE_CURL_FALLBACK === 'true' || process.env.PROXY_USE_CURL_FALLBACK === '1';
     res.json({
       proxyEnabled: isProxyEnabled(),
       proxySet: !!proxyUrl,
-      proxyUrlPresent: !!proxyUrl ? '(set)' : '(not set)'
+      proxyUrlPresent: !!proxyUrl ? '(set)' : '(not set)',
+      proxyUseCurlFallback: curlFallbackEnv,
+      curlFallbackActive: curlFallbackEnv && !!getProxyUrlForCurl()
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

@@ -21,6 +21,7 @@ Optional (if Node gets 503 through proxy but curl works):
 
 - `PROXY_MIMIC_CURL=true` – use a curl-like User-Agent on CONNECT
 - `PROXY_USER_AGENT=curl/7.68.0` – custom User-Agent for CONNECT (overrides default)
+- **`PROXY_USE_CURL_FALLBACK=true`** – run Jira API requests via a **curl subprocess** instead of Node’s proxy agent. Use this when `curl -x PROXY https://...` works from the server but the app still gets 503. Requires `curl` installed on the server.
 
 All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this proxy (30s timeout, User-Agent sent). Set `BACKEND_USE_PROXY=false` to force direct connection. Leave proxy unset when no proxy is required.
 
@@ -124,7 +125,7 @@ The app returns "Excel data temporarily unavailable" with `detail: Request faile
    - **SSL inspection** – If the proxy does MITM SSL inspection, exclude `login.microsoftonline.com` and `graph.microsoft.com` from inspection (allowlist). Microsoft endpoints often fail when inspected.
    - **Proxy auth** – If the proxy requires authentication, set in `.env`: `PROXY_USERNAME` and `PROXY_PASSWORD`. The app will send them with the CONNECT request.
    - **Timeouts** – The app uses a 30s timeout for proxy + upstream. If the proxy is slow, increase is not configurable yet; ensure the proxy responds within 30s.
-   - **Node gets 503, curl works** – If `curl -x http://PROXY:3128 https://...` succeeds from the same server but the app gets 503 (Squid HTML), the app now uses `Proxy-Connection: close` and no keep-alive to the proxy (curl-like). Set `PROXY_MIMIC_CURL=true` in `.env` so the CONNECT request uses a curl User-Agent, then `pm2 restart poc-backend` and test `/api/debug/jira` again.
+   - **Node gets 503, curl works** – If `curl -x http://PROXY:3128 https://...` succeeds from the same server but the app gets 503 (Squid HTML), set **`PROXY_USE_CURL_FALLBACK=true`** in `.env`. The app will then run Jira requests via a `curl` subprocess (same path as your working curl), so `/api/debug/jira` and `/api/jira/projects` etc. work. Requires `curl` on the server. Alternatively try `PROXY_MIMIC_CURL=true` first (curl-like User-Agent over Node’s agent).
 
 6. **Squid logs: 503 HIER_NONE vs 502 HIER_DIRECT**  
    If URLs are allowed but you still see 502/503 in Squid:
