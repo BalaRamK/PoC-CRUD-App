@@ -17,6 +17,11 @@ Optional proxy auth (if the proxy requires it):
 - `PROXY_USERNAME` – proxy username
 - `PROXY_PASSWORD` – proxy password
 
+Optional (if Node gets 503 through proxy but curl works):
+
+- `PROXY_MIMIC_CURL=true` – use a curl-like User-Agent on CONNECT
+- `PROXY_USER_AGENT=curl/7.68.0` – custom User-Agent for CONNECT (overrides default)
+
 All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this proxy (30s timeout, User-Agent sent). Set `BACKEND_USE_PROXY=false` to force direct connection. Leave proxy unset when no proxy is required.
 
 ### Jira
@@ -28,7 +33,7 @@ All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this
 
 If `GET /api/debug/jira` returns 403 with a **Squid** HTML error ("The requested URL could not be retrieved"), the proxy is blocking outbound access to your Jira host. Ask your network team to allow the Jira domain (e.g. `*.atlassian.net`) through the proxy, or set `BACKEND_USE_PROXY=false` if the server can reach Jira without the proxy.
 
-The backend sends **User-Agent** and **Proxy-Connection: Keep-Alive** on the CONNECT request so the proxy sees a normal client (some Squid setups return 503 when CONNECT lacks these). To verify proxy from the **backend server** (not the proxy host): `curl -v -x http://PROXY:3128 https://qnulabs.atlassian.net/rest/api/3/serverInfo`.
+The backend sends **User-Agent** and **Proxy-Connection: close** on the CONNECT request (no keep-alive to the proxy) so Squid behaves like with curl. If **curl works** through the proxy but the **Node app gets 503** (Squid HTML error), try: `PROXY_MIMIC_CURL=true` (and restart PM2) so the CONNECT request uses a curl-like User-Agent. Optional: `PROXY_USER_AGENT=curl/7.68.0` to set the exact UA. To verify proxy from the **backend server**: `curl -v -x http://PROXY:3128 https://qnulabs.atlassian.net/rest/api/3/serverInfo`.
 
 ### SharePoint / Excel (Graph API)
 
@@ -119,6 +124,7 @@ The app returns "Excel data temporarily unavailable" with `detail: Request faile
    - **SSL inspection** – If the proxy does MITM SSL inspection, exclude `login.microsoftonline.com` and `graph.microsoft.com` from inspection (allowlist). Microsoft endpoints often fail when inspected.
    - **Proxy auth** – If the proxy requires authentication, set in `.env`: `PROXY_USERNAME` and `PROXY_PASSWORD`. The app will send them with the CONNECT request.
    - **Timeouts** – The app uses a 30s timeout for proxy + upstream. If the proxy is slow, increase is not configurable yet; ensure the proxy responds within 30s.
+   - **Node gets 503, curl works** – If `curl -x http://PROXY:3128 https://...` succeeds from the same server but the app gets 503 (Squid HTML), the app now uses `Proxy-Connection: close` and no keep-alive to the proxy (curl-like). Set `PROXY_MIMIC_CURL=true` in `.env` so the CONNECT request uses a curl User-Agent, then `pm2 restart poc-backend` and test `/api/debug/jira` again.
 
 6. **Squid logs: 503 HIER_NONE vs 502 HIER_DIRECT**  
    If URLs are allowed but you still see 502/503 in Squid:

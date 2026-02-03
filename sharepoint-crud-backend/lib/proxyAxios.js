@@ -29,23 +29,26 @@ function buildProxyUrl() {
 }
 
 const PROXY_TIMEOUT_MS = 30000; // 30s for proxy + upstream (Microsoft can be slow)
-const USER_AGENT = 'PoC-CRUD-Backend/1.0 (Node; Microsoft Graph)';
+// Some Squid proxies 503 Node.js CONNECT but allow curl; use curl-like UA when requested
+const PROXY_MIMIC_CURL = process.env.PROXY_MIMIC_CURL === 'true' || process.env.PROXY_MIMIC_CURL === '1';
+const USER_AGENT = process.env.PROXY_USER_AGENT
+  || (PROXY_MIMIC_CURL ? 'curl/7.68.0' : 'PoC-CRUD-Backend/1.0 (Node; Microsoft Graph)');
 
 let httpsAgent = null;
 
 if (useProxy && proxyEnv) {
   try {
     const proxyUrl = buildProxyUrl();
-    // Headers sent on CONNECT so Squid sees a normal client (some proxies 503 when missing)
+    // CONNECT request: curl-like = no keep-alive, Proxy-Connection: close (avoids Squid 503 on reuse)
     httpsAgent = new HttpsProxyAgent(proxyUrl, {
       headers: {
         'User-Agent': USER_AGENT,
-        'Proxy-Connection': 'Keep-Alive'
+        'Proxy-Connection': 'close'
       },
-      keepAlive: true
+      keepAlive: false
     });
     const safeUrl = (proxyUrl || proxyEnv).replace(/:[^:@]+@/, ':****@');
-    console.log('[proxyAxios] Outbound: proxy', safeUrl, 'timeout=', PROXY_TIMEOUT_MS + 'ms');
+    console.log('[proxyAxios] Outbound: proxy', safeUrl, 'timeout=', PROXY_TIMEOUT_MS + 'ms', 'UA=', USER_AGENT.substring(0, 30) + (USER_AGENT.length > 30 ? '...' : ''));
   } catch (err) {
     console.warn('[proxyAxios] Failed to create proxy agent:', err.message);
   }
