@@ -1,25 +1,31 @@
 /**
  * Shared axios proxy configuration for outbound Jira and Excel/Graph API calls.
- * When HTTPS_PROXY, HTTP_PROXY, or PROXY_URL is set, all axios requests use that proxy.
+ * - No proxy env (HTTPS_PROXY/HTTP_PROXY/PROXY_URL) → direct connection.
+ * - Proxy env set → use proxy, unless BACKEND_USE_PROXY=false (force direct).
  */
 require('dotenv').config();
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
-const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.PROXY_URL;
+const proxyEnv = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.PROXY_URL;
+const useProxyEnv = process.env.BACKEND_USE_PROXY;
+const useProxy = proxyEnv && useProxyEnv !== 'false' && useProxyEnv !== '0';
 
 let httpsAgent = null;
 
-if (proxyUrl) {
+if (useProxy && proxyEnv) {
   try {
-    httpsAgent = new HttpsProxyAgent(proxyUrl);
-    // Redact password for logging
-    const safeUrl = proxyUrl.replace(/:[^:@]+@/, ':****@');
-    console.log('[proxyAxios] Proxy enabled:', safeUrl);
+    httpsAgent = new HttpsProxyAgent(proxyEnv);
+    const safeUrl = proxyEnv.replace(/:[^:@]+@/, ':****@');
+    console.log('[proxyAxios] Outbound: proxy', safeUrl);
   } catch (err) {
     console.warn('[proxyAxios] Failed to create proxy agent:', err.message);
   }
 } else {
-  console.log('[proxyAxios] No proxy configured (HTTPS_PROXY/HTTP_PROXY/PROXY_URL not set)');
+  if (proxyEnv && (useProxyEnv === 'false' || useProxyEnv === '0')) {
+    console.log('[proxyAxios] Outbound: direct (BACKEND_USE_PROXY=false)');
+  } else {
+    console.log('[proxyAxios] Outbound: direct (no proxy configured)');
+  }
 }
 
 /**
