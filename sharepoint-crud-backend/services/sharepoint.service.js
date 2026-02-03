@@ -1,14 +1,17 @@
 require('dotenv').config();
 const axios = require('axios');
 const { ConfidentialClientApplication } = require('@azure/msal-node');
-const { getProxyConfig } = require('../lib/proxyAxios');
+const { getProxyConfig, isProxyEnabled } = require('../lib/proxyAxios');
+const { msalProxyNetworkClient } = require('../lib/msalProxyNetworkClient');
 
 const config = {
   auth: {
     clientId: process.env.AZURE_CLIENT_ID,
     authority: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}`,
     clientSecret: process.env.AZURE_CLIENT_SECRET
-  }
+  },
+  // When proxy is set, MSAL must use a custom network client so token requests to login.microsoftonline.com go through the proxy
+  ...(isProxyEnabled() && { system: { networkClient: msalProxyNetworkClient } })
 };
 
 const cca = new ConfidentialClientApplication(config);

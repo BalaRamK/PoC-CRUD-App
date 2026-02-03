@@ -1,0 +1,62 @@
+/**
+ * Custom MSAL network client that sends all requests (login.microsoftonline.com) through the proxy.
+ * Use this when HTTPS_PROXY/HTTP_PROXY is set so token acquisition works behind a corporate proxy.
+ */
+const axios = require('axios');
+const { getProxyConfig } = require('./proxyAxios');
+
+/**
+ * Implements INetworkModule for @azure/msal-node so token requests go through the proxy.
+ */
+const msalProxyNetworkClient = {
+  async sendGetRequestAsync(url, options = {}, timeout) {
+    const axiosConfig = {
+      ...getProxyConfig(),
+      method: 'GET',
+      url,
+      headers: options.headers || {},
+      timeout: timeout || 10000,
+      validateStatus: () => true, // so we get response even on 4xx/5xx
+    };
+    const response = await axios(axiosConfig);
+    const headers = {};
+    if (response.headers && typeof response.headers === 'object') {
+      for (const [k, v] of Object.entries(response.headers)) {
+        if (typeof v === 'string') headers[k] = v;
+        else if (v != null) headers[k] = String(v);
+      }
+    }
+    return {
+      status: response.status,
+      body: response.data,
+      headers,
+    };
+  },
+
+  async sendPostRequestAsync(url, options = {}) {
+    const axiosConfig = {
+      ...getProxyConfig(),
+      method: 'POST',
+      url,
+      headers: options.headers || {},
+      data: options.body,
+      timeout: 10000,
+      validateStatus: () => true,
+    };
+    const response = await axios(axiosConfig);
+    const headers = {};
+    if (response.headers && typeof response.headers === 'object') {
+      for (const [k, v] of Object.entries(response.headers)) {
+        if (typeof v === 'string') headers[k] = v;
+        else if (v != null) headers[k] = String(v);
+      }
+    }
+    return {
+      status: response.status,
+      body: response.data,
+      headers,
+    };
+  },
+};
+
+module.exports = { msalProxyNetworkClient };
