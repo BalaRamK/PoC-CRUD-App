@@ -40,7 +40,8 @@ function jiraCurlGet(fullUrl) {
   if (proxyUrl) {
     args.splice(2, 0, '-x', proxyUrl);
   }
-  const curlBin = process.env.CURL_PATH || (fs.existsSync('/usr/bin/curl') ? '/usr/bin/curl' : 'curl');
+  // Use PATH 'curl' by default; some systems have /usr/bin/curl as a wrapper that ignores args
+  const curlBin = process.env.CURL_PATH || 'curl';
   let out;
   try {
     out = execFileSync(curlBin, args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });

@@ -75,18 +75,18 @@ You should see JSON. If you see `<!DOCTYPE html>`, another process is on port 30
 
 ### PM2 status "errored" or `/api/debug/proxy` missing `proxyUseCurlFallback`
 
-If `pm2 show poc-backend` shows **status: errored** and high restarts, the app is crashing. Another process may still be bound to port 3000 (serving old code). Fix:
+If `pm2 show poc-backend` shows **status: errored** and high restarts, the app is crashing. Another process is usually still bound to port 3000 (serving old code), so the new one never binds. Fix in this order:
 
-1. See who is on 3000 and the PM2 app PID:
+1. **Stop PM2** so the only thing on 3000 is the stray process: `pm2 stop poc-backend`
+2. See who is on 3000 (the **PID is after `pid=`**, e.g. `pid=30317` → use 30317):
    ```bash
    sudo ss -tlnp | grep 3000
-   pm2 show poc-backend
    ```
-   In the `ss` line, the **PID is the number after `pid=`** (e.g. `users:(("node",pid=27695,fd=20))` → PID is **27695**). The first number on the line (e.g. 511) is the listen backlog, not the PID.
-2. If the PID on port 3000 is **not** the PM2 process PID, kill the stale process: `sudo kill 27695` (use the actual pid= value). If it doesn’t exit: `sudo kill -9 27695`.
-3. Check why the app crashed: `pm2 logs poc-backend --err --lines 80`.
-4. Restart clean: `pm2 delete poc-backend` then from `sharepoint-crud-backend`: `pm2 start ecosystem.config.cjs`.
-5. Confirm `/api/debug/proxy` returns `proxyUseCurlFallback` and `curlFallbackActive` (ensures new code is running).
+3. **Kill that process**: `sudo kill <pid>` (e.g. `sudo kill 30317`). If it doesn’t exit: `sudo kill -9 <pid>`.
+4. Start the app again: `cd /opt/PoC-CRUD-App/sharepoint-crud-backend` then `pm2 start poc-backend` (or `pm2 start ecosystem.config.cjs` if you had deleted it).
+5. Confirm: `curl -s http://localhost:3000/api/debug/proxy` should include `proxyUseCurlFallback` and `curlFallbackActive`. Then test `curl -s http://localhost:3000/api/debug/jira`.
+
+If you still see "curl: try 'curl --help'", the Jira service now uses `curl` from PATH by default. Set `CURL_PATH=/usr/bin/curl` in `.env` only if you need a specific binary.
 
 ### Port 3000 already in use (curl returns 404 but logs show app started)
 
