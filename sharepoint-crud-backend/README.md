@@ -117,3 +117,8 @@ The app returns "Excel data temporarily unavailable" with `detail: Request faile
    - **SSL inspection** – If the proxy does MITM SSL inspection, exclude `login.microsoftonline.com` and `graph.microsoft.com` from inspection (allowlist). Microsoft endpoints often fail when inspected.
    - **Proxy auth** – If the proxy requires authentication, set in `.env`: `PROXY_USERNAME` and `PROXY_PASSWORD`. The app will send them with the CONNECT request.
    - **Timeouts** – The app uses a 30s timeout for proxy + upstream. If the proxy is slow, increase is not configurable yet; ensure the proxy responds within 30s.
+
+6. **Squid logs: 503 HIER_NONE vs 502 HIER_DIRECT**  
+   If URLs are allowed but you still see 502/503 in Squid:
+   - **503 with HIER_NONE** (e.g. to atlassian.net): Squid could not connect to the upstream at all (no TCP tunnel). Check: DNS on the proxy for that host, firewall from proxy to internet, and whether SSL inspection is blocking the CONNECT. Exclude the host from SSL inspection or fix DNS/firewall.
+   - **502 with HIER_DIRECT** (e.g. to graph.microsoft.com): Squid did connect to the upstream (IP shown) but got an invalid or error response (often due to SSL inspection / MITM). **Exclude `login.microsoftonline.com` and `graph.microsoft.com` from SSL inspection** so the proxy does not decrypt and re-encrypt; use a direct tunnel (CONNECT) only.
