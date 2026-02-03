@@ -11,6 +11,12 @@ const { getDebugInfo } = require('./services/sharepoint.service');
 app.use(cors()); 
 app.use(express.json());
 
+// Log every request (confirm which process receives traffic)
+app.use((req, res, next) => {
+  console.log('[backend]', req.method, req.url);
+  next();
+});
+
 // Use routers for API endpoints
 app.use('/api/items', itemsRouter);
 app.use('/api/jira', jiraRouter);
