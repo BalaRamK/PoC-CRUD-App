@@ -11,9 +11,11 @@ router.get('/', async (req, res, next) => {
   } catch (error) {
     const detail = error?.message || String(error);
     const url = error?.config?.url || '';
+    const status = error?.response?.status;
     const step = url.includes('login.microsoftonline.com') ? 'MSAL/token' : url.includes('graph.microsoft.com') ? 'Graph' : 'unknown';
-    // stderr so it shows in pm2 --err and is easy to find; tag for grep ITEMS_DEBUG
-    console.error('[ITEMS_DEBUG] GET /api/items FAILED', 'message=', detail, 'code=', error?.code || '', 'step=', step, 'url=', url ? url.substring(0, 80) : '');
+    // Single line to stderr so it always appears in pm2 --err; grep ITEMS_DEBUG or 503
+    const line = `[ITEMS_DEBUG] GET /api/items FAILED step=${step} status=${status || ''} code=${error?.code || ''} message=${detail} url=${(url || '').substring(0, 80)}`;
+    console.error(line);
     // Return 200 with success:false so frontend can show "Excel unavailable" without breaking the page
     res.status(200).json({
       success: false,

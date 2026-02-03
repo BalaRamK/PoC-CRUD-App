@@ -30,8 +30,8 @@ async function getAccessToken() {
     const response = await cca.acquireTokenByClientCredential(tokenRequest);
     return response.accessToken;
   } catch (tokenErr) {
-    // stderr so it shows in pm2 --err; tag for grep ITEMS_DEBUG
-    console.error('[ITEMS_DEBUG] getAccessToken failed', 'message=', tokenErr?.message || '', 'code=', tokenErr?.code || '', 'name=', tokenErr?.name || '');
+    const line = `[ITEMS_DEBUG] getAccessToken failed message=${tokenErr?.message || ''} code=${tokenErr?.code || ''} name=${tokenErr?.name || ''}`;
+    console.error(line);
     throw tokenErr;
   }
 }

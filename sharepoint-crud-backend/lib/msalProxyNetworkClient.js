@@ -19,6 +19,9 @@ const msalProxyNetworkClient = {
       validateStatus: () => true, // so we get response even on 4xx/5xx
     };
     const response = await axios(axiosConfig);
+    if (response.status >= 400) {
+      console.error(`[ITEMS_DEBUG] MSAL token (GET) returned ${response.status} url=${(url || '').substring(0, 60)}`);
+    }
     const headers = {};
     if (response.headers && typeof response.headers === 'object') {
       for (const [k, v] of Object.entries(response.headers)) {
@@ -44,6 +47,9 @@ const msalProxyNetworkClient = {
       validateStatus: () => true,
     };
     const response = await axios(axiosConfig);
+    if (response.status >= 400) {
+      console.error(`[ITEMS_DEBUG] MSAL token (POST) returned ${response.status} url=${(url || '').substring(0, 60)}`);
+    }
     const headers = {};
     if (response.headers && typeof response.headers === 'object') {
       for (const [k, v] of Object.entries(response.headers)) {
