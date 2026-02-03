@@ -26,6 +26,8 @@ All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this
 - `JIRA_API_TOKEN` – Jira API token
 - `JIRA_PROJECT_KEY` – (optional) default project filter
 
+If `GET /api/debug/jira` returns 403 with a **Squid** HTML error ("The requested URL could not be retrieved"), the proxy is blocking outbound access to your Jira host. Ask your network team to allow the Jira domain (e.g. `*.atlassian.net`) through the proxy, or set `BACKEND_USE_PROXY=false` if the server can reach Jira without the proxy.
+
 ### SharePoint / Excel (Graph API)
 
 - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`
