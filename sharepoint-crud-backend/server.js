@@ -16,6 +16,15 @@ app.use('/api/items', itemsRouter);
 app.use('/api/jira', jiraRouter);
 app.use('/api/reports', reportsRouter);
 
+// Confirm which backend code is running (items GET returns 200 + success:false on Excel failure)
+app.get('/api/version', (req, res) => {
+  res.json({
+    version: require('./package.json').version,
+    itemsErrorFormat: 'Excel data temporarily unavailable',
+    code: 'EXCEL_UNAVAILABLE'
+  });
+});
+
 // Proxy status (no Graph call) – use this to confirm proxy is loaded
 app.get('/api/debug/proxy', (req, res) => {
   try {
