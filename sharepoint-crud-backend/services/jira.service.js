@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
+const { getProxyConfig } = require('../lib/proxyAxios');
 
 const JIRA_API_URL = process.env.JIRA_API_URL;
 const JIRA_USER_EMAIL = process.env.JIRA_USER_EMAIL;
@@ -50,7 +51,8 @@ async function getJiraIssues({ jql, projectKey } = {}) {
         console.log('[JiraService] Fetching issues from URL:', url);
         console.log('[JiraService] Request params for issues:', params);
 
-        const response = await axios.get(url, { // <--- Use the 'url' variable here
+        const response = await axios.get(url, {
+            ...getProxyConfig(),
             headers: {
                 'Authorization': authHeader,
                 'Accept': 'application/json'
@@ -113,6 +115,7 @@ async function getJiraProjects() {
         console.log('[JiraService] Request params:', params);
 
         const response = await axios.get(url, {
+            ...getProxyConfig(),
             headers: {
                 'Authorization': authHeader,
                 'Accept': 'application/json'
