@@ -16,6 +16,21 @@ app.use('/api/items', itemsRouter);
 app.use('/api/jira', jiraRouter);
 app.use('/api/reports', reportsRouter);
 
+// Proxy status (no Graph call) – use this to confirm proxy is loaded
+app.get('/api/debug/proxy', (req, res) => {
+  try {
+    const { isProxyEnabled } = require('./lib/proxyAxios');
+    const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.PROXY_URL;
+    res.json({
+      proxyEnabled: isProxyEnabled(),
+      proxySet: !!proxyUrl,
+      proxyUrlPresent: !!proxyUrl ? '(set)' : '(not set)'
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Read-only debug endpoint to help diagnose Graph discovery issues
 app.get('/api/debug', async (req, res) => {
   try {

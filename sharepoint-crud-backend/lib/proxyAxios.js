@@ -12,9 +12,14 @@ let httpsAgent = null;
 if (proxyUrl) {
   try {
     httpsAgent = new HttpsProxyAgent(proxyUrl);
+    // Redact password for logging
+    const safeUrl = proxyUrl.replace(/:[^:@]+@/, ':****@');
+    console.log('[proxyAxios] Proxy enabled:', safeUrl);
   } catch (err) {
     console.warn('[proxyAxios] Failed to create proxy agent:', err.message);
   }
+} else {
+  console.log('[proxyAxios] No proxy configured (HTTPS_PROXY/HTTP_PROXY/PROXY_URL not set)');
 }
 
 /**
