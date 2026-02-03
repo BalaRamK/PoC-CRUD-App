@@ -61,7 +61,7 @@ pm2 restart poc-backend
 curl -s http://localhost:3000/api/jira/projects | head -c 200
 ```
 
-You should see JSON (`{"success":false,"error":{...}}` or `{"success":true,"data":[...]}`). If you see `<!DOCTYPE html>`, the process serving port 3000 is not this repo—check `sudo ss -tlnp | grep 3000` and `pm2 show poc-backend` (PID must match). If curl to localhost returns JSON but the browser still gets HTML, the reverse proxy (e.g. nginx) may be caching 500; disable caching for `/api/` or restart nginx.
+You should see JSON. If you see `<!DOCTYPE html>`, another process is on port 3000 (old code). Run `sudo ss -tlnp | grep 3000` and `pm2 show poc-backend`; if the PIDs differ, run `sudo kill <pid-from-ss>` then `pm2 restart poc-backend` and curl again. If curl returns JSON but the browser gets HTML, the reverse proxy may be caching 500; restart nginx or disable cache for `/api/`.
 
 ### Port 3000 already in use (curl returns 404 but logs show app started)
 
