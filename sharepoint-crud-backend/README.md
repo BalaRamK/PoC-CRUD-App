@@ -34,3 +34,33 @@ All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this
 npm install
 npm start
 ```
+
+## Deploy with PM2
+
+```bash
+cd /path/to/sharepoint-crud-backend
+npm install
+pm2 start ecosystem.config.cjs
+pm2 save
+```
+
+### Port 3000 already in use (curl returns 404 but logs show app started)
+
+Another process is holding port 3000, so your new app never bound to it. Fix:
+
+1. See who is on 3000 and your PM2 process ID:
+   ```bash
+   sudo ss -tlnp | grep 3000
+   pm2 show poc-backend
+   ```
+2. If the **PID on port 3000** is **different** from the **PM2 process PID**, kill the old process:
+   ```bash
+   sudo kill <pid-from-ss>
+   ```
+3. Restart so the app binds to 3000:
+   ```bash
+   pm2 restart poc-backend
+   curl -s http://localhost:3000/api/version
+   ```
+
+You should see JSON with `version` and `itemsErrorFormat`. If you still get HTML "Cannot GET /api/version", repeat step 1 and ensure the PID on 3000 matches the PM2 PID.

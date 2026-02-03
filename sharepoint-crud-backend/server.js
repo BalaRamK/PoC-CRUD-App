@@ -59,8 +59,16 @@ app.get('/api/debug', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log('[backend] loaded from:', __dirname);
   console.log('[backend] GET /api/version registered (use this to confirm running code)');
+});
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error('[backend] PORT', PORT, 'already in use. Another process is holding it.');
+    console.error('[backend] Free the port: sudo ss -tlnp | grep', PORT, 'then sudo kill <pid>');
+    process.exit(1);
+  }
+  throw err;
 });
