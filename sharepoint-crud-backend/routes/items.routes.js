@@ -11,7 +11,14 @@ router.get('/', async (req, res, next) => {
   } catch (error) {
     const detail = error?.message || String(error);
     console.error('GET /api/items error:', detail);
-    console.error('GET /api/items full error (for debug):', error?.response?.data || error?.code || error);
+    console.error('GET /api/items debug:', {
+      code: error?.code,
+      message: error?.message,
+      responseStatus: error?.response?.status,
+      responseData: error?.response?.data ? '(present)' : undefined,
+      url: error?.config?.url,
+      step: error?.config?.url ? (error.config.url.includes('login.microsoftonline.com') ? 'MSAL/token' : 'Graph') : 'unknown'
+    });
     // Return 200 with success:false so frontend can show "Excel unavailable" without breaking the page
     res.status(200).json({
       success: false,

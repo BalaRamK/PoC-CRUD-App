@@ -26,8 +26,13 @@ async function getAccessToken() {
   }
 
   const tokenRequest = { scopes: [process.env.GRAPH_SCOPE] };
-  const response = await cca.acquireTokenByClientCredential(tokenRequest);
-  return response.accessToken;
+  try {
+    const response = await cca.acquireTokenByClientCredential(tokenRequest);
+    return response.accessToken;
+  } catch (tokenErr) {
+    console.error('[sharepoint.service] getAccessToken failed:', tokenErr?.message, 'code:', tokenErr?.code);
+    throw tokenErr;
+  }
 }
 
 async function getSiteId(accessToken) {
