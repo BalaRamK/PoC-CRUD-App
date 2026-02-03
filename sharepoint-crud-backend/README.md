@@ -28,6 +28,8 @@ All outbound HTTPS requests (Jira API and Microsoft Graph / Excel) will use this
 
 If `GET /api/debug/jira` returns 403 with a **Squid** HTML error ("The requested URL could not be retrieved"), the proxy is blocking outbound access to your Jira host. Ask your network team to allow the Jira domain (e.g. `*.atlassian.net`) through the proxy, or set `BACKEND_USE_PROXY=false` if the server can reach Jira without the proxy.
 
+The backend sends **User-Agent** and **Proxy-Connection: Keep-Alive** on the CONNECT request so the proxy sees a normal client (some Squid setups return 503 when CONNECT lacks these). To verify proxy from the **backend server** (not the proxy host): `curl -v -x http://PROXY:3128 https://qnulabs.atlassian.net/rest/api/3/serverInfo`.
+
 ### SharePoint / Excel (Graph API)
 
 - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`

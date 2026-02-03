@@ -36,7 +36,14 @@ let httpsAgent = null;
 if (useProxy && proxyEnv) {
   try {
     const proxyUrl = buildProxyUrl();
-    httpsAgent = new HttpsProxyAgent(proxyUrl);
+    // Headers sent on CONNECT so Squid sees a normal client (some proxies 503 when missing)
+    httpsAgent = new HttpsProxyAgent(proxyUrl, {
+      headers: {
+        'User-Agent': USER_AGENT,
+        'Proxy-Connection': 'Keep-Alive'
+      },
+      keepAlive: true
+    });
     const safeUrl = (proxyUrl || proxyEnv).replace(/:[^:@]+@/, ':****@');
     console.log('[proxyAxios] Outbound: proxy', safeUrl, 'timeout=', PROXY_TIMEOUT_MS + 'ms');
   } catch (err) {
