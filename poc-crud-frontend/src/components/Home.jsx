@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Button as MUIButton, LinearProgress, IconButton, Avatar, FormControl, InputLabel, Select, MenuItem, Chip, Tabs, Tab,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tooltip, Alert
 } from '@mui/material';
 import { Button as UIButton } from './ui/button';
 import axios from 'axios';
@@ -45,6 +45,7 @@ export default function Home() {
   const { user } = useAuth();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [excelError, setExcelError] = useState(null); // When Excel/Graph is unreachable, show message
   const navigate = useNavigate();
   
   // Jira state
@@ -61,10 +62,18 @@ export default function Home() {
 
   async function fetchRows() {
     setLoading(true);
+    setExcelError(null);
     try {
       const res = await axios.get('/api/items');
-      let data = res?.data;
-      if (data && data.success && data.data) data = data.data;
+      const body = res?.data;
+      // Backend may return { success: false, data: [], error, detail } when Excel/Graph is unreachable
+      if (body && body.success === false) {
+        setRows([]);
+        setExcelError(body.detail || body.error || 'Excel data temporarily unavailable. Check network/proxy for Microsoft Graph.');
+        return;
+      }
+      let data = body;
+      if (data && typeof data.success !== 'undefined' && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
 
       // Ensure keys match your Excel columns (shared for mapping and filtering)
@@ -101,8 +110,10 @@ export default function Home() {
 
       setRows(cleaned);
     } catch (e) {
-      console.error('Home.fetchRows', e);
+      console.error('Home.fetchRows', e?.response?.data || e);
       setRows([]);
+      const detail = e?.response?.data?.detail || e?.response?.data?.error || e?.message || 'Excel data temporarily unavailable. Check network/proxy for Microsoft Graph.';
+      setExcelError(detail);
     } finally {
       setLoading(false);
     }
@@ -367,6 +378,17 @@ export default function Home() {
 
         {/* TAB 1: PoC Status */}
         <Box sx={{ display: tabValue === 0 ? 'block' : 'none' }}>
+          {excelError && (
+            <Alert severity="warning" sx={{ mb: 3 }} onClose={() => setExcelError(null)}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Excel data temporarily unavailable</Typography>
+              <Typography variant="body2" component="span" sx={{ display: 'block', mt: 0.5 }}>
+                {excelError}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                Jira / Projects data below may still work. To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY).
+              </Typography>
+            </Alert>
+          )}
           {/* Status Summary Section */}
           <Paper sx={{ 
             p: 5, 

@@ -4,7 +4,7 @@ import {
   Button as MUIButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Toolbar, Typography, Box, IconButton, TableSortLabel, Chip, Menu, MenuItem,
   InputAdornment, Select, FormControl, InputLabel, Checkbox, ListItemText,
-  Autocomplete, Avatar, CircularProgress
+  Autocomplete, Avatar, CircularProgress, Alert
 } from "@mui/material";
 // Import specific icons for actions and toolbar if needed (MoreVertIcon, etc.)
 import AddIcon from '@mui/icons-material/Add';
@@ -117,6 +117,7 @@ export default function DataTable({ onFilteredDataChange }) {
   const [page, setPage] = useState(Number.isNaN(initPage) ? 0 : initPage);
   const [rowsPerPage, setRowsPerPage] = useState(Number.isNaN(initRpp) ? 10 : initRpp);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null); // When Excel/Graph is unreachable, show message
   const [visibleColumns, setVisibleColumns] = useState(initialVisibleColumns);
   const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
 
@@ -292,10 +293,18 @@ export default function DataTable({ onFilteredDataChange }) {
 
   async function fetchRows() {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await axios.get('/api/items');
-      let data = res?.data;
-      if (data && data.success && data.data) data = data.data;
+      const body = res?.data;
+      // Backend may return { success: false, data: [], error, detail } when Excel/Graph is unreachable
+      if (body && body.success === false) {
+        setRows([]);
+        setLoadError(body.detail || body.error || 'Excel data temporarily unavailable. Check network/proxy for Microsoft Graph.');
+        return;
+      }
+      let data = body;
+      if (data && typeof data.success !== 'undefined' && data.data) data = data.data;
       if (!Array.isArray(data)) data = [];
 
       console.log('Raw data from backend:', data.slice(0, 2)); // Log first 2 rows
@@ -351,6 +360,8 @@ export default function DataTable({ onFilteredDataChange }) {
     } catch (err) {
       console.error('Failed to fetch rows', err?.response?.data || err.message || err);
       setRows([]);
+      const detail = err?.response?.data?.detail || err?.response?.data?.error || err?.message || 'Excel data temporarily unavailable. Check network/proxy for Microsoft Graph.';
+      setLoadError(detail);
     } finally {
       setLoading(false);
     }
@@ -789,6 +800,18 @@ export default function DataTable({ onFilteredDataChange }) {
           </UIButton>
         </Box>
       </Toolbar>
+
+      {loadError && (
+        <Alert severity="warning" sx={{ mt: 2 }} onClose={() => setLoadError(null)}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Excel data temporarily unavailable</Typography>
+          <Typography variant="body2" component="span" sx={{ display: 'block', mt: 0.5 }}>
+            {loadError}
+          </Typography>
+          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+            To fix: ensure the backend can reach Microsoft Graph (check network/proxy and HTTPS_PROXY). Add/Edit may also fail until Graph is reachable.
+          </Typography>
+        </Alert>
+      )}
       
       <TableContainer component={Paper} sx={{ 
         mt: 2, 

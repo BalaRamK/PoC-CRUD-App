@@ -3,13 +3,23 @@ const router = express.Router();
 const { getRows, addRow, updateRow, deleteRow } = require('../services/sharepoint.service');
 
 // GET all items (Excel rows)
+// On failure (e.g. Graph unreachable), return 200 with success:false so the app can still load and show a message
 router.get('/', async (req, res, next) => {
   try {
     const rows = await getRows();
-    res.json(rows);
+    res.json(Array.isArray(rows) ? rows : []);
   } catch (error) {
-    console.error('GET /api/items error:', error?.response?.data || error);
-    res.status(500).json({ error: 'Could not fetch excel rows', detail: error.message });
+    const detail = error?.message || String(error);
+    console.error('GET /api/items error:', detail);
+    console.error('GET /api/items full error (for debug):', error?.response?.data || error?.code || error);
+    // Return 200 with success:false so frontend can show "Excel unavailable" without breaking the page
+    res.status(200).json({
+      success: false,
+      data: [],
+      error: 'Excel data temporarily unavailable',
+      detail,
+      code: 'EXCEL_UNAVAILABLE'
+    });
   }
 });
 
