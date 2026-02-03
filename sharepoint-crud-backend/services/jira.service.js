@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
+const fs = require('fs');
 const { execSync } = require('child_process');
 const { getProxyConfig, getProxyHeaders, getProxyUrlForCurl } = require('../lib/proxyAxios');
 
@@ -9,7 +10,13 @@ const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN;
 const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY;
 
 // When true, use curl subprocess for Jira requests (bypasses Node proxy agent; use when Squid 503 with Node but curl works)
-const USE_CURL_FALLBACK = (process.env.PROXY_USE_CURL_FALLBACK === 'true' || process.env.PROXY_USE_CURL_FALLBACK === '1') && getProxyUrlForCurl();
+let USE_CURL_FALLBACK = false;
+try {
+  USE_CURL_FALLBACK = (process.env.PROXY_USE_CURL_FALLBACK === 'true' || process.env.PROXY_USE_CURL_FALLBACK === '1') && !!getProxyUrlForCurl();
+  if (USE_CURL_FALLBACK) console.log('[JiraService] PROXY_USE_CURL_FALLBACK active: Jira requests will use curl subprocess');
+} catch (e) {
+  console.warn('[JiraService] PROXY_USE_CURL_FALLBACK check failed:', e.message);
+}
 
 // Basic Auth header for Jira API token
 const authHeader = `Basic ${Buffer.from(`${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}`).toString('base64')}`;
@@ -33,7 +40,8 @@ function jiraCurlGet(fullUrl) {
   if (proxyUrl) {
     args.splice(2, 0, '-x', proxyUrl);
   }
-  const out = execSync('curl', args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });
+  const curlBin = process.env.CURL_PATH || (fs.existsSync('/usr/bin/curl') ? '/usr/bin/curl' : 'curl');
+  const out = execSync(curlBin, args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });
   const lastNewline = out.lastIndexOf('\n');
   const body = lastNewline >= 0 ? out.slice(0, lastNewline) : out;
   const statusStr = lastNewline >= 0 ? out.slice(lastNewline + 1).trim() : '200';

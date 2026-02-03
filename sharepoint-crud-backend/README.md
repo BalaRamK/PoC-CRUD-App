@@ -73,6 +73,20 @@ curl -s http://localhost:3000/api/jira/projects | head -c 200
 
 You should see JSON. If you see `<!DOCTYPE html>`, another process is on port 3000 (old code). Run `sudo ss -tlnp | grep 3000` and `pm2 show poc-backend`; if the PIDs differ, run `sudo kill <pid-from-ss>` then `pm2 restart poc-backend` and curl again. If curl returns JSON but the browser gets HTML, the reverse proxy may be caching 500; restart nginx or disable cache for `/api/`.
 
+### PM2 status "errored" or `/api/debug/proxy` missing `proxyUseCurlFallback`
+
+If `pm2 show poc-backend` shows **status: errored** and high restarts, the app is crashing. Another process may still be bound to port 3000 (serving old code). Fix:
+
+1. See who is on 3000 and the PM2 app PID:
+   ```bash
+   sudo ss -tlnp | grep 3000
+   pm2 show poc-backend
+   ```
+2. If the PID on port 3000 is **not** the PM2 process PID, kill the stale process: `sudo kill <pid>`.
+3. Check why the app crashed: `pm2 logs poc-backend --err --lines 80`.
+4. Restart clean: `pm2 delete poc-backend` then from `sharepoint-crud-backend`: `pm2 start ecosystem.config.cjs`.
+5. Confirm `/api/debug/proxy` returns `proxyUseCurlFallback` and `curlFallbackActive` (ensures new code is running).
+
 ### Port 3000 already in use (curl returns 404 but logs show app started)
 
 Another process is holding port 3000, so your new app never bound to it. Fix:
