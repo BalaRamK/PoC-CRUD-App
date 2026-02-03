@@ -137,19 +137,11 @@ async function getJiraProjects() {
         }));
 
     } catch (error) {
-        console.error('Error fetching Jira projects:', error?.response?.data || error.message);
-        // Log the full error response from Axios for deeper inspection
-        if (error.response) {
-            console.error('[JiraService] Full error response data:', error.response.data);
-            console.error('[JiraService] Full error response status:', error.response.status);
-            console.error('[JiraService] Full error response headers:', error.response.headers);
-        } else if (error.request) {
-            console.error('[JiraService] No response received:', error.request);
-        } else {
-            console.error('[JiraService] Error setting up request:', error.message);
-        }
-
-        throw new Error(`Failed to fetch Jira projects: ${error?.response?.status || 'Unknown'} - ${error?.response?.statusText || error.message}`);
+        const status = error?.response?.status;
+        const statusText = error?.response?.statusText;
+        console.error('[JiraService] getJiraProjects failed:', status, statusText, error?.response?.data || error.message);
+        // Rethrow so route can send 403/401 with JSON; route uses error.response.status
+        throw error;
     }
 }
 

@@ -4,8 +4,14 @@ const jiraService = require('../services/jira.service');
 
 function sendJiraError(res, error, routeName) {
   const status = error?.response?.status || 500;
-  const message = error?.response?.data?.error?.message || error?.message || 'Jira request failed';
-  console.error(`[jira.routes] ${routeName}:`, message, error?.response?.status);
+  const data = error?.response?.data;
+  const message =
+    (Array.isArray(data?.errorMessages) ? data.errorMessages.join('; ') : null)
+    || data?.error?.message
+    || data?.errors?.message
+    || error?.message
+    || 'Jira request failed';
+  console.error(`[jira.routes] ${routeName}:`, status, message);
   res.status(status).json({
     success: false,
     error: { message: String(message).substring(0, 500), status },
