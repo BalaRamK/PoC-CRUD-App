@@ -82,7 +82,8 @@ If `pm2 show poc-backend` shows **status: errored** and high restarts, the app i
    sudo ss -tlnp | grep 3000
    pm2 show poc-backend
    ```
-2. If the PID on port 3000 is **not** the PM2 process PID, kill the stale process: `sudo kill <pid>`.
+   In the `ss` line, the **PID is the number after `pid=`** (e.g. `users:(("node",pid=27695,fd=20))` → PID is **27695**). The first number on the line (e.g. 511) is the listen backlog, not the PID.
+2. If the PID on port 3000 is **not** the PM2 process PID, kill the stale process: `sudo kill 27695` (use the actual pid= value). If it doesn’t exit: `sudo kill -9 27695`.
 3. Check why the app crashed: `pm2 logs poc-backend --err --lines 80`.
 4. Restart clean: `pm2 delete poc-backend` then from `sharepoint-crud-backend`: `pm2 start ecosystem.config.cjs`.
 5. Confirm `/api/debug/proxy` returns `proxyUseCurlFallback` and `curlFallbackActive` (ensures new code is running).
@@ -97,8 +98,9 @@ Another process is holding port 3000, so your new app never bound to it. Fix:
    pm2 show poc-backend
    ```
 2. If the **PID on port 3000** is **different** from the **PM2 process PID**, kill the old process:
+   Use the **pid= value** from the `ss` output (e.g. `pid=27695` → `sudo kill 27695`):
    ```bash
-   sudo kill <pid-from-ss>
+   sudo kill <pid-from-ss>   # e.g. sudo kill 27695
    ```
 3. Restart so the app binds to 3000:
    ```bash
