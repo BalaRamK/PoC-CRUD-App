@@ -8,6 +8,7 @@ const jiraRouter = require('./routes/jira.routes');
 const reportsRouter = require('./routes/reports.routes');
 const errorHandler = require('./middleware/error.middleware');
 const { getDebugInfo } = require('./services/sharepoint.service');
+const { getJiraConnectionTest } = require('./services/jira.service');
 
 app.use(cors()); 
 app.use(express.json());
@@ -33,6 +34,16 @@ app.get('/api/version', (req, res) => {
     itemsErrorFormat: 'Excel data temporarily unavailable',
     code: 'EXCEL_UNAVAILABLE'
   });
+});
+
+// Jira connection test (auth + reachability)
+app.get('/api/debug/jira', async (req, res) => {
+  try {
+    const result = await getJiraConnectionTest();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e?.message || String(e) });
+  }
 });
 
 // Proxy status (no Graph call) – use this to confirm proxy is loaded

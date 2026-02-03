@@ -140,9 +140,64 @@ async function getJiraProjects() {
         const status = error?.response?.status;
         const statusText = error?.response?.statusText;
         console.error('[JiraService] getJiraProjects failed:', status, statusText, error?.response?.data || error.message);
-        // Rethrow so route can send 403/401 with JSON; route uses error.response.status
         throw error;
     }
 }
 
-module.exports = { getJiraIssues, getJiraProjects }; // <--- UPDATE module.exports
+/**
+ * Test Jira connection (auth + reachability). Call GET /rest/api/3/myself.
+ * @returns {{ ok: boolean, status?: number, message?: string, user?: object, detail?: any }}
+ */
+async function getJiraConnectionTest() {
+    const base = (JIRA_API_URL || '').replace(/\/$/, '');
+    if (!base || !JIRA_USER_EMAIL || !JIRA_API_TOKEN) {
+        return {
+            ok: false,
+            message: 'Missing JIRA_API_URL, JIRA_USER_EMAIL, or JIRA_API_TOKEN in .env',
+            hasUrl: !!base,
+            hasEmail: !!JIRA_USER_EMAIL,
+            hasToken: !!JIRA_API_TOKEN
+        };
+    }
+    const url = `${base}/myself`;
+    try {
+        const response = await axios.get(url, {
+            ...getProxyConfig(),
+            headers: {
+                ...getProxyHeaders(),
+                'Authorization': authHeader,
+                'Accept': 'application/json'
+            },
+            timeout: 15000
+        });
+        if (response.status >= 400) {
+            return {
+                ok: false,
+                status: response.status,
+                message: response.statusText || 'Jira returned error',
+                detail: response.data
+            };
+        }
+        return {
+            ok: true,
+            status: response.status,
+            user: {
+                key: response.data.accountId,
+                name: response.data.displayName,
+                email: response.data.emailAddress
+            }
+        };
+    } catch (error) {
+        const status = error?.response?.status;
+        const data = error?.response?.data;
+        const message = Array.isArray(data?.errorMessages) ? data.errorMessages.join('; ') : data?.message || error?.message || 'Request failed';
+        return {
+            ok: false,
+            status: status || 0,
+            message,
+            detail: data ? (typeof data === 'object' ? data : { body: String(data).substring(0, 500) }) : undefined
+        };
+    }
+}
+
+module.exports = { getJiraIssues, getJiraProjects, getJiraConnectionTest };
