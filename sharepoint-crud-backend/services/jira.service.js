@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
-const { spawnSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { getProxyConfig, getProxyHeaders, getProxyUrlForCurl } = require('../lib/proxyAxios');
 
 const JIRA_API_URL = process.env.JIRA_API_URL;
@@ -41,11 +41,15 @@ function jiraCurlGet(fullUrl) {
     args.splice(2, 0, '-x', proxyUrl);
   }
   const curlBin = process.env.CURL_PATH || (fs.existsSync('/usr/bin/curl') ? '/usr/bin/curl' : 'curl');
-  const result = spawnSync(curlBin, args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });
-  const out = result.stdout || '';
-  if (result.error) {
-    throw new Error(`curl failed: ${result.error.message}`);
+  let out;
+  try {
+    out = execFileSync(curlBin, args, { encoding: 'utf8', maxBuffer: 5 * 1024 * 1024 });
+  } catch (e) {
+    // curl exits non-zero for HTTP 4xx/5xx; we still get body via -w %{http_code}
+    out = (e && e.stdout) ? e.stdout : '';
+    if (!out && e && e.message) throw new Error(`curl failed: ${e.message}`);
   }
+  if (typeof out !== 'string') out = String(out || '');
   const lastNewline = out.lastIndexOf('\n');
   const body = lastNewline >= 0 ? out.slice(0, lastNewline) : out;
   const statusStr = lastNewline >= 0 ? out.slice(lastNewline + 1).trim() : '200';
